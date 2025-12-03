@@ -3,77 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Common Schemas - DTW Documentation</title>
-    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <title>Matera Digital Twin - Commons Events</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
     <link rel="stylesheet" href="assets/styles.css">
-    <style>
-        .events-detail {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 24px;
-        }
-        .event-schema {
-            background: #F8F9FA;
-            border-left: 4px solid #00D4AA;
-            padding: 24px;
-            margin: 24px 0;
-            border-radius: 8px;
-        }
-        .event-name {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1A1A2E;
-            margin-bottom: 16px;
-        }
-        .namespace {
-            color: #666;
-            font-family: monospace;
-            font-size: 14px;
-            margin-bottom: 16px;
-        }
-        .fields-table {
-            width: 100%;
-            background: white;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 16px;
-        }
-        .fields-table th, .fields-table td {
-            text-align: left;
-            padding: 12px;
-            border-bottom: 1px solid #E0E0E0;
-        }
-        .fields-table th {
-            background: #1A1A2E;
-            color: white;
-            font-weight: 600;
-        }
-        .field-name { color: #00D4AA; font-weight: 600; font-family: monospace; }
-        .field-type { color: #8B5CF6; font-family: monospace; }
-        .back-link {
-            display: inline-block;
-            margin-bottom: 24px;
-            color: #00D4AA;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .back-link:hover { text-decoration: underline; }
-    </style>
 </head>
 <body>
     <header class="main-header">
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="40" height="40" rx="8" fill="#00D4AA"/>
-                        <path d="M12 14h6c3.31 0 6 2.69 6 6s-2.69 6-6 6h-6V14zm6 10c2.21 0 4-1.79 4-4s-1.79-4-4-4h-3v8h3z" fill="white"/>
-                        <path d="M26 14h2v12h-2V14z" fill="white"/>
-                    </svg>
-                    <span class="logo-text">DTW Documentation</span>
+                    <img src="assets/matera-icon.svg" alt="Matera" width="40" height="40">
+                    <span class="logo-text">Matera Digital Twin</span>
                 </div>
                 <nav class="main-nav">
-                    <a href="index.html#home" class="nav-link">Home</a>
+                    <a href="index.html" class="nav-link">Home</a>
                     <a href="index.html#apis" class="nav-link">API Reference</a>
                     <a href="index.html#events" class="nav-link active">Events & Commands</a>
                 </nav>
@@ -81,469 +24,259 @@
         </div>
     </header>
 
-    <div class="events-detail">
-        <a href="index.html#events" class="back-link">← Back to Events</a>
-        <h1>Common Schemas</h1>
-        <p style="color: #666; font-size: 18px; margin: 16px 0 40px;">Common event schemas and data structures</p>
+    <main class="content-section">
+        <div class="container">
+            <div class="api-detail">
+                <div class="breadcrumb">
+                    <a href="index.html">Home</a> > <a href="index.html#events">Events & Commands</a> > Commons Events
+                </div>
+                
+                <h1>Commons Events</h1>
+                <p class="api-description">Base event structures and common event types used across the platform.</p>
+                
+                <div class="endpoint-section">
+                    <div class="endpoints-header">
+                        <h2>Event Schemas</h2>
+                    </div>
+                    
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method event">EVENT</span>
+                            <code>BaseEventContent</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Base event content structure containing common fields for all events.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.event.base.common</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">source</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">Identifies the system (module) where the event was originated from (ie.: checking-account-system)</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">eventId</div>
+                                    <div class="param-type">uuid</div>
+                                    <div class="param-desc">Event Id on the originating system</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">createdAtUtc</div>
+                                    <div class="param-type">timestamp-millis</div>
+                                    <div class="param-desc">Timestamp with milliseconds when the event was generated in UTC</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">kind</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">The kind (type) of the underlying event. It description should (preferably) include which aggregate the event is associated with (ie.: account-change-type)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-        <div class="event-schema" id="FinancialAmount">
-            <div class="event-name">FinancialAmount</div>
-            <div class="namespace">Namespace: com.matera.dtw.event.common.financial</div>
-            <p style="color: #666; margin-bottom: 16px;">Monetary amount</p>
-            
-            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
-            <table class="fields-table">
-                <thead>
-                    <tr>
-                        <th>Field Name</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method event">EVENT</span>
+                            <code>BaseEvent</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Base event structure that wraps event content and provides parent event tracking.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.event.base.common</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">content</div>
+                                    <div class="param-type">BaseEventContent</div>
+                                    <div class="param-desc">Event data</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">parents</div>
+                                    <div class="param-type">array[BaseEventContent]</div>
+                                    <div class="param-desc">The events that originated the underlying event. These events are disposed in an order on which the oldest event come first. The first event is the originating event (default: [])</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                    <tr>
-                        <td class="field-name">currency</td>
-                        <td class="field-type">com.matera.dtw.event.common.financial.Currency</td>
-                        <td>No documentation</td>
-                    </tr>
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method event">EVENT</span>
+                            <code>Currency</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Includes ISO 4217 currency codes plus custom stablecoins and cryptocurrencies.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.event.common.financial</code>
+                            </div>
+                            
+                            <h3>Type</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">type</div>
+                                    <div class="param-type">enum</div>
+                                    <div class="param-desc">Currency enumeration (default: BRL)</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">symbols</div>
+                                    <div class="param-type">array</div>
+                                    <div class="param-desc">BRL, USD, EUR, BTC, USC, UST, SOL, XRP and all ISO 4217 codes</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                    <tr>
-                        <td class="field-name">amount</td>
-                        <td class="field-type">{'type': 'bytes', 'logicalType': 'decimal', 'precision': 19}</td>
-                        <td>Amount as an unscaled value. For values with decimal parts, multiply by the scale. E.g.: $14.85 becomes 1485. $12.00 becomes 1200. The scale is defined according the currency.</td>
-                    </tr>
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method event">EVENT</span>
+                            <code>FinancialAmount</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Monetary amount representation.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.event.common.financial</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">currency</div>
+                                    <div class="param-type">Currency</div>
+                                    <div class="param-desc">Currency type (default: BRL)</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">amount</div>
+                                    <div class="param-type">decimal</div>
+                                    <div class="param-desc">Amount as an unscaled value. For values with decimal parts, multiply by the scale. E.g.: $14.85 becomes 1485</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                </tbody>
-            </table>
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method event">EVENT</span>
+                            <code>FeatureValue</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Transport generic data of different types.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.event.common.feature</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">type</div>
+                                    <div class="param-type">FeatureType</div>
+                                    <div class="param-desc">Feature type: BOOLEAN, STRING, DECIMAL, DATE, DATE_RANGE (default: STRING)</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">booleanValue</div>
+                                    <div class="param-type">boolean | null</div>
+                                    <div class="param-desc">Boolean value (default: null)</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">stringValue</div>
+                                    <div class="param-type">string | null</div>
+                                    <div class="param-desc">String value (default: null)</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">decimalValue</div>
+                                    <div class="param-type">decimal | null</div>
+                                    <div class="param-desc">Decimal value with 19 precision (default: null)</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">dateValue</div>
+                                    <div class="param-type">date | null</div>
+                                    <div class="param-desc">Date value (default: null)</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">dateRangeValue</div>
+                                    <div class="param-type">DateRange | null</div>
+                                    <div class="param-desc">Date range value (default: null)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method event">EVENT</span>
+                            <code>Limit</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Represents a limit in the system.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.event.common.financial</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">limitType</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">Type of limit</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">amountRange</div>
+                                    <div class="param-type">FinancialAmountRange</div>
+                                    <div class="param-desc">The limit amount range. For example, for an overdraft limit of 100 it would be minimum -100 and maximum 0</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">feature</div>
+                                    <div class="param-type">map[FeatureValue]</div>
+                                    <div class="param-desc">Additional limit features/information (default: {})</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+    </main>
 
-        <div class="event-schema" id="FinancialAmountRange">
-            <div class="event-name">FinancialAmountRange</div>
-            <div class="namespace">Namespace: com.matera.dtw.event.common.financial</div>
-            <p style="color: #666; margin-bottom: 16px;">Monetary amount range</p>
-            
-            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
-            <table class="fields-table">
-                <thead>
-                    <tr>
-                        <th>Field Name</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <td class="field-name">currency</td>
-                        <td class="field-type">com.matera.dtw.event.common.financial.Currency</td>
-                        <td>No documentation</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">min</td>
-                        <td class="field-type">{'type': 'bytes', 'logicalType': 'decimal', 'precision': 19}</td>
-                        <td>Minimum Amount as an unscaled value. For values with decimal parts, multiply by the scale. E.g.: $14.85 becomes 1485. $12.00 becomes 1200. The scale is defined according the currency.</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">max</td>
-                        <td class="field-type">{'type': 'bytes', 'logicalType': 'decimal', 'precision': 19}</td>
-                        <td>Maximum Amount as an unscaled value. For values with decimal parts, multiply by the scale. E.g.: $14.85 becomes 1485. $12.00 becomes 1200. The scale is defined according the currency.</td>
-                    </tr>
-
-                </tbody>
-            </table>
-        </div>
-
-        <div class="event-schema" id="Limit">
-            <div class="event-name">Limit</div>
-            <div class="namespace">Namespace: com.matera.dtw.event.common.financial</div>
-            <p style="color: #666; margin-bottom: 16px;">Represents a limit in the system</p>
-            
-            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
-            <table class="fields-table">
-                <thead>
-                    <tr>
-                        <th>Field Name</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <td class="field-name">limitType</td>
-                        <td class="field-type">string</td>
-                        <td>No documentation</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">amountRange</td>
-                        <td class="field-type">com.matera.dtw.event.common.financial.FinancialAmountRange</td>
-                        <td>The limit amount range. For example, for an overdraft limit of 100 it would be minimum -100 and maximum 0</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">feature</td>
-                        <td class="field-type">{'type': 'map', 'values': 'com.matera.dtw.event.common.feature.FeatureValue'}</td>
-                        <td>Additional limit features/information.</td>
-                    </tr>
-
-                </tbody>
-            </table>
-        </div>
-
-        <div class="event-schema" id="FailureInfo">
-            <div class="event-name">FailureInfo</div>
-            <div class="namespace">Namespace: com.matera.dtw.command.base.common</div>
-            <p style="color: #666; margin-bottom: 16px;">Represent a command execution failure metadata. Loosely based on the RFC7807 (https://datatracker.ietf.org/doc/html/rfc7807)</p>
-            
-            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
-            <table class="fields-table">
-                <thead>
-                    <tr>
-                        <th>Field Name</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <td class="field-name">type</td>
-                        <td class="field-type">string</td>
-                        <td>A URI reference RFC3986 (https://datatracker.ietf.org/doc/html/rfc3986) that identifies the problem type.</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">title</td>
-                        <td class="field-type">string</td>
-                        <td>A short, human-readable summary of the problem type.</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">details</td>
-                        <td class="field-type">['null', 'string']</td>
-                        <td>A human-readable explanation specific to this occurrence of the problem.</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">parameters</td>
-                        <td class="field-type">['null', {'type': 'string', 'logicalType': 'json'}]</td>
-                        <td>Additional parameters that give more context on the cause of the given errors. Stored on the Json Format</td>
-                    </tr>
-
-                </tbody>
-            </table>
-        </div>
-
-        <div class="event-schema" id="BaseCommand">
-            <div class="event-name">BaseCommand</div>
-            <div class="namespace">Namespace: com.matera.dtw.command.base.common</div>
-            <p style="color: #666; margin-bottom: 16px;">No description available</p>
-            
-            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
-            <table class="fields-table">
-                <thead>
-                    <tr>
-                        <th>Field Name</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <td class="field-name">baseEvent</td>
-                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
-                        <td>This command's meta-data</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">replyTo</td>
-                        <td class="field-type">string</td>
-                        <td>The destination topic to reply to</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">replyKey</td>
-                        <td class="field-type">['null', 'string']</td>
-                        <td>Key used when replying</td>
-                    </tr>
-
-                </tbody>
-            </table>
-        </div>
-
-        <div class="event-schema" id="BaseCommandSuccessResult">
-            <div class="event-name">BaseCommandSuccessResult</div>
-            <div class="namespace">Namespace: com.matera.dtw.command.base.common</div>
-            <p style="color: #666; margin-bottom: 16px;">No description available</p>
-            
-            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
-            <table class="fields-table">
-                <thead>
-                    <tr>
-                        <th>Field Name</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <td class="field-name">baseEvent</td>
-                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
-                        <td>This command's meta-data</td>
-                    </tr>
-
-                </tbody>
-            </table>
-        </div>
-
-        <div class="event-schema" id="BaseCommandFailureResult">
-            <div class="event-name">BaseCommandFailureResult</div>
-            <div class="namespace">Namespace: com.matera.dtw.command.base.common</div>
-            <p style="color: #666; margin-bottom: 16px;">No description available</p>
-            
-            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
-            <table class="fields-table">
-                <thead>
-                    <tr>
-                        <th>Field Name</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <td class="field-name">baseEvent</td>
-                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
-                        <td>This command's meta-data</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">failureInfo</td>
-                        <td class="field-type">com.matera.dtw.command.base.common.FailureInfo</td>
-                        <td>Data related with the underlying failure</td>
-                    </tr>
-
-                </tbody>
-            </table>
-        </div>
-
-        <div class="event-schema" id="DateRange">
-            <div class="event-name">DateRange</div>
-            <div class="namespace">Namespace: com.matera.dtw.event.common.feature</div>
-            <p style="color: #666; margin-bottom: 16px;">Date range type for feature value. Inclusive range.</p>
-            
-            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
-            <table class="fields-table">
-                <thead>
-                    <tr>
-                        <th>Field Name</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <td class="field-name">startDate</td>
-                        <td class="field-type">['null', {'type': 'long', 'logicalType': 'local-timestamp-millis'}]</td>
-                        <td>Start date value</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">endDate</td>
-                        <td class="field-type">['null', {'type': 'long', 'logicalType': 'local-timestamp-millis'}]</td>
-                        <td>End date value</td>
-                    </tr>
-
-                </tbody>
-            </table>
-        </div>
-
-        <div class="event-schema" id="FeatureValue">
-            <div class="event-name">FeatureValue</div>
-            <div class="namespace">Namespace: com.matera.dtw.event.common.feature</div>
-            <p style="color: #666; margin-bottom: 16px;">Transport generic data of different types</p>
-            
-            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
-            <table class="fields-table">
-                <thead>
-                    <tr>
-                        <th>Field Name</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <td class="field-name">type</td>
-                        <td class="field-type">com.matera.dtw.event.common.feature.FeatureType</td>
-                        <td>No documentation</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">booleanValue</td>
-                        <td class="field-type">['null', 'boolean']</td>
-                        <td>boolean value</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">stringValue</td>
-                        <td class="field-type">['null', 'string']</td>
-                        <td>string value</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">decimalValue</td>
-                        <td class="field-type">['null', {'type': 'bytes', 'logicalType': 'decimal', 'precision': 19}]</td>
-                        <td>decimal value with 19 precision</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">dateValue</td>
-                        <td class="field-type">['null', {'type': 'int', 'logicalType': 'date'}]</td>
-                        <td>date value</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">dateRangeValue</td>
-                        <td class="field-type">['null', 'com.matera.dtw.event.common.feature.DateRange']</td>
-                        <td>Date range value</td>
-                    </tr>
-
-                </tbody>
-            </table>
-        </div>
-
-        <div class="event-schema" id="FeatureEntry">
-            <div class="event-name">FeatureEntry</div>
-            <div class="namespace">Namespace: com.matera.dtw.event.common.feature</div>
-            <p style="color: #666; margin-bottom: 16px;">Transport generic data of different types</p>
-            
-            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
-            <table class="fields-table">
-                <thead>
-                    <tr>
-                        <th>Field Name</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <td class="field-name">name</td>
-                        <td class="field-type">string</td>
-                        <td>Feature name</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">value</td>
-                        <td class="field-type">com.matera.dtw.event.common.feature.FeatureValue</td>
-                        <td>Feature value</td>
-                    </tr>
-
-                </tbody>
-            </table>
-        </div>
-
-        <div class="event-schema" id="BaseEventContent">
-            <div class="event-name">BaseEventContent</div>
-            <div class="namespace">Namespace: com.matera.dtw.event.base.common</div>
-            <p style="color: #666; margin-bottom: 16px;">No description available</p>
-            
-            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
-            <table class="fields-table">
-                <thead>
-                    <tr>
-                        <th>Field Name</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <td class="field-name">source</td>
-                        <td class="field-type">string</td>
-                        <td>Identifies the system (module) where the event was originated from (ie.: checking-account-system).</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">eventId</td>
-                        <td class="field-type">{'type': 'string', 'logicalType': 'uuid'}</td>
-                        <td>Event Id on the originating system.</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">createdAtUtc</td>
-                        <td class="field-type">{'type': 'long', 'logicalType': 'local-timestamp-millis'}</td>
-                        <td>Timestamp with milliseconds when the event was generated in UTC.</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">kind</td>
-                        <td class="field-type">string</td>
-                        <td>The kind (type) of the underlying event. It description should (preferably) include which aggregate the event is associated with (ie.: account-change-type).</td>
-                    </tr>
-
-                </tbody>
-            </table>
-        </div>
-
-        <div class="event-schema" id="BaseEvent">
-            <div class="event-name">BaseEvent</div>
-            <div class="namespace">Namespace: com.matera.dtw.event.base.common</div>
-            <p style="color: #666; margin-bottom: 16px;">No description available</p>
-            
-            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
-            <table class="fields-table">
-                <thead>
-                    <tr>
-                        <th>Field Name</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <td class="field-name">content</td>
-                        <td class="field-type">com.matera.dtw.event.base.common.BaseEventContent</td>
-                        <td>Event data.</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">parents</td>
-                        <td class="field-type">{'type': 'array', 'items': {'name': 'parent', 'type': 'com.matera.dtw.event.base.common.BaseEventCon</td>
-                        <td>No documentation</td>
-                    </tr>
-
-                </tbody>
-            </table>
-        </div>
-
-    </div>
-    
     <footer class="main-footer">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-section">
-                    <h4>Digital Twin Platform</h4>
-                    <p>Enterprise-grade financial platform documentation</p>
-                </div>
+                <img src="assets/matera-logo.png" alt="Matera" height="40" class="footer-logo">
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 Digital Twin Platform. All rights reserved.</p>
+                <p>&copy; 2025 Matera. Todos os direitos reservados.</p>
             </div>
         </div>
     </footer>
+
+    <script src="assets/script.js"></script>
+    <script>
+        function toggleEndpoint(header) {
+            const content = header.nextElementSibling;
+            const isExpanded = content.classList.contains('expanded');
+            
+            if (isExpanded) {
+                content.classList.remove('expanded');
+                header.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                header.classList.add('expanded');
+            }
+        }
+    </script>
 </body>
 </html>

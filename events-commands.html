@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matera Digital Twin - Commands</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="assets/matera-icon.svg" alt="Matera" width="40" height="40">
+                    <span class="logo-text">Matera Digital Twin</span>
+                </div>
+                <nav class="main-nav">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="index.html#apis" class="nav-link">API Reference</a>
+                    <a href="index.html#events" class="nav-link active">Events & Commands</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="content-section">
+        <div class="container">
+            <div class="api-detail">
+                <div class="breadcrumb">
+                    <a href="index.html">Home</a> > <a href="index.html#events">Events & Commands</a> > Commands
+                </div>
+                
+                <h1>Commands</h1>
+                <p class="api-description">Command structures and base command types used across the platform.</p>
+                
+                <div class="endpoint-section">
+                    <div class="endpoints-header">
+                        <h2>Command Schemas</h2>
+                    </div>
+                    
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method command">COMMAND</span>
+                            <code>BaseCommand</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Base command structure containing common fields for all commands.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.command.base.common</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">baseEvent</div>
+                                    <div class="param-type">BaseEvent</div>
+                                    <div class="param-desc">This command's meta-data</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">replyTo</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">The destination topic to reply to</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">replyKey</div>
+                                    <div class="param-type">string | null</div>
+                                    <div class="param-desc">Key used when replying (default: null)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method command">COMMAND</span>
+                            <code>BaseCommandSuccessResult</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Base structure for successful command execution results.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.command.base.common</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">baseEvent</div>
+                                    <div class="param-type">BaseEvent</div>
+                                    <div class="param-desc">This command's meta-data</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method command">COMMAND</span>
+                            <code>BaseCommandFailureResult</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Base structure for failed command execution results.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.command.base.common</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">baseEvent</div>
+                                    <div class="param-type">BaseEvent</div>
+                                    <div class="param-desc">This command's meta-data</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">failureInfo</div>
+                                    <div class="param-type">FailureInfo</div>
+                                    <div class="param-desc">Data related with the underlying failure</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method command">COMMAND</span>
+                            <code>FailureInfo</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Represent a command execution failure metadata. Loosely based on the RFC7807.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.command.base.common</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">type</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">A URI reference RFC3986 that identifies the problem type</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">title</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">A short, human-readable summary of the problem type</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">details</div>
+                                    <div class="param-type">string | null</div>
+                                    <div class="param-desc">A human-readable explanation specific to this occurrence of the problem (default: null)</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">parameters</div>
+                                    <div class="param-type">json | null</div>
+                                    <div class="param-desc">Additional parameters that give more context on the cause of the given errors. Stored on the Json Format (default: null)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method command">COMMAND</span>
+                            <code>ResultStatus</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Whether the result is already obtained or is deferred.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.command.base.common</code>
+                            </div>
+                            
+                            <h3>Type</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">type</div>
+                                    <div class="param-type">enum</div>
+                                    <div class="param-desc">Result status enumeration</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">symbols</div>
+                                    <div class="param-type">array</div>
+                                    <div class="param-desc">IMMEDIATE, DEFERRED</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <img src="assets/matera-logo.png" alt="Matera" height="40" class="footer-logo">
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Matera. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/script.js"></script>
+    <script>
+        function toggleEndpoint(header) {
+            const content = header.nextElementSibling;
+            const isExpanded = content.classList.contains('expanded');
+            
+            if (isExpanded) {
+                content.classList.remove('expanded');
+                header.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                header.classList.add('expanded');
+            }
+        }
+    </script>
+</body>
+</html>

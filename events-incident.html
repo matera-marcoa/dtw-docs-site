@@ -3,77 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Incident Events - DTW Documentation</title>
-    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <title>Matera Digital Twin - Incident Events</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
     <link rel="stylesheet" href="assets/styles.css">
-    <style>
-        .events-detail {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 24px;
-        }
-        .event-schema {
-            background: #F8F9FA;
-            border-left: 4px solid #00D4AA;
-            padding: 24px;
-            margin: 24px 0;
-            border-radius: 8px;
-        }
-        .event-name {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1A1A2E;
-            margin-bottom: 16px;
-        }
-        .namespace {
-            color: #666;
-            font-family: monospace;
-            font-size: 14px;
-            margin-bottom: 16px;
-        }
-        .fields-table {
-            width: 100%;
-            background: white;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 16px;
-        }
-        .fields-table th, .fields-table td {
-            text-align: left;
-            padding: 12px;
-            border-bottom: 1px solid #E0E0E0;
-        }
-        .fields-table th {
-            background: #1A1A2E;
-            color: white;
-            font-weight: 600;
-        }
-        .field-name { color: #00D4AA; font-weight: 600; font-family: monospace; }
-        .field-type { color: #8B5CF6; font-family: monospace; }
-        .back-link {
-            display: inline-block;
-            margin-bottom: 24px;
-            color: #00D4AA;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .back-link:hover { text-decoration: underline; }
-    </style>
 </head>
 <body>
     <header class="main-header">
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="40" height="40" rx="8" fill="#00D4AA"/>
-                        <path d="M12 14h6c3.31 0 6 2.69 6 6s-2.69 6-6 6h-6V14zm6 10c2.21 0 4-1.79 4-4s-1.79-4-4-4h-3v8h3z" fill="white"/>
-                        <path d="M26 14h2v12h-2V14z" fill="white"/>
-                    </svg>
-                    <span class="logo-text">DTW Documentation</span>
+                    <img src="assets/matera-icon.svg" alt="Matera" width="40" height="40">
+                    <span class="logo-text">Matera Digital Twin</span>
                 </div>
                 <nav class="main-nav">
-                    <a href="index.html#home" class="nav-link">Home</a>
+                    <a href="index.html" class="nav-link">Home</a>
                     <a href="index.html#apis" class="nav-link">API Reference</a>
                     <a href="index.html#events" class="nav-link active">Events & Commands</a>
                 </nav>
@@ -81,69 +24,89 @@
         </div>
     </header>
 
-    <div class="events-detail">
-        <a href="index.html#events" class="back-link">← Back to Events</a>
-        <h1>Incident Events</h1>
-        <p style="color: #666; font-size: 18px; margin: 16px 0 40px;">Events related to incident management and reporting</p>
-
-        <div class="event-schema" id="IncidentEvent">
-            <div class="event-name">IncidentEvent</div>
-            <div class="namespace">Namespace: com.matera.dtw.event.incident</div>
-            <p style="color: #666; margin-bottom: 16px;">An event that is an incident or an incident candidate that will be processed by an incident management tool.</p>
-            
-            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
-            <table class="fields-table">
-                <thead>
-                    <tr>
-                        <th>Field Name</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <td class="field-name">type</td>
-                        <td class="field-type">string</td>
-                        <td>A URI reference that identifies the problem type of this incident.</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">title</td>
-                        <td class="field-type">string</td>
-                        <td>A short summary of the problem type of this incident</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">detail</td>
-                        <td class="field-type">['null', 'string']</td>
-                        <td>A explanation specific to this occurrence of the incident.</td>
-                    </tr>
-
-                    <tr>
-                        <td class="field-name">parameters</td>
-                        <td class="field-type">['null', {'type': 'string', 'logicalType': 'json'}]</td>
-                        <td>Additional parameters that give more context on the cause of the given errors. Stored on the Json Format</td>
-                    </tr>
-
-                </tbody>
-            </table>
+    <main class="content-section">
+        <div class="container">
+            <div class="api-detail">
+                <div class="breadcrumb">
+                    <a href="index.html">Home</a> > <a href="index.html#events">Events & Commands</a> > Incident Events
+                </div>
+                
+                <h1>Incident Events</h1>
+                <p class="api-description">Events related to incident management and reporting.</p>
+                
+                <div class="endpoint-section">
+                    <div class="endpoints-header">
+                        <h2>Event Schemas</h2>
+                    </div>
+                    
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method event">EVENT</span>
+                            <code>IncidentEvent</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>An event that is an incident or an incident candidate that will be processed by an incident management tool.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.event.incident</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">type</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">A URI reference that identifies the problem type of this incident</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">title</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">A short summary of the problem type of this incident</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">detail</div>
+                                    <div class="param-type">string | null</div>
+                                    <div class="param-desc">A explanation specific to this occurrence of the incident (default: null)</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">parameters</div>
+                                    <div class="param-type">json | null</div>
+                                    <div class="param-desc">Additional parameters that give more context on the cause of the given errors. Stored on the Json Format (default: null)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+    </main>
 
-    </div>
-    
     <footer class="main-footer">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-section">
-                    <h4>Digital Twin Platform</h4>
-                    <p>Enterprise-grade financial platform documentation</p>
-                </div>
+                <img src="assets/matera-logo.png" alt="Matera" height="40" class="footer-logo">
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 Digital Twin Platform. All rights reserved.</p>
+                <p>&copy; 2025 Matera. Todos os direitos reservados.</p>
             </div>
         </div>
     </footer>
+
+    <script src="assets/script.js"></script>
+    <script>
+        function toggleEndpoint(header) {
+            const content = header.nextElementSibling;
+            const isExpanded = content.classList.contains('expanded');
+            
+            if (isExpanded) {
+                content.classList.remove('expanded');
+                header.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                header.classList.add('expanded');
+            }
+        }
+    </script>
 </body>
 </html>

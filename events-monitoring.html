@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matera Digital Twin - Monitoring Commands</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="assets/matera-icon.svg" alt="Matera" width="40" height="40">
+                    <span class="logo-text">Matera Digital Twin</span>
+                </div>
+                <nav class="main-nav">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="index.html#apis" class="nav-link">API Reference</a>
+                    <a href="index.html#events" class="nav-link active">Events & Commands</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="content-section">
+        <div class="container">
+            <div class="api-detail">
+                <div class="breadcrumb">
+                    <a href="index.html">Home</a> > <a href="index.html#events">Events & Commands</a> > Monitoring Commands
+                </div>
+                
+                <h1>Monitoring Commands</h1>
+                <p class="api-description">Commands related to balance monitoring and transaction tracking.</p>
+                
+                <div class="endpoint-section">
+                    <div class="endpoints-header">
+                        <h2>Command Schemas</h2>
+                    </div>
+                    
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method command">COMMAND</span>
+                            <code>CreateMonitoringCommandSuccessResult</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Represents the successful result of a monitoring command.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.command.transaction.monitoring</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">baseResult</div>
+                                    <div class="param-type">BaseCommandSuccessResult</div>
+                                    <div class="param-desc">Base command result</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">target</div>
+                                    <div class="param-type">AccountKey | AccountGroupKey</div>
+                                    <div class="param-desc">The account or account-group which the balance is being monitored</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">source</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">Which system had created the monitoring</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">correlationId</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">The correlation id of monitoring</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">intent</div>
+                                    <div class="param-type">MonitoringDataResponse | null</div>
+                                    <div class="param-desc">The monitoring intent</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method command">COMMAND</span>
+                            <code>CreateMonitoringCommandFailureResult</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Represents a rejected result of a monitoring command.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.command.transaction.monitoring</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">baseResult</div>
+                                    <div class="param-type">BaseCommandFailureResult</div>
+                                    <div class="param-desc">Base command failure result</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method enum">ENUM</span>
+                            <code>MonitoringStatus</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>The monitoring status enumeration.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.event.monitoring.common</code>
+                            </div>
+                            
+                            <h3>Type</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">type</div>
+                                    <div class="param-type">enum</div>
+                                    <div class="param-desc">Monitoring status enumeration</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">symbols</div>
+                                    <div class="param-type">array</div>
+                                    <div class="param-desc">ACTIVE, INACTIVE, CANCELLED, REALIZED, EXCLUDED</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <img src="assets/matera-logo.png" alt="Matera" height="40" class="footer-logo">
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Matera. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/script.js"></script>
+    <script>
+        function toggleEndpoint(header) {
+            const content = header.nextElementSibling;
+            const isExpanded = content.classList.contains('expanded');
+            
+            if (isExpanded) {
+                content.classList.remove('expanded');
+                header.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                header.classList.add('expanded');
+            }
+        }
+    </script>
+</body>
+</html>

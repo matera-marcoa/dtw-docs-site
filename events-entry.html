@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matera Digital Twin - Entry Events & Commands</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="assets/matera-icon.svg" alt="Matera" width="40" height="40">
+                    <span class="logo-text">Matera Digital Twin</span>
+                </div>
+                <nav class="main-nav">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="index.html#apis" class="nav-link">API Reference</a>
+                    <a href="index.html#events" class="nav-link active">Events & Commands</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="content-section">
+        <div class="container">
+            <div class="api-detail">
+                <div class="breadcrumb">
+                    <a href="index.html">Home</a> > <a href="index.html#events">Events & Commands</a> > Entry Events & Commands
+                </div>
+                
+                <h1>Entry Events & Commands</h1>
+                <p class="api-description">Events and commands related to transaction entries and financial operations.</p>
+                
+                <div class="endpoint-section">
+                    <div class="endpoints-header">
+                        <h2>Command Schemas</h2>
+                    </div>
+                    
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method command">COMMAND</span>
+                            <code>CautionaryUnblockInformation</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Holds information related to a cautionary-blocked entry to be release.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.command.transaction.command</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">correlationId</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">Which entry to release. The supplied correlation id must be the same correlation passed within the 'uponCreationHeldAs' tag during creation</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method command">COMMAND</span>
+                            <code>CautionaryBlockInformation</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Holds information related to cautionary block. As such, should only be used when the status is "ON_HOLD" and the associated entry is a credit.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.command.transaction.command</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">holdReasonId</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">Reason for the held credit amount</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">correlationId</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">The correlation id of the cautionary block entry that blocks the soon-to-be-created entry</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method event">EVENT</span>
+                            <code>EntryCreationEvent</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Represents a regular entry (debit/credit) on a given account.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.event.transaction.entry</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">baseEvent</div>
+                                    <div class="param-type">BaseEvent</div>
+                                    <div class="param-desc">Base event information</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">entry</div>
+                                    <div class="param-type">LedgerEntry</div>
+                                    <div class="param-desc">Ledger entry data</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method event">EVENT</span>
+                            <code>EntryExclusionEvent</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Represents the exclusion of an entry on a given account.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.event.transaction.entry</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">baseEvent</div>
+                                    <div class="param-type">BaseEvent</div>
+                                    <div class="param-desc">Base event information</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">entry</div>
+                                    <div class="param-type">ExclusionEntry</div>
+                                    <div class="param-desc">Exclusion entry data</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <img src="assets/matera-logo.png" alt="Matera" height="40" class="footer-logo">
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Matera. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/script.js"></script>
+    <script>
+        function toggleEndpoint(header) {
+            const content = header.nextElementSibling;
+            const isExpanded = content.classList.contains('expanded');
+            
+            if (isExpanded) {
+                content.classList.remove('expanded');
+                header.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                header.classList.add('expanded');
+            }
+        }
+    </script>
+</body>
+</html>

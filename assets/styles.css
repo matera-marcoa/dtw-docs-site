@@ -201,6 +201,13 @@ body {
     margin-top: 48px;
 }
 
+.card-grid.single-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    margin: 32px 0;
+}
+
 .card {
     background-color: var(--bg-white);
     border-radius: var(--border-radius);
@@ -604,6 +611,36 @@ code {
 .method.delete {
     background-color: rgba(244, 67, 54, 0.1);
     color: #F44336;
+}
+
+.method.event {
+    background-color: rgba(253, 126, 20, 0.1);
+    color: #fd7e14;
+}
+
+.method.command {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #198754;
+}
+
+.method.key {
+    background-color: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+}
+
+.method.enum {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+/* Event specific styles */
+.event-namespace {
+    background-color: #f8f9fa;
+    padding: 12px;
+    border-radius: var(--border-radius);
+    margin: 16px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
 }
 
 .endpoint-header code {

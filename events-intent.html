@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matera Digital Twin - Intent Events</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="assets/matera-icon.svg" alt="Matera" width="40" height="40">
+                    <span class="logo-text">Matera Digital Twin</span>
+                </div>
+                <nav class="main-nav">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="index.html#apis" class="nav-link">API Reference</a>
+                    <a href="index.html#events" class="nav-link active">Events & Commands</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="content-section">
+        <div class="container">
+            <div class="api-detail">
+                <div class="breadcrumb">
+                    <a href="index.html">Home</a> > <a href="index.html#events">Events & Commands</a> > Intent Events
+                </div>
+                
+                <h1>Intent Events</h1>
+                <p class="api-description">Events related to transaction intents and deferred operations.</p>
+                
+                <div class="endpoint-section">
+                    <div class="endpoints-header">
+                        <h2>Event Schemas</h2>
+                    </div>
+                    
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method command">COMMAND</span>
+                            <code>ExclusionIntentRequestData</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>A command to request to exclude an intent.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.command.transaction.intent</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">source</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">Which system had created the intent</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">criteria</div>
+                                    <div class="param-type">ByCorrelationIdCriteria | ByIdCriteria</div>
+                                    <div class="param-desc">Criteria to use when looking for which intent to delete (e.g., byId, byCorrelation)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method command">COMMAND</span>
+                            <code>IntentExclusionSuccessResult</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Represents the successful result of an intent exclusion command.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.command.transaction.intent</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">baseResult</div>
+                                    <div class="param-type">BaseCommandSuccessResult</div>
+                                    <div class="param-desc">Base command result</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">target</div>
+                                    <div class="param-type">AccountKey | AccountGroupKey</div>
+                                    <div class="param-desc">The target of the excluded intent</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">source</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">Which system had created the intent</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">intent</div>
+                                    <div class="param-type">MonitoringDataResponse | null</div>
+                                    <div class="param-desc">The excluded intent data</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method command">COMMAND</span>
+                            <code>ByCorrelationIdCriteria</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Criteria-based on the intent correlation id.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.command.transaction.intent</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">correlationId</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">The correlation id of the intent</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method event">EVENT</span>
+                            <code>AccountIntentCreationEvent</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Represents an account creation intent.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.event.transaction.intent</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">baseEvent</div>
+                                    <div class="param-type">BaseEvent</div>
+                                    <div class="param-desc">Base event information</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">accountKey</div>
+                                    <div class="param-type">AccountKey</div>
+                                    <div class="param-desc">Account identification</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">deferredEntry</div>
+                                    <div class="param-type">DeferredEntry</div>
+                                    <div class="param-desc">The criteria of execution the intention</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method event">EVENT</span>
+                            <code>AccountGroupIntentCreationEvent</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Represents an account group creation intent.</p>
+                            
+                            <div class="event-namespace">
+                                <strong>Namespace:</strong> <code>com.matera.dtw.event.transaction.intent</code>
+                            </div>
+                            
+                            <h3>Fields</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">baseEvent</div>
+                                    <div class="param-type">BaseEvent</div>
+                                    <div class="param-desc">Base event information</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">accountGroupKey</div>
+                                    <div class="param-type">AccountGroupKey</div>
+                                    <div class="param-desc">Account group identification</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">deferredEntry</div>
+                                    <div class="param-type">DeferredEntry</div>
+                                    <div class="param-desc">The criteria of execution the intention</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <img src="assets/matera-logo.png" alt="Matera" height="40" class="footer-logo">
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Matera. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/script.js"></script>
+    <script>
+        function toggleEndpoint(header) {
+            const content = header.nextElementSibling;
+            const isExpanded = content.classList.contains('expanded');
+            
+            if (isExpanded) {
+                content.classList.remove('expanded');
+                header.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                header.classList.add('expanded');
+            }
+        }
+    </script>
+</body>
+</html>
