@@ -1,0 +1,14 @@
+[
+ {
+    "namespace": "com.matera.dtw.event.incident",
+    "type": "record",
+    "name": "IncidentEvent",
+    "doc": "An event that is an incident or an incident candidate that will be processed by an incident management tool.",
+    "fields": [
+      {"name": "type", "type": "string", "doc": "A URI reference that identifies the problem type of this incident."},
+      {"name": "title", "type": "string", "doc": "A short summary of the problem type of this incident"},
+      {"name": "detail", "type": ["null", "string"], "default": null, "doc": "A explanation specific to this occurrence of the incident."},
+      {"name": "parameters", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Additional parameters that give more context on the cause of the given errors. Stored on the Json Format"}
+    ]
+  }
+]

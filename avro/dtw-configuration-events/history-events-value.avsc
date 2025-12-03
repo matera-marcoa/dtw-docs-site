@@ -1,0 +1,46 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "type": "record",
+    "name": "HistoryCodeChangeEvent",
+    "doc": "Event of change of history record.",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "historyCodeKey", "type": "com.matera.dtw.event.configuration.HistoryCodeKey", "doc": "The unique identifier to history record"},
+      {"name": "historyCodeType", "type": {"type": "enum", "name": "CodeType", "symbols": ["DEBIT","CREDIT","BALANCE"]},
+        "doc": "The entry type (CREDIT, DEBIT OR BALANCE)"},
+      {"name": "description", "type": "string", "doc": "The history description. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "reversalHistoryCode", "type": ["null","com.matera.dtw.event.configuration.HistoryCodeKey"], "doc": "History to entry reversal history", "default":  null}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "type": "record",
+    "name": "HistoryCodeDeleteEvent",
+    "doc": "Event of a delete operation to an history record.",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "historyCodeKey", "type": "com.matera.dtw.event.configuration.HistoryCodeKey", "doc": "The unique identifier to history record"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "name": "HistoryCodeFeatureChangeEvent",
+    "type": "record",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "historyCodeKey", "type": "com.matera.dtw.event.configuration.HistoryCodeKey", "doc": "The unique identifier to history record"},
+      {"name": "feature", "type" : "com.matera.dtw.event.common.feature.FeatureEntry", "doc": "feature to be changed. For example BLOCKED_FOR_CREDIT"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "name": "HistoryCodeFeatureDeleteEvent",
+    "type": "record",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "historyCodeKey", "type": "com.matera.dtw.event.configuration.HistoryCodeKey", "doc": "The unique identifier to history record"},
+      {"name": "featureName", "type" : "string", "doc": "feature name to be deleted"}
+    ]
+  }
+]

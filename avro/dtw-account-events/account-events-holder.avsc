@@ -1,0 +1,66 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.account",
+    "type": "record",
+    "name": "AccountHolder",
+    "doc": "Account holder data.",
+    "fields": [
+      {
+        "name": "kind",
+        "type": "string",
+        "doc": "A membership kind specifies the given account group (for example, accounts owned by a person could be bound together by an account group whose membership kind is HOLDER). They may be created as pleased. It is up to the developer to specify their semantics (the DTW assumes no semantics)"
+      },
+      {
+        "name": "clientId",
+        "type": "string",
+        "doc": "Cryptographic hash that identifies the client. This hash replaces the client taxId."
+      }
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.account.holder",
+    "type": "record",
+    "name": "AccountHolderChangeEvent",
+    "doc": "Event to add or change an account holder related to an account",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "accountHolder", "type": "com.matera.dtw.event.account.AccountHolder","doc": "Account holder"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.account.holder",
+    "type": "record",
+    "name": "AccountHolderDeleteEvent",
+    "doc": "Event to delete an account holder from an account.",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "accountHolder", "type": "com.matera.dtw.event.account.AccountHolder","doc": "Account holder"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.account.membership",
+    "type": "record",
+    "name": "AccountMembershipFeatureChangeEvent",
+    "doc": "",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "features", "type": {"type": "array", "items": ["com.matera.dtw.event.common.feature.FeatureEntry"]}, "doc": "features array to be changed"},
+      {"name": "membership", "type": "com.matera.dtw.event.account.AccountHolder", "doc": "Account membership"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.account.membership",
+    "type": "record",
+    "name": "AccountMembershipFeatureDeleteEvent",
+    "doc": "",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "featureNames", "type": {"type": "array", "items": ["string"]}, "doc": "feature names array to be deleted"},
+      {"name": "membership", "type": "com.matera.dtw.event.account.AccountHolder", "doc": "Account membership"}
+    ]
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.state",
+    "name": "SystemStateChangeEvent",
+    "type": "record",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "source", "type": "com.matera.dtw.event.state.SystemStateKey", "doc": "The unique identifier to system configuration record"},
+      {"name": "states", "type": {"type": "array", "items": ["com.matera.dtw.event.common.feature.FeatureEntry"]}, "doc": "states to be changed. For example CURRENT_BUSINESS_DAY"}
+    ]
+  }
+]

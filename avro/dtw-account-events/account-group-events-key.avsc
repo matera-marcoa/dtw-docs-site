@@ -1,0 +1,11 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.account.group.common",
+    "type": "record",
+    "name": "AccountGroupKey",
+    "fields": [
+      {"name": "kind", "type": "string"},
+      {"name": "membershipId", "type": "string"}
+    ]
+  }
+]

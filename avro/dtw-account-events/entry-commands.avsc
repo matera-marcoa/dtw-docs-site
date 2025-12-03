@@ -1,0 +1,445 @@
+[
+  {
+    "namespace": "com.matera.dtw.command.transaction.command",
+    "type": "record",
+    "name": "CautionaryUnblockInformation",
+    "doc": "Holds information related to a cautionary-blocked entry to be release.",
+    "fields": [
+      { "name": "correlationId", "type": "string", "doc": "Which entry to release. The supplied correlation id must be the same correlation passed within the 'uponCreationHeldAs' tag during creation."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.command",
+    "type": "record",
+    "name": "CautionaryBlockInformation",
+    "doc": "Holds information related to cautionary block. As such, should only be used when the status is \"ON_HOLD\" and the associated entry is a credit.",
+    "fields": [
+      { "name": "holdReasonId", "type": "string", "doc": "Reason for the held credit amount" },
+      { "name": "correlationId", "type": "string", "doc": "The correlation id of the cautionary block entry that blocks the soon-to-be-created entry. The correlation id used to unblock the given entry is the correlation id within this tag"}
+    ]
+  },{
+    "namespace": "com.matera.dtw.event.transaction.common",
+    "type": "enum",
+    "name": "Fulfillment",
+    "default": "TOTAL",
+    "doc": "\"TOTAL\" means an total amount entry. On the other hand, \"PARTIAL\" means the partial amount entry. When on \"PARTIAL\" value is present a amountRange min and max must always be provided.",
+    "symbols": [
+      "TOTAL",
+      "PARTIAL"
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.command",
+    "type": "record",
+    "name": "PartialSettlementInfo",
+    "doc" : "",
+    "fields": [
+      {"name": "fulfillment", "type": "com.matera.dtw.event.transaction.common.Fulfillment", "default": "PARTIAL", "doc": "Whether the created entry is TOTAL or PARTIAL."},
+      {"name": "amountRange", "type": "com.matera.dtw.event.common.financial.FinancialAmountRange", "doc": "amount"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.command",
+    "type": "record",
+    "name": "TotalSettlementInfo",
+    "doc" : "",
+    "fields": [
+      {"name": "fulfillment", "type": "com.matera.dtw.event.transaction.common.Fulfillment", "default": "TOTAL", "doc": "Whether the created entry is TOTAL or PARTIAL."},
+      {"name": "amount", "type": "com.matera.dtw.event.common.financial.FinancialAmount" , "doc": "amount"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.transaction.common",
+    "type": "enum",
+    "name": "EntryStatus",
+    "doc": "\"POSTED\" means an available entry. On the other hand, \"PENDING\" means the entry credit will be held. When on \"PENDING\" value is present a holdReasonId must always be provided. \"REMOVED\" represents a compensating action of an already existing N credit or debit entry. \"ON_HOLD\" indicates that the given entry should be created and cautionary blocked (only simple credits/balance unblocking may be created as such)",
+    "symbols": [
+      "POSTED",
+      "PENDING",
+      "REMOVED",
+      "REVERSED",
+      "EXCLUDED",
+      "ON_HOLD"
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.transaction.common",
+    "type": "enum",
+    "name": "EntryBalanceUpdateStrategy",
+    "doc": "\"CONDITIONAL\" means that the entry will only be effective after validating the balances (default behavior). On the other hand, \"UNCONDITIONAL\" means validation of balances will be ignored",
+    "symbols": [
+      "CONDITIONAL",
+      "UNCONDITIONAL"
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.command",
+    "type": "record",
+    "name": "ReplyKey",
+    "doc": "Key of command.",
+    "fields": [
+      {"name": "target", "type": "string", "doc":  "Key used when replying."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.command",
+    "type": "record",
+    "name": "CommandKey",
+    "doc": "Key of command. Is based on both the requester of the command and the underlying target that can be accountKey or AccountGroupKey",
+    "fields": [
+      {"name": "target", "type": ["com.matera.dtw.event.account.common.AccountKey","com.matera.dtw.event.account.group.common.AccountGroupKey", "com.matera.dtw.command.transaction.command.ReplyKey"]},
+      {"name": "source", "type": "string", "doc": "Which system has requested the entry"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.command",
+    "type": "record",
+    "name": "LedgerEntryRequestData",
+    "doc": "Data associated with a ledger entry request",
+    "fields": [
+      {"name": "historyCode", "type": "int" , "doc": "Determine if the entry is debit and credit, might be shown on de statement with its description"},
+      {"name": "status", "type": "com.matera.dtw.event.transaction.common.EntryStatus", "default": "POSTED", "doc": "Whether the created entry is POSTED or PENDING."},
+      {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+      {"name": "asOfDate", "type": {"type": "int", "logicalType": "date"}, "doc": "Date when the entry happened"},
+      {"name": "source", "type": "string", "doc": "Which system has requested the entry"},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the soon-to-be-created entry"},
+      {"name": "settlement", "type": ["com.matera.dtw.command.transaction.command.TotalSettlementInfo","com.matera.dtw.command.transaction.command.PartialSettlementInfo"],"doc": "Amount rule information for a Ledger Entry"},
+      {"name": "description", "type": ["null","string"], "default": null,"doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "uponCreationHeldAs", "type": ["null", "com.matera.dtw.command.transaction.command.CautionaryBlockInformation"], "default": null, "doc": "Holds information related to cautionary block. As such, should only be used when the status is \"ON_HOLD\" and the associated entry is a credit."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.command",
+    "type": "record",
+    "name": "LedgerEntryResultData",
+    "doc": "Data associated with a newly-created ledger entry",
+    "fields": [
+      {"name": "id", "type":{ "type" : "string","logicalType":"uuid"}, "doc":  "The id of the newly-created entry"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "kind", "type": "string", "default": "LEDGER"},
+      {"name": "historyCode", "type": "int" , "doc": "Determine if the entry is debit and credit, might be shown on de statement with its description"},
+      {"name": "status", "type": "com.matera.dtw.event.transaction.common.EntryStatus", "default": "POSTED", ",doc": "Whether the created entry is POSTED or PENDING."},
+      {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+      {"name": "asOfDate", "type": {"type": "int", "logicalType": "date"}, "doc": "Date when the entry happened"},
+      {"name": "correlations", "type" : {"type": "map", "values" : "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "amount", "type": "com.matera.dtw.event.common.financial.FinancialAmount" , "doc": "amount"},
+      {"name": "description", "type": ["null","string"], "default": null,"doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "balanceChanges", "type" : {"type": "map", "values" : "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+      {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"},
+      {"name": "uponCreationHeldAs", "type": ["null", "com.matera.dtw.command.transaction.command.CautionaryBlockInformation"], "default": null, "doc": "Holds information related to cautionary block. As such, should only be used when the status is \"ON_HOLD\" and the associated entry is a credit."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.command",
+    "type": "record",
+    "name": "BlockingEntryRequestData",
+    "doc": "Data associated with a blocking entry request",
+    "fields": [
+      {"name": "source", "type": "string", "doc": "Which system has requested the entry"},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the soon-to-be-created entry"},
+      {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "description", "type": ["null", "string"], "default": null, "doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "status", "type": "com.matera.dtw.event.transaction.common.EntryStatus", "default": "POSTED", "doc": "Whether the created entry is POSTED or PENDING."},
+      {"name": "asOfDate", "type": {"type": "int", "logicalType": "date"}, "doc": "Date when the entry happened"},
+      {"name": "settlement", "type": ["com.matera.dtw.command.transaction.command.TotalSettlementInfo","com.matera.dtw.command.transaction.command.PartialSettlementInfo"],"doc": "Amount rule information for a Blocking Entry"},
+      {"name": "holdReasonId", "type": ["null","string"], "doc": "Reason for the block credit amount."},
+      {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.command",
+    "type": "record",
+    "name": "UnblockingEntryRequestData",
+    "doc": "Data associated with a unblocking entry request",
+    "fields": [
+      {"name": "source", "type": "string", "doc": "Which system has requested the entry"},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the soon-to-be-created entry"},
+      {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "description", "type": ["null", "string"], "default": null, "doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "status", "type": "com.matera.dtw.event.transaction.common.EntryStatus", "default": "POSTED", "doc": "Whether the created entry is POSTED or PENDING."},
+      {"name": "asOfDate", "type": {"type": "int", "logicalType": "date"}, "doc": "Date when the entry happened"},
+      {"name": "settlement", "type": ["com.matera.dtw.command.transaction.command.TotalSettlementInfo", "com.matera.dtw.command.transaction.command.PartialSettlementInfo"],"doc": "Amount rule information for a Unblocking Entry"},
+      {"name": "holdReasonId", "type": ["null","string"], "doc": "Reason for the block credit amount."},
+      {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+      {"name": "uponCreationHeldAs", "type": ["null", "com.matera.dtw.command.transaction.command.CautionaryBlockInformation"], "default": null, "doc": "Holds information related to cautionary block. As such, should only be used when the status is \"ON_HOLD\"."},
+      {"name": "releasing", "type": ["null", "com.matera.dtw.command.transaction.command.CautionaryUnblockInformation"], "default": null, "doc": "Informs an entry to be release. The entry must be cautionary-blocked (i.e., its status must be ON_HOLD). The correlation id passed within this tag is the same correlation passed within the 'uponCreationHeldAs' tag during creation"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.command",
+    "type": "record",
+    "name": "ExclusionEntryRequestData",
+    "doc": "Data associated with a exclusion entry request",
+    "fields": [
+      {"name": "source", "type": "string", "doc": "Which system has created the soon-to-be-excluded entry"},
+      {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the soon-to-be-excluded entry"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.command",
+    "type": "record",
+    "name": "ReleaseEntryRequestData",
+    "doc": "Data associated with a release entry request",
+    "fields": [
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the soon-to-be-excluded entry"},
+      {"name": "balanceChanges", "type" : {"type": "map", "values" : "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+      {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+      {"name": "amount", "type": "com.matera.dtw.event.common.financial.FinancialAmount" , "doc": "amount"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.command",
+    "type": "record",
+    "name": "RemovalEntryRequestData",
+    "doc": "Data associated with a removal entry request",
+    "fields": [
+      {"name": "source", "type": "string", "doc": "Which system has requested the entry"},
+      {"name": "correlationId", "type": "string", "doc": "The correlation ID of the soon-to-be-removal entry."},
+      {"name": "description", "type": ["null", "string"], "default": null, "doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "entryToRemoval", "type": "string", "doc": "The avocation ID of the soon-to-be-removal entry."},
+      {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "asOfDate", "type": {"type": "int", "logicalType": "date"}, "doc": "Date when the entry happened"},
+      {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+      {"name": "status", "type": "com.matera.dtw.event.transaction.common.EntryStatus", "default": "POSTED", "doc": "Whether the created entry is POSTED or PENDING."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.command",
+    "type": "record",
+    "name": "ReversalEntryRequestData",
+    "doc": "Data associated with a reversal request",
+    "fields": [
+      {"name": "source", "type": "string", "doc": "Which system has requested the entry"},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the reversal entry"},
+      {"name": "entryToRevert", "type": "string", "doc": "The correlation id of the soon-to-be-reversed entry"},
+      {"name": "asOfDate", "type": {"type": "int", "logicalType": "date"}, "doc": "Date when the entry happened"},
+      {"name": "description", "type": ["null","string"], "default": null,"doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+      {"name": "status", "type": "com.matera.dtw.event.transaction.common.EntryStatus", "default": "POSTED", "doc": "Whether the created entry is POSTED or PENDING."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.entry",
+    "type": "record",
+    "name": "EntryLedgerCommandSuccessResult",
+    "doc": "Represents a result of a successful ledger entry creation",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandSuccessResult"},
+      {"name": "entry", "type": "com.matera.dtw.command.transaction.command.LedgerEntryResultData", "doc":  "The newly-created ledger entry"},
+      {"name": "correlationId", "type": ["null", "string"], "default": null, "doc": "The correlation id of the entry that was created"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.entry",
+    "type": "record",
+    "name": "EntryLedgerCommandFailureResult",
+    "doc": "Represents a result of a rejected ledger entry.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandFailureResult"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "entry", "type": "com.matera.dtw.command.transaction.command.LedgerEntryRequestData", "doc":  "Rejected ledger entry"},
+      {"name": "correlationId", "type": ["null", "string"], "default": null, "doc": "The correlation id of the entry that was rejected"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.entry",
+    "type": "record",
+    "name": "EntryExclusionCommandSuccessResult",
+    "doc": "Represents a result of a successful entry exclusion",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandSuccessResult"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc": "The account associated with the excluded entry"},
+      {"name": "source", "type": "string", "doc": "Which system had created the entry that was excluded"},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the entry that was excluded"},
+      {"name": "status", "type" : "com.matera.dtw.command.base.common.ResultStatus", "doc" :  "Whether the entry was excluded ('IMMEDIATE') or it is scheduled to deletion ('DEFERRED')" },
+      {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+      {"name": "entry", "type": ["null", "com.matera.dtw.event.transaction.entry.ExclusionEntry"], "doc":  "The exclusion entry. Only available if the status is 'IMMEDIATE'"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.entry",
+    "type": "record",
+    "name": "EntryExclusionCommandFailureResult",
+    "doc": "Represents a result of a rejected entry exclusion",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandFailureResult"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc" :  "The account associated with the entry that ought to be excluded" },
+      {"name": "source", "type": "string", "doc": "Which system that had created the entry that ought to be excluded"},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the entry that ought to be excluded"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.entry",
+    "type": "record",
+    "name": "EntryReleaseCommandSuccessResult",
+    "doc": "Represents a result of a successful command to release amount",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandSuccessResult"},
+      {"name": "id", "type": ["null", { "type" : "string","logicalType":"uuid"}], "doc":  "The id of the newly-created entry"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc": "The account associated with the excluded entry"},
+      {"name": "source", "type": "string", "doc": "Which system had created the entry that was excluded"},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the entry that was excluded"},
+      {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+      {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.entry",
+    "type": "record",
+    "name": "EntryReleaseCommandFailureResult",
+    "doc": "Represents a result of a rejected command to release value",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandFailureResult"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc" :  "The account associated with the entry that ought to be excluded" },
+      {"name": "source", "type": "string", "doc": "Which system that had created the entry that ought to be excluded"},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the entry that ought to be excluded"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.entry",
+    "type": "record",
+    "name": "EntryReversalCommandSuccessResult",
+    "doc": "Represents a result of a successful entry reversal",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandSuccessResult"},
+      {"name": "id", "type":{ "type" : "string","logicalType":"uuid"}, "doc":  "The id of the newly-created entry"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc": "The account associated with the reversal entry"},
+      {"name": "source", "type": "string", "doc": "Which system had created the entry that was reversal"},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the reversal entry"},
+      {"name": "entryToRevert", "type": "string", "doc": "The correlation id of the entry that was reversal"},
+      {"name": "balanceChanges", "type" : {"type": "map", "values" : "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"},
+      {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+      {"name": "status", "type": "com.matera.dtw.event.transaction.common.EntryStatus", "default": "POSTED", "doc": "Whether the created entry is POSTED or PENDING."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.entry",
+    "type": "record",
+    "name": "EntryReversalCommandFailureResult",
+    "doc": "Represents a result of a rejected entry reversal",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandFailureResult"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc" :  "The account associated with the entry that ought to be reversal" },
+      {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+      {"name": "source", "type": "string", "doc": "Which system that had created the entry that ought to be reversal"},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the reversal entry"},
+      {"name": "entryToRevert", "type": "string", "doc": "The correlation id of the entry that ought to be reversal"},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.entry",
+    "type": "record",
+    "name": "EntryRemovalCommandSuccessResult",
+    "doc": "Represents the successful result of a removal entry.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandSuccessResult"},
+      {"name": "id", "type": ["null", { "type" : "string","logicalType":"uuid"}], "default": null, "doc":  "The id of the newly-created entry"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc": "The account associated with the removal entry."},
+      {"name": "balanceChanges", "type" : {"type": "map", "values" : "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+      {"name": "correlationId", "type": "string", "doc": "The correlation ID of the entry that was removal."},
+      {"name": "entryToRemoval", "type": "string", "doc": "The avocation ID of the entry that was removal."},
+      {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "source", "type": "string", "doc": "Which system had created the entry that was removal."},
+      {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+      {"name": "status", "type": "com.matera.dtw.event.transaction.common.EntryStatus", "default": "POSTED", "doc": "Whether the created entry is POSTED or PENDING."},
+      {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.entry",
+    "type": "record",
+    "name": "EntryRemovalCommandFailureResult",
+    "doc": "Represents a result of a rejected removal entry.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandFailureResult"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc": "The account associated with the entry that ought to be removal."},
+      {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+      {"name": "correlationId", "type": "string", "doc": "The correlation ID of the entry that ought to be removal."},
+      {"name": "entryToRemoval", "type": "string", "doc": "The avocation ID of the entry that ought to be removal."},
+      {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "source", "type": "string", "doc": "Which system that had created the entry that ought to be removal."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.entry",
+    "type": "record",
+    "name": "EntryBlockingCommandSuccessResult",
+    "doc": "Represents the successful result of a blocking entry.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandSuccessResult"},
+      {"name": "id", "type": ["null", { "type" : "string","logicalType":"uuid"}], "default": null, "doc":  "The id of the newly-created entry"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc" : "The account which the balance should be blocked."},
+      {"name": "balanceChanges", "type" : {"type": "map", "values" : "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the soon-to-be-created entry"},
+      {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "description", "type": ["null", "string"], "default": null, "doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "status", "type": "com.matera.dtw.event.transaction.common.EntryStatus", "default": "POSTED", "doc": "Whether the created entry is POSTED or PENDING."},
+      {"name": "amount", "type": "com.matera.dtw.event.common.financial.FinancialAmount" , "doc": "amount"},
+      {"name": "holdReasonId", "type": ["null","string"], "doc": "Reason for the block credit amount."},
+      {"name": "source", "type": "string", "doc": "Which system has created the soon-to-be-created entry."},
+      {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+      {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.entry",
+    "type": "record",
+    "name": "EntryBlockingCommandFailureResult",
+    "doc": "Represents a result of a rejected removal entry.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandFailureResult"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc" : "The account which the balance should be blocked."},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the soon-to-be-created entry"},
+      {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "description", "type": ["null", "string"], "default": null, "doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "status", "type": "com.matera.dtw.event.transaction.common.EntryStatus", "default": "POSTED", "doc": "Whether the created entry is POSTED or PENDING."},
+      {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+      {"name": "settlement", "type": ["com.matera.dtw.command.transaction.command.TotalSettlementInfo","com.matera.dtw.command.transaction.command.PartialSettlementInfo"],"doc": "Amount rule information for a Blocking Entry"},
+      {"name": "holdReasonId", "type": ["null","string"], "doc": "Reason for the block credit amount."},
+      {"name": "source", "type": "string", "doc": "Which system has created the soon-to-be-created entry."}
+    ]
+  }, {
+      "namespace": "com.matera.dtw.command.transaction.entry",
+      "type": "record",
+      "name": "EntryUnblockingCommandSuccessResult",
+      "doc": "Represents the successful result of a unblocking entry.",
+      "fields": [
+        {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandSuccessResult"},
+        {"name": "id", "type": ["null", { "type" : "string","logicalType":"uuid"}], "default": null, "doc":  "The id of the newly-created entry"},
+        {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc" : "The account which the balance should be unblocked."},
+        {"name": "balanceChanges", "type" : {"type": "map", "values" : "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Which balances were changed by the given entry. May be empty if no such information is available."},
+        {"name": "correlationId", "type": "string", "doc": "The correlation id of the soon-to-be-created entry"},
+        {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations."},
+        {"name": "description", "type": ["null", "string"], "default": null, "doc": "Description of the entry. This description will end up on the customer statement."},
+        {"name": "status", "type": "com.matera.dtw.event.transaction.common.EntryStatus", "default": "POSTED", "doc": "Whether the created entry is POSTED or PENDING."},
+        {"name": "amount", "type": "com.matera.dtw.event.common.financial.FinancialAmount" , "doc": "amount"},
+        {"name": "holdReasonId", "type": ["null","string"], "doc": "Reason for the block credit amount."},
+        {"name": "source", "type": "string", "doc": "Which system has created the soon-to-be-created entry."},
+        {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"},
+        {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+        {"name": "uponCreationHeldAs", "type": ["null", "com.matera.dtw.command.transaction.command.CautionaryBlockInformation"], "default": null, "doc": "Holds information related to cautionary block. As such, should only be used when the status is \"ON_HOLD\"."},
+        {"name": "releasing", "type": ["null", "com.matera.dtw.command.transaction.command.CautionaryUnblockInformation"], "default": null, "doc": "Informs an entry to be release. The entry must be cautionary-blocked (i.e., its status must be ON_HOLD). The correlation id passed within this tag is the same correlation passed within the 'uponCreationHeldAs' tag during creation"}
+      ]
+    }, {
+      "namespace": "com.matera.dtw.command.transaction.entry",
+      "type": "record",
+      "name": "EntryUnblockingCommandFailureResult",
+      "doc": "Represents a result of a rejected unblocking entry.",
+      "fields": [
+        {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandFailureResult"},
+        {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc" : "The account which the balance should be unblocked."},
+        {"name": "correlationId", "type": "string", "doc": "The correlation id of the soon-to-be-created entry"},
+        {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations."},
+        {"name": "description", "type": ["null", "string"], "default": null, "doc": "Description of the entry. This description will end up on the customer statement."},
+        {"name": "status", "type": "com.matera.dtw.event.transaction.common.EntryStatus", "default": "POSTED", "doc": "Whether the created entry is POSTED or PENDING."},
+        {"name": "balanceUpdateStrategy", "type": "com.matera.dtw.event.transaction.common.EntryBalanceUpdateStrategy", "default": "CONDITIONAL", "doc": "Whether the used strategy is CONDITIONAL or UNCONDITIONAL."},
+        {"name": "settlement", "type": ["com.matera.dtw.command.transaction.command.TotalSettlementInfo","com.matera.dtw.command.transaction.command.PartialSettlementInfo"],"doc": "Amount rule information for a Unblocking Entry"},
+        {"name": "holdReasonId", "type": ["null","string"], "doc": "Reason for the block credit amount."},
+        {"name": "source", "type": "string", "doc": "Which system has created the soon-to-be-created entry."},
+        {"name": "uponCreationHeldAs", "type": ["null", "com.matera.dtw.command.transaction.command.CautionaryBlockInformation"], "default": null, "doc": "Holds information related to cautionary block. As such, should only be used when the status is \"ON_HOLD\"."},
+        {"name": "releasing", "type": ["null", "com.matera.dtw.command.transaction.command.CautionaryUnblockInformation"], "default": null, "doc": "Informs an entry to be release. The entry must be cautionary-blocked (i.e., its status must be ON_HOLD). The correlation id passed within this tag is the same correlation passed within the 'uponCreationHeldAs' tag during creation"}
+      ]
+    }, {
+      "namespace": "com.matera.dtw.command.transaction.entry",
+      "type": "record",
+      "name": "EntryRequestCommand",
+      "doc": "A entry request command",
+      "fields": [
+        {"name": "baseCommand", "type": "com.matera.dtw.command.base.common.BaseCommand"},
+        {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc":  "The account associated with the entry"},
+        {
+          "name": "entry",
+          "type": [
+            "com.matera.dtw.command.transaction.command.LedgerEntryRequestData",
+            "com.matera.dtw.command.transaction.command.BlockingEntryRequestData",
+            "com.matera.dtw.command.transaction.command.ExclusionEntryRequestData",
+            "com.matera.dtw.command.transaction.command.ReleaseEntryRequestData",
+            "com.matera.dtw.command.transaction.command.RemovalEntryRequestData",
+            "com.matera.dtw.command.transaction.command.ReversalEntryRequestData",
+            "com.matera.dtw.command.transaction.command.UnblockingEntryRequestData"
+          ],
+          "doc": "The soon-to-be-created entry"
+        }
+      ]
+    }
+]

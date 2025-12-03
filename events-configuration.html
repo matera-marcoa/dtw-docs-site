@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration Events - DTW Documentation</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="stylesheet" href="assets/styles.css">
+    <style>
+        .events-detail {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+        .event-schema {
+            background: #F8F9FA;
+            border-left: 4px solid #00D4AA;
+            padding: 24px;
+            margin: 24px 0;
+            border-radius: 8px;
+        }
+        .event-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 16px;
+        }
+        .namespace {
+            color: #666;
+            font-family: monospace;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        .fields-table {
+            width: 100%;
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+        .fields-table th, .fields-table td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #E0E0E0;
+        }
+        .fields-table th {
+            background: #1A1A2E;
+            color: white;
+            font-weight: 600;
+        }
+        .field-name { color: #00D4AA; font-weight: 600; font-family: monospace; }
+        .field-type { color: #8B5CF6; font-family: monospace; }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 24px;
+            color: #00D4AA;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="40" height="40" rx="8" fill="#00D4AA"/>
+                        <path d="M12 14h6c3.31 0 6 2.69 6 6s-2.69 6-6 6h-6V14zm6 10c2.21 0 4-1.79 4-4s-1.79-4-4-4h-3v8h3z" fill="white"/>
+                        <path d="M26 14h2v12h-2V14z" fill="white"/>
+                    </svg>
+                    <span class="logo-text">DTW Documentation</span>
+                </div>
+                <nav class="main-nav">
+                    <a href="index.html#home" class="nav-link">Home</a>
+                    <a href="index.html#apis" class="nav-link">API Reference</a>
+                    <a href="index.html#events" class="nav-link active">Events & Commands</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="events-detail">
+        <a href="index.html#events" class="back-link">← Back to Events</a>
+        <h1>Configuration Events</h1>
+        <p style="color: #666; font-size: 18px; margin: 16px 0 40px;">Events related to system and account configuration</p>
+
+        <div class="event-schema" id="GenericDomainChangeEvent">
+            <div class="event-name">GenericDomainChangeEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">domainTypeId</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.GenericDomainKey</td>
+                        <td>The unique identifier to generic domain record</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">itemId</td>
+                        <td class="field-type">string</td>
+                        <td>id of item was changed</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">itemDescription</td>
+                        <td class="field-type">string</td>
+                        <td>description of item was changed</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="GenericDomainDeleteEvent">
+            <div class="event-name">GenericDomainDeleteEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">domainTypeId</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.GenericDomainKey</td>
+                        <td>The unique identifier to generic domain record</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">itemId</td>
+                        <td class="field-type">string</td>
+                        <td>item id to be deleted</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="GenericDomainFeatureChangeEvent">
+            <div class="event-name">GenericDomainFeatureChangeEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">domainTypeId</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.GenericDomainKey</td>
+                        <td>The unique identifier to generic domain record</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">itemId</td>
+                        <td class="field-type">string</td>
+                        <td>id of item was changed</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">feature</td>
+                        <td class="field-type">com.matera.dtw.event.common.feature.FeatureEntry</td>
+                        <td>feature to be changed. For example BLOCKED_FOR_CREDIT</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="GenericDomainFeatureDeleteEvent">
+            <div class="event-name">GenericDomainFeatureDeleteEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">domainTypeId</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.GenericDomainKey</td>
+                        <td>The unique identifier to generic domain record</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">itemId</td>
+                        <td class="field-type">string</td>
+                        <td>item id to be deleted</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">featureName</td>
+                        <td class="field-type">string</td>
+                        <td>feature name to be deleted</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="SystemConfigurationFeatureChangeEvent">
+            <div class="event-name">SystemConfigurationFeatureChangeEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">systemConfiguration</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.SystemConfigurationKey</td>
+                        <td>The unique identifier to system configuration record</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">feature</td>
+                        <td class="field-type">com.matera.dtw.event.common.feature.FeatureEntry</td>
+                        <td>feature to be changed. For example BLOCKED_FOR_CREDIT</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="SystemConfigurationFeatureDeleteEvent">
+            <div class="event-name">SystemConfigurationFeatureDeleteEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">systemConfiguration</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.SystemConfigurationKey</td>
+                        <td>The unique identifier to system configuration record</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">featureName</td>
+                        <td class="field-type">string</td>
+                        <td>feature name to be deleted</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="AccountTypeChangeEvent">
+            <div class="event-name">AccountTypeChangeEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">accountType</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.AccountTypeKey</td>
+                        <td>The unique identifier to account type record</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">description</td>
+                        <td class="field-type">string</td>
+                        <td>A String to represents a more detailed description to an account Type. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados).</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">categoryType</td>
+                        <td class="field-type">string</td>
+                        <td>A String to represents category to an account type</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="AccountTypeDeleteEvent">
+            <div class="event-name">AccountTypeDeleteEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">accountType</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.AccountTypeKey</td>
+                        <td>The unique identifier to account type record</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="AccountTypeFeatureChangeEvent">
+            <div class="event-name">AccountTypeFeatureChangeEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">accountType</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.AccountTypeKey</td>
+                        <td>The unique identifier to account type record</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">feature</td>
+                        <td class="field-type">com.matera.dtw.event.common.feature.FeatureEntry</td>
+                        <td>feature to be changed. For example SPI_CATEGORY</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="AccountTypeFeatureDeleteEvent">
+            <div class="event-name">AccountTypeFeatureDeleteEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">accountType</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.AccountTypeKey</td>
+                        <td>The unique identifier to account type record</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">featureName</td>
+                        <td class="field-type">string</td>
+                        <td>feature name to be deleted</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="SystemConfigurationKey">
+            <div class="event-name">SystemConfigurationKey</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">key</td>
+                        <td class="field-type">string</td>
+                        <td>The unique identifier to system configuration record</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="AccountTypeKey">
+            <div class="event-name">AccountTypeKey</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">key</td>
+                        <td class="field-type">string</td>
+                        <td>The unique identifier to account type record</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="GenericDomainKey">
+            <div class="event-name">GenericDomainKey</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">key</td>
+                        <td class="field-type">string</td>
+                        <td>The unique identifier to generic domain record</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="HistoryCodeChangeEvent">
+            <div class="event-name">HistoryCodeChangeEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">Event of change of history record.</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">historyCodeKey</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.HistoryCodeKey</td>
+                        <td>The unique identifier to history record</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">historyCodeType</td>
+                        <td class="field-type">{'type': 'enum', 'name': 'CodeType', 'symbols': ['DEBIT', 'CREDIT', 'BALANCE']}</td>
+                        <td>The entry type (CREDIT, DEBIT OR BALANCE)</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">description</td>
+                        <td class="field-type">string</td>
+                        <td>The history description. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados).</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">reversalHistoryCode</td>
+                        <td class="field-type">['null', 'com.matera.dtw.event.configuration.HistoryCodeKey']</td>
+                        <td>History to entry reversal history</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="HistoryCodeDeleteEvent">
+            <div class="event-name">HistoryCodeDeleteEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">Event of a delete operation to an history record.</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">historyCodeKey</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.HistoryCodeKey</td>
+                        <td>The unique identifier to history record</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="HistoryCodeFeatureChangeEvent">
+            <div class="event-name">HistoryCodeFeatureChangeEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">historyCodeKey</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.HistoryCodeKey</td>
+                        <td>The unique identifier to history record</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">feature</td>
+                        <td class="field-type">com.matera.dtw.event.common.feature.FeatureEntry</td>
+                        <td>feature to be changed. For example BLOCKED_FOR_CREDIT</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="HistoryCodeFeatureDeleteEvent">
+            <div class="event-name">HistoryCodeFeatureDeleteEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">historyCodeKey</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.HistoryCodeKey</td>
+                        <td>The unique identifier to history record</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">featureName</td>
+                        <td class="field-type">string</td>
+                        <td>feature name to be deleted</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="AccountTypeLimitChangeEvent">
+            <div class="event-name">AccountTypeLimitChangeEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">Event to change a limit parameter for an account.</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">accountType</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.AccountTypeKey</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">limit</td>
+                        <td class="field-type">com.matera.dtw.event.common.financial.Limit</td>
+                        <td>The limit amount range. For example, for an overdraft limit of 100 it would be minimum -100 and maximum 0</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="AccountTypeLimitDeleteEvent">
+            <div class="event-name">AccountTypeLimitDeleteEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">Event to delete a limit for an account.</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">accountType</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.AccountTypeKey</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">limitType</td>
+                        <td class="field-type">string</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="HistoryCodeKey">
+            <div class="event-name">HistoryCodeKey</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">historyCodeId</td>
+                        <td class="field-type">string</td>
+                        <td>The unique identifier to history record</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="SystemConfigurationLimitChangeEvent">
+            <div class="event-name">SystemConfigurationLimitChangeEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">systemConfiguration</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.SystemConfigurationKey</td>
+                        <td>The unique identifier to system configuration record</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">limit</td>
+                        <td class="field-type">com.matera.dtw.event.common.financial.Limit</td>
+                        <td>The limit amount range. For example, for an overdraft limit of 100 it would be minimum -100 and maximum 0</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="event-schema" id="SystemConfigurationLimitDeleteEvent">
+            <div class="event-name">SystemConfigurationLimitDeleteEvent</div>
+            <div class="namespace">Namespace: com.matera.dtw.event.configuration</div>
+            <p style="color: #666; margin-bottom: 16px;">No description available</p>
+            
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Fields</h3>
+            <table class="fields-table">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="field-name">baseEvent</td>
+                        <td class="field-type">com.matera.dtw.event.base.common.BaseEvent</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">systemConfiguration</td>
+                        <td class="field-type">com.matera.dtw.event.configuration.SystemConfigurationKey</td>
+                        <td>The unique identifier to system configuration record</td>
+                    </tr>
+
+                    <tr>
+                        <td class="field-name">limitType</td>
+                        <td class="field-type">string</td>
+                        <td>No documentation</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Digital Twin Platform</h4>
+                    <p>Enterprise-grade financial platform documentation</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Digital Twin Platform. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

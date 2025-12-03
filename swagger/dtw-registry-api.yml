@@ -1,0 +1,669 @@
+openapi: 3.0.3
+info:
+  title: Digital Twin Registry Services API
+  description: |
+    These endpoints retrieve account information and manage account limits. <br>
+     ## Recommended Resilience Patterns
+    To improve resilience when consuming this API, we recommend using the following patterns:
+
+    - **Retry**: Implement retry logic for responses with HTTP status codes 5xx or 429 - Too Many Requests. This ensures that the application can handle temporary overload situations or intermittent failures.<br>
+    - **Backoff**: Use a backoff mechanism between retry attempts to prevent overloading the system with multiple simultaneous requests. An exponential backoff, for example, can be used to progressively space out the retry attempts.<br>
+    
+    These practices enhance the robustness and resilience of your integration with the API.
+  version: 1.0.0
+security:
+  - oAuth2ClientCredentials: []
+servers:
+  - url: http://localhost:8080/v1
+
+tags:
+  - name: Accounts
+    description: 'You can use the Accounts API to get account information.'
+  - name: Account Limits
+    description: 'You can use the Account limits API to manage account limits. The Account Limits API enables you to retrieve limits by account or limit type, as well as add, update and delete an account limit by type.'
+  - name: System Limits
+    description: 'You can use the Account limits API to manage account limits. The System Limits API enables you to retrieve system limits by account or limit type, as well as add, update and delete a system limit by type.'
+  - name: Membership
+    description: You can use the Membership API to get account information based on membership/holders. 
+
+paths:
+  /accounts:
+    get:
+      tags:
+        - Accounts
+      summary: Retrieve account information
+      description: This request retrieves information for one or a list of accounts by specifying account keys. It requires a logged user with the *view-accounts* role assigned. 
+      operationId: getAccountNotMigratingByKey
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - in: query
+          name: key
+          description: |
+            A list of account keys, each composed of the BranchNumber and AccountNumber separated by a slash (/). <br> Use commas to separate multiple account keys. At least one account key is required for filtering.
+            
+            **Important:** Accounts undergoing migration from a DDA system to Digital Twin will not be listed.
+          required: true
+          style: form
+          explode: false
+          example: 1234/12345,1234/678901
+          schema:
+            type: array
+            items:
+              type: string
+              pattern: '^\d+\/\d+$' # Validate the pattern for branch/account (e.g., 1/100)
+      responses:
+        '200':
+          $ref: '#/components/responses/accountResponse'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '500':
+          $ref: '#/components/responses/unexpectedError'
+
+  /memberships/accounts:
+    get:
+      tags:
+        - Membership
+      summary: |
+        Retrieve account details using membership related filters
+      description:  >
+        This request retrieves all accounts related to the membership key. It requires a logged user with the *view-account-memberships* role assigned. <br> Accounts may have multiple memberships, each key identified by a unique kind and ID separated by a slash (/).
+      operationId: getAccountsByMembership
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - in: query
+          name: membershipKey
+          description: |
+            The membership key has the format [Membership kind]/[Membership id] with a slash separating the membership kind and id. <br>
+            Use comma to separate multiple membership keys. <br>
+            At least one membership key is required for filtering. <br>
+            The membership kind Matera DDA system, so far: <br>
+                1) [Deprecated] PERSON_HOLDER Account holders are individuals identified by personId from Matera central registry. <br>
+                2) [Deprecated] COMPANY_HOLDER Company account holders are business identified by personId from Matera central registry. <br>
+                3) [Deprecated] CORPORATE_GROUP_HOLDER All business accounts will be assigned this personID. It is associated with the initial 8 digits of the Brazilian business tax ID (CNPJ), referred to as the tax ID root. <br>
+                4) [Deprecated] NON_SALARY_PERSON_HOLDER All individual accounts, excluding salary accounts, will be assigned this membership type. Minimum personId from matera central data for the person CPF/TaxId <br>
+                5) PERSON_HOLDER_TAX_ID Account holders are individuals identified by the individual tax ID (CPF - format: 11 numbers with leading zeros). <br>
+                6) COMPANY_HOLDER_TAX_ID Account holders are businesses identified by the business tax ID (CNPJ - format: 14 numbers with leading zeros). <br>
+                7) CORPORATE_GROUP_HOLDER_TAX_ID All business accounts will be assigned this membership. It is associated with Brazilian business tax ID (CNPJ - format: the initial 8 digits with leading zeros, referred to as the tax ID root).
+                8) NON_SALARY_PERSON_HOLDER_TAX_ID All individual accounts, excluding salary accounts, will be assigned this membership type. It is associated with the Brazilian individual tax ID (CPF - format: 11 numbers with leading zeros).
+          required: true
+          style: form
+          explode: false
+          example: PERSON_HOLDER/12345678901,COMPANY_HOLDER/12345678000125,CORPORATE_GROUP_HOLDER/12345678,NON_SALARY_PERSON_HOLDER/12345678901
+          schema:
+            type: array
+            items:
+              type: string
+              pattern: '^\w+\/\w+$' # Validate the pattern for Membership Key has the format [membership kind]/[Membership id] (e.g., NON_SALARY_PERSON_HOLDER/12345678901)
+      responses:
+        '200':
+          $ref: '#/components/responses/accountResponse'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '500':
+          $ref: '#/components/responses/unexpectedError'
+
+  /accounts/{branch}/{account}/limits:
+    get:
+      tags:
+        - Account Limits
+      summary: List all account limits
+      description: >
+        This request lists all account limits set to an account. It requires a logged user with the *view-account-limits* role assigned. 
+      operationId: getAccountLimits
+      parameters:
+        - $ref: '#/components/parameters/branch'
+        - $ref: '#/components/parameters/account'
+      responses:
+        '200':
+          description: Successful request. It returns a list with the account limits.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/limits'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '500':
+          $ref: '#/components/responses/unexpectedError'
+
+  /accounts/{branch}/{account}/limits/{limitType}:
+    get:
+      tags:
+        - Account Limits
+      summary: Retrieve an account limit by type
+      description: This request requires a logged user with the *view-account-limits* role assigned.
+      operationId: getAccountLimitByLimitType
+      parameters:
+        - $ref: '#/components/parameters/branch'
+        - $ref: '#/components/parameters/account'
+        - name: limitType
+          in: path
+          description: The limit type to return.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request. It returns detailed information about the requested account limit.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/limitResult'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '500':
+          $ref: '#/components/responses/unexpectedError'
+    put:
+      tags:
+        - Account Limits
+      summary: Add or update an account limit 
+      description: >
+        This request adds or updates an existing account limit by specifying its type. It requires a logged user with the *modify-account-limits* role assigned.
+      operationId: insertOrUpdateAccountLimitByLimitType
+      parameters:
+        - $ref: '#/components/parameters/branch'
+        - $ref: '#/components/parameters/account'
+        - name: limitType
+          in: path
+          description: The limit type to add or update.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Request body of the limit.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/limitRequest'
+        required: true
+      responses:
+        200:
+          description: Successful request. The limit type was added or updated on the account. The JSON response body contains detailed information about it.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/limitResult'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '500':
+          $ref: '#/components/responses/unexpectedError'
+    delete:
+      tags:
+        - Account Limits
+      summary: Delete an account limit
+      description: >
+        This request deletes an account limit by specifying its type. It requires a logged user with the *modify-account-limits* role assigned.
+      operationId: deleteAccountLimitByLimitType
+      parameters:
+        - $ref: '#/components/parameters/branch'
+        - $ref: '#/components/parameters/account'
+        - name: limitType
+          in: path
+          description: The limit type to delete.
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Sucsessful request. The limit type was successful deleted from the account.
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '500':
+          $ref: '#/components/responses/unexpectedError'
+  /system/limits:
+    get:
+      tags:
+        - System Limits
+      summary: List all system limits
+      description: This request requires a logged user with the *view-system-limits* role assigned.
+      operationId: getSystemLimits
+      responses:
+        '200':
+          description: Successful request. It returns a list with all system limits.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/limits'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '500':
+          $ref: '#/components/responses/unexpectedError'
+  /system/limits/{limitType}:
+    get:
+      tags:
+        - System Limits
+      summary: Retrieve a system limit by type
+      description: This request requires a logged user with the *view-system-limits* role assigned.
+      operationId: getSystemLimitByLimitType
+      parameters:
+        - name: limitType
+          in: path
+          description: The system limit to return.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request. It returns detailed information about the requested system limit.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/limitResult'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '500':
+          $ref: '#/components/responses/unexpectedError'
+    put:
+      tags:
+        - System Limits
+      summary: Add or update a system limit 
+      description: >
+        This request adds or updates an existing system limit by specifying its type. It requires a logged user with the *modify-system-limits* role assigned. 
+      operationId: insertOrUpdateSystemLimitByLimitType
+      parameters:
+        - name: limitType
+          in: path
+          description: The limit type to add or update.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Request body of the limit.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/limitRequest'
+        required: true
+      responses:
+        200:
+          description: Successful request. The limit type was added or updated on the account. The JSON response body contains detailed information about it.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/limitResult'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '500':
+          $ref: '#/components/responses/unexpectedError'
+    delete:
+      tags:
+        - System Limits
+      summary: Delete a system limit
+      description: >
+        This request deletes a system limit by specifying its type. It requires a logged user with the *modify-system-limits* role assigned.
+      operationId: deleteSystemLimitByLimitType
+      parameters:
+        - name: limitType
+          in: path
+          description: The system limit to delete.
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Successful request. The system limit was deleted..
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '500':
+          $ref: '#/components/responses/unexpectedError'
+
+components:
+  parameters:
+    branch:
+      in: path
+      name: branch
+      description: 'The account branch. The branch field in the account information should be set to 0 if it does not contain a branch number.'
+      required: true
+      schema:
+        type: integer
+    account:
+      name: account
+      in: path
+      description: 'The account number or unique identifier representing the account.' 
+      required: true
+      schema:
+        type: integer
+        format: int64
+    size:
+      name: size
+      in: query
+      description: The maximum number of items to return per page.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 100
+        default: 20
+    page:
+      name: page
+      in: query
+      description: The range of pages to retrieve, specified from 0 to N.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        default: 0
+  headers:
+    xHasNext:
+      schema:
+        type: boolean
+      description: indicates if there is a next page with elements to be queried
+    xTotalElements:
+      schema:
+        type: integer
+        format: int64
+      description: The total number of items based on the applied query filters.
+    xTotalPages:
+      schema:
+        type: integer
+        format: int32
+      description: The total number of pages based on the applied query filters and page size.
+  responses:
+    accountResponse:
+      description: 'Successful request. It returns a list with the requested accounts along with their respective details.'
+      headers:
+        'X-Total-Elements':
+          $ref: '#/components/headers/xTotalElements'
+        'X-Total-Pages':
+          $ref: '#/components/headers/xTotalPages'
+        'X-Has-Next':
+          $ref: '#/components/headers/xHasNext'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/accountResponse'
+    badRequest:
+      description: 'The request failed because there is an invalid attribute.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            badRequest:
+              $ref: '#/components/examples/badRequest'
+    unauthorizedRequest:
+      description: 'The request failed because of an authentication error.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            unauthorizedRequest:
+              $ref: '#/components/examples/unauthorizedRequest'
+    notFound:
+      description: 'Resource not found.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            notFound:
+              $ref: '#/components/examples/notFound'
+    unexpectedError:
+      description: The request failed due to an unexpected error. For example, the database connection may have timed out. The error-context field allows to find more information about the error in the application logs.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            unexpectedError:
+              $ref: '#/components/examples/unexpectedError'
+
+
+  schemas:
+    accountResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/account'
+    account:
+      type: object
+      properties:
+        branch:
+          description: 'The account branch. The branch field in the account information should be set to 0 if it does not contain a branch number.'
+          type: integer
+          format: int32
+          minimum: 0
+          example: 4919
+        account:
+          description: 'The account number or unique identifier representing the account.'
+          type: integer
+          format: int64
+          minimum: 0
+          example: 223166
+        status:
+          description: The account status.
+          enum: [ACTIVE,INACTIVE]
+          default: ACTIVE
+        timeZone:
+          description: The specific time zone setting associated with the account registration.
+          type: string
+          example: America/Sao_Paulo
+        type:
+          description: An object containing information about the account type.
+          type: object
+          properties:
+            id:
+              description: The identifier of the account type. 
+              type: string
+            description:
+              description: A description for the account type.
+              type: string
+            category:
+              description: The account type (e.g. checking account, business account).
+              type: string
+            features:
+              $ref: '#/components/schemas/features'
+        features:
+          description: The account type features.
+          $ref: '#/components/schemas/features'
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/membership'
+
+    feature:
+      type: object
+      properties:
+        name:
+          description: The name of the feature.
+          type: string
+          example: BLOCKED_FOR_DEBIT
+        value:
+          description: Details of the feature. Since it's a string, it accepts various kinds of values (e.g. if credit limit it accepts numbers; if the feature can be active or inactive, it accepts Y or N, etc.)
+          type: string
+          example: "true"
+        type:
+          $ref: '#/components/schemas/featureType'
+
+    features:
+      type: array
+      items:
+        $ref: '#/components/schemas/feature'
+
+    featureType:
+      description: Further details or adjustments regarding the feature's functionality and configuration.
+      enum: [STRING, BOOLEAN, DECIMAL, DATE]
+
+    membership:
+      type: object
+      properties:
+        id:
+          description: The id of the membership type.
+          type: string
+        kind:
+          description: The membershp type (e.g. person holder, company holder.)
+          type: string
+        features:
+
+          $ref: '#/components/schemas/features'
+
+    limits: # Can be referenced as '#/components/schemas/limits'
+      type: array
+      items:
+        $ref: '#/components/schemas/limitResult'
+
+    limitResult: # Can be referenced as '#/components/schemas/LimitResult'
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/limitType'
+        limit:
+          $ref: '#/components/schemas/range'
+        lastUpdatedAt:
+          type: string
+          description: The date and time of the last limit update, based on [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html)
+          format: date-time
+          example: '2019-01-03T00:00:00Z'
+
+    limitType: # Can be referenced as '#/components/schemas/limitType'
+      type: string
+      description: |
+        The limit type (e.g. overdraft, instant payments monthly limit, etc).
+        
+        The Registry system contains an environment variable that sets a list of limit types allowed to create or update.
+      example: OVERDRAFT,PIX_MONTHLY_LIMIT
+      default: ALL
+
+    limitRequest: # Can be referenced as '#/components/schemas/limitRequest'
+      type: object
+      properties:
+        limit:
+          $ref: '#/components/schemas/range'
+      required:
+        - limit
+
+    range:
+      description: An object containing information about the limit type.
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/currencyISO4217'
+        min:
+          type: integer
+          format: int64
+          example: 1
+          description: The minimum allowable value for the limit type, based on JSR 354 (Java Specification Request 354).
+        max:
+          type: integer
+          format: int64
+          example: 10000
+          description: The maximum allowable value for the limit type, based on JSR 354 (Java Specification Request 354).
+      required:
+        - currency
+        - min
+        - max
+    currencyISO4217: # Can be referenced as '#/components/schemas/currencyISO4217'
+      type: string
+      description: The currency code as in ISO 4217 standard (e.g. BRL for Brazilian Real).
+      example: 'BRL'
+      enum: [ AED, AFN, ALL, AMD, ANG, AOA, ARS, AUD, AWG, AZN, BAM, BBD, BDT, BGN, BHD, BIF, BMD, BND, BOB, BOV, BRL, BSD, BTN, BWP, BYR, BZD, CAD, CDF, CHE, CHF, CHW, CLF, CLP, CNY, COP, COU, CRC, CUC, CUP, CVE, CZK, DJF, DKK, DOP, DZD, ECS, EGP, ERN, ETB, EUR, FJD, FKP, GBP, GEL, GHS, GIP, GMD, GNF, GTQ, GYD, HKD, HNL, HRK, HTG, HUF, IDR, ILS, INR, IQD, IRR, ISK, JMD, JOD, JPY, KES, KGS, KHR, KMF, KPW, KRW, KWD, KYD, KZT, LAK, LBP, LKR, LRD, LSL, LTL, LVL, LYD, MAD, MDL, MGA, MKD, MMK, MNT, MOP, MRO, MUR, MVR, MWK, MXN, MXV, MYR, MZN, NAD, NGN, NIO, NOK, NPR, NZD, OMR, PAB, PEN, PGK, PHP, PKR, PLN, PYG, QAR, RON, RSD, RUB, RWF, SAR, SBD, SCR, SDG, SEK, SGD, SHP, SLL, SOS, SRD, STD, SVC, SYP, SZL, THB, TJS, TMT, TND, TOP, TRY, TTD, TWD, TZS, UAH, UGX, USD, USN, USS, UYI, UYU, UZS, VEF, VND, VUV, WST, XAF, XAG, XAU, XBA, XBB, XBC, XBD, XCD, XDR, XFU, XOF, XPD, XPF, XPT, XTS, XXX, YER, ZAR, ZMW, ZWL ]
+    problemResponse: # Can be referenced as '#/components/schemas/problemResponse'
+      type: object
+      description: Response based on [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807)
+      required:
+        - status
+        - title
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+          format: uri
+          description: |
+            A Uniform Resource Identifier (URI) that identifies the problem type.  When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          default: 'about:blank'
+          example: 'https://zalando.github.io/problem/constraint-violation'
+        title:
+          type: string
+          description: |
+            The title of the problem summarizing the encountered issue, such as 'Service Unavailable'. It could either adopt the title recommended by RFC 7807 or encompass more specific details relevant to the issue.
+        status:
+          type: integer
+          format: int32
+          description: |
+            The HTTP status code produced by the server in response to this specific problem instance.
+          minimum: 100
+          maximum: 600
+          exclusiveMaximum: true
+          example: 503
+        detail:
+          type: string
+          description: A clear, understandable description for this particular problem instance.
+          example: Connection to database timed out
+  examples:
+    badRequest:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Bad Request
+        status: 400
+        detail: Invalid attribute
+      summary: Bad request
+    unauthorizedRequest:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Unauthorized
+        status: 401
+        detail: Unauthorized request
+      summary: Bad request
+    notFound:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Not Found
+        status: 404
+        detail: Resource not found
+      summary: Bad request
+    unexpectedError:
+      value:
+        type: http://dtw.matera.com/problem/internal-server-error
+        title: Internal Server Error
+        status: 500
+        detail: An unexpected/unrecoverable error has occurred
+        error-context: 1ced9bfc-8fef-4c4c-98ae-37bb8c81ab91
+      summary: Internal Server Error
+  securitySchemes:
+    oAuth2ClientCredentials:
+      type: oauth2
+      description: Default OAuth2 client credentials flow. See https://datatracker.ietf.org/doc/html/rfc6749#section-4.4
+      flows:
+        clientCredentials:
+          tokenUrl: https://localhost:7443/oauth2/token/
+          scopes: {}
+

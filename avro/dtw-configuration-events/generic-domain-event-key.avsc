@@ -1,0 +1,10 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "name": "GenericDomainKey",
+    "type": "record",
+    "fields": [
+      {"name": "key", "type": "string", "doc": "The unique identifier to generic domain record"}
+    ]
+  }
+]

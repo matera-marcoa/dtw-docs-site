@@ -1,0 +1,45 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "name": "GenericDomainChangeEvent",
+    "type": "record",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "domainTypeId", "type": "com.matera.dtw.event.configuration.GenericDomainKey", "doc": "The unique identifier to generic domain record"},
+      {"name": "itemId", "type" : "string", "doc": "id of item was changed"},
+      {"name": "itemDescription", "type" : "string", "doc": "description of item was changed"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "name": "GenericDomainDeleteEvent",
+    "type": "record",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "domainTypeId", "type": "com.matera.dtw.event.configuration.GenericDomainKey", "doc": "The unique identifier to generic domain record"},
+      {"name": "itemId", "type" : "string", "doc": "item id to be deleted"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "name": "GenericDomainFeatureChangeEvent",
+    "type": "record",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "domainTypeId", "type": "com.matera.dtw.event.configuration.GenericDomainKey", "doc": "The unique identifier to generic domain record"},
+      {"name": "itemId", "type" : "string", "doc": "id of item was changed"},
+      {"name": "feature", "type" : "com.matera.dtw.event.common.feature.FeatureEntry", "doc": "feature to be changed. For example BLOCKED_FOR_CREDIT"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "name": "GenericDomainFeatureDeleteEvent",
+    "type": "record",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "domainTypeId", "type": "com.matera.dtw.event.configuration.GenericDomainKey", "doc": "The unique identifier to generic domain record"},
+      {"name": "itemId", "type" : "string", "doc": "item id to be deleted"},
+      {"name": "featureName", "type" : "string", "doc": "feature name to be deleted"}
+    ]
+  }
+]

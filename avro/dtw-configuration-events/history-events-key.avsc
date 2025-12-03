@@ -1,0 +1,10 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "type": "record",
+    "name": "HistoryCodeKey",
+    "fields": [
+      {"name": "historyCodeId", "type": "string", "doc": "The unique identifier to history record"}
+    ]
+  }
+]

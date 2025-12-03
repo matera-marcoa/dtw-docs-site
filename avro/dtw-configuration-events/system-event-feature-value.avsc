@@ -1,0 +1,22 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "name": "SystemConfigurationFeatureChangeEvent",
+    "type": "record",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "systemConfiguration", "type": "com.matera.dtw.event.configuration.SystemConfigurationKey", "doc": "The unique identifier to system configuration record"},
+      {"name": "feature", "type" : "com.matera.dtw.event.common.feature.FeatureEntry", "doc": "feature to be changed. For example BLOCKED_FOR_CREDIT"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "name": "SystemConfigurationFeatureDeleteEvent",
+    "type": "record",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "systemConfiguration", "type": "com.matera.dtw.event.configuration.SystemConfigurationKey", "doc": "The unique identifier to system configuration record"},
+      {"name": "featureName", "type" : "string", "doc": "feature name to be deleted"}
+    ]
+  }
+]

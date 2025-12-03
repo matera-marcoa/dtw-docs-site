@@ -1,0 +1,77 @@
+[
+  {
+    "namespace": "com.matera.dtw.command.transaction.intent",
+    "type": "record",
+    "name": "ExclusionIntentRequestData",
+    "doc": "A command to request to exclude an intent",
+    "fields": [
+      {"name": "source", "type": "string", "doc": "Which system had created the intent"},
+      {"name": "criteria", "type": ["com.matera.dtw.command.transaction.intent.ByCorrelationIdCriteria", "com.matera.dtw.command.transaction.intent.ByIdCriteria"], ",doc": "Criteria to use when looking for which intent to delete (e.g., byId, byCorrelation."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.intent",
+    "type": "record",
+    "name": "IntentExclusionSuccessResult",
+    "doc": "Represents the successful result of an intent exclusion command.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandSuccessResult"},
+      {"name": "target", "type": ["com.matera.dtw.event.account.common.AccountKey","com.matera.dtw.event.account.group.common.AccountGroupKey"], ",doc" : "The target of the excluded intent."},
+      {"name": "source", "type": "string", "doc": "Which system had created the intent"},
+      {"name": "intent", "type": ["null","com.matera.dtw.event.monitoring.common.MonitoringDataResponse"], "doc": "The excluded intent data"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.intent",
+    "type": "record",
+    "name": "IntentExclusionFailureResult",
+    "doc": "Represents a rejected result of an intent exclusion command.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandFailureResult"},
+      {"name": "target", "type": ["com.matera.dtw.event.account.common.AccountKey","com.matera.dtw.event.account.group.common.AccountGroupKey"], ",doc" : "The account or account-group which the balance should be monitored."},
+      {"name": "criteria", "type": [ "com.matera.dtw.command.transaction.intent.ByCorrelationIdCriteria", "com.matera.dtw.command.transaction.intent.ByIdCriteria"], ",doc": "Used criteria to look for which intent to delete (e.g., byId, byCorrelation."}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.command.transaction.intent",
+    "type": "record",
+    "name": "CreateIntentRequestData",
+    "doc": "Holds the setup of entry intent command",
+    "fields": [
+      {"name": "source", "type": "string", "doc": "Which system had created the intent"},
+      {"name": "deferredEntry", "type": "com.matera.dtw.event.command.intent.commons.DeferredEntry", "doc": "The criteria of execution the intention"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.command.transaction.intent",
+    "type": "record",
+    "name": "IntentRequestCommand",
+    "doc": "A intent request command",
+    "fields": [
+      {"name": "baseCommand", "type": "com.matera.dtw.command.base.common.BaseCommand"},
+      {"name": "target", "type": ["com.matera.dtw.event.account.common.AccountKey","com.matera.dtw.event.account.group.common.AccountGroupKey"], ",doc" : "The target (account or account-group) should be create intent."},
+      {"name": "intent", "type": ["com.matera.dtw.command.transaction.intent.CreateIntentRequestData","com.matera.dtw.command.transaction.intent.ExclusionIntentRequestData"], "doc": "The soon-to-be-created intent"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.command.transaction.intent",
+    "type": "record",
+    "name": "CreateIntentSuccessResult",
+    "doc": "Represents the successful result of a create intent command.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandSuccessResult"},
+      {"name": "target", "type": ["com.matera.dtw.event.account.common.AccountKey","com.matera.dtw.event.account.group.common.AccountGroupKey"], ",doc" : "The target of the created intent."},
+      {"name": "intent", "type": ["null","com.matera.dtw.command.transaction.intent.CreateIntentRequestData"], "doc": "The created intent data"},
+      {"name": "correlationId", "type": ["null", "string"], "default": null, "doc": "The correlation id of the intent that was created"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.command.transaction.intent",
+    "type": "record",
+    "name": "CreateIntentFailureResult",
+    "doc": "Represents a rejected result of a create intent command.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandFailureResult"},
+      {"name": "target", "type": ["com.matera.dtw.event.account.common.AccountKey","com.matera.dtw.event.account.group.common.AccountGroupKey"], ",doc" : "The target of created intent."},
+      {"name": "correlationId", "type": ["null", "string"], "default": null, "doc": "The correlation id of the intent that was rejected"}
+    ]
+  }
+]

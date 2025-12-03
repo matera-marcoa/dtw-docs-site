@@ -1,0 +1,11 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.account.common",
+    "type": "record",
+    "name": "AccountKey",
+    "fields": [
+      {"name": "branch", "type": "int"},
+      {"name": "account", "type": "long"}
+    ]
+  }
+]

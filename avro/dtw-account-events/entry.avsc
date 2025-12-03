@@ -1,0 +1,271 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.transaction.common",
+    "type": "enum",
+    "name": "BlockingKind",
+    "doc": "The type of blocking a blocking-related entry is associated with",
+    "symbols": [
+      "CAUTIONARY",
+      "BALANCE"
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "CautionaryBlockTargetInfo",
+    "doc": "Represents information on a cautionary block target",
+    "fields": [
+      {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc":  "The id of the cautionary block target"},
+      {"name": "kind", "type": "string", "default": "LEDGER"},
+      {"name": "correlations", "type" : {"type": "map", "values" : "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations"},
+      {"name": "balanceChanges", "type" : {"type": "map", "values" : "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Which balances were changed by the given entry. May be empty if no such information is available."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "InitiatorInfo",
+    "doc": "Represents information on the given entry's initiator",
+    "fields": [
+      {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc":  "The id of the newly-created entry"},
+      {"name": "kind", "type": "string", "doc": "The initiator kind" },
+      {"name": "correlations", "type" : {"type": "map", "values" : "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "PendingEntryInfo",
+    "doc": "Represents information on the pending entry",
+    "fields": [
+      {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc":  "The id of the newly-created entry"},
+      {"name": "kind", "type": "string", "default": "LEDGER"},
+      {"name": "correlations", "type" : {"type": "map", "values" : "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "balanceChanges", "type" : {"type": "map", "values" : "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "LedgerEntry",
+    "doc": "Represents a debit/credit entry",
+    "fields": [
+      {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc":  "The id of the newly-created entry"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "kind", "type": "string", "default": "LEDGER"},
+      {"name": "historyCode", "type": "int" , "doc": "Determine if the entry is debit and credit, might be shown on de statement with its description"},
+      {"name": "holdReasonId", "type": ["null","string"], "default": null, "doc": "Reason for holding the credit amount when the status is \"ON_HOLD\". Used only in credit entries."},
+      {"name": "asOfDate", "type": {"type": "int", "logicalType": "date"}, "doc": "date when the entry happened"},
+      {"name": "correlations", "type" : {"type": "map", "values" : "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "balanceChanges", "type" : {"type": "map", "values" : "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+      {"name": "amount", "type": "com.matera.dtw.event.common.financial.FinancialAmount" , "doc": "amount"},
+      {"name": "description", "type": ["null","string"], "default": null,"doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "pendingEntry", "type": ["null","com.matera.dtw.event.transaction.entry.PendingEntryInfo"], "default": null, "doc":  "Information related as the entry that originally blocked this particular entry. May be null if the entry was created as 'posted'"},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "CompensatingEntryInfo",
+    "doc": "Represents information on the compensating entry",
+    "fields": [
+      {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc":  "The id of the entry being compensated" },
+      {"name": "kind", "type": "string", "doc":  "The kind of the entry being compensated"},
+      {"name": "amount", "type": "com.matera.dtw.event.common.financial.FinancialAmount" , "doc": "The amount of the compensating entry"},
+      {"name": "correlations", "type" : {"type": "map", "values" : "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "balanceChanges", "type" : {"type": "map", "values" : "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+      {"name": "pendingEntry", "type": ["null","com.matera.dtw.event.transaction.entry.PendingEntryInfo"], "default": null, "doc":  "Information related as the entry that originally blocked this particular entry. May be null if the entry was created as 'posted'"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "ExclusionEntry",
+    "doc": "Represents an exclusion entry",
+    "fields": [
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "kind", "type": "string", "default": "EXCLUSION"},
+      {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc":  "The id of the newly-created entry"},
+      {"name": "correlations", "type" : {"type": "map", "values" : "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "balanceChanges", "type" : {"type": "map", "values" : "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "compensatingEntry", "type": "com.matera.dtw.event.transaction.entry.CompensatingEntryInfo", "doc":  "Information related to the entry that has been compensated"},
+      {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"}
+    ]
+  },
+   {
+      "namespace": "com.matera.dtw.event.transaction.entry",
+      "type": "record",
+      "name": "PendingLedgerEntry",
+      "doc": "Represents a blocked credit entry",
+      "fields": [
+        {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc":  "The id of the newly-created entry"},
+        {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+        {"name": "kind", "type": "string", "default": "PENDING_LEDGER"},
+        {"name": "historyCode", "type": "int" , "doc": "Determine credit type, might be shown on de statement with its description"},
+        {"name": "asOfDate", "type": {"type": "int", "logicalType": "date"}, "doc": "date when the entry happened"},
+        {"name": "correlations", "type" : {"type": "map", "values" : "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+        {"name": "balanceChanges", "type" : {"type": "map", "values" : "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+        {"name": "amount", "type": "com.matera.dtw.event.common.financial.FinancialAmount" , "doc": "amount"},
+        {"name": "description", "type": ["null","string"], "default": null,"doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+        {"name": "holdReasonId", "type": ["null", "string"], "doc": "Reason for hold credit amount when the entry status is PENDING."},
+        {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+        {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"}
+      ]
+    },
+    {
+      "namespace": "com.matera.dtw.event.transaction.entry",
+      "type": "record",
+      "name": "ReversalEntry",
+      "doc": "Represents an reversal entry",
+      "fields": [
+        {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+        {"name": "balanceChanges", "type": {"type": "map", "values": "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+        {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc":  "The id of the newly-created entry"},
+        {"name": "kind", "type": "string", "default": "REVERSAL"},
+        {"name": "correlations", "type" : {"type": "map", "values" : "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+        {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+        {"name": "reversedEntry", "type": "com.matera.dtw.event.transaction.entry.CompensatingEntryInfo", "doc":  "Information related to the entry that is going to be reversed"},
+        {"name": "pendingEntry", "type": ["null", "com.matera.dtw.event.transaction.entry.PendingEntryInfo"], "default": null, "doc": "Information related to the PendingReversal entry that has been defined as a 'pending' entry. May be null if the entry was created already as 'posted'"},
+        {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"},
+        {"name": "asOfDate", "type": {"type": "int", "logicalType": "date"}, "doc": "The accounting date of the given entry"}
+      ]
+    },
+  {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "RemovalEntry",
+    "doc": "Represents an removal entry.",
+    "fields": [
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc": "The account associated with the removal entry."},
+      {"name": "balanceChanges", "type": {"type": "map", "values": "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+      {"name": "correlations", "type": {"type": "map", "values": "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "description", "type": ["null", "string"], "default": null, "doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc": "The ID of the newly-removed entry."},
+      {"name": "kind", "type": "string", "default": "REMOVAL"},
+      {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "compensatingEntry", "type": "com.matera.dtw.event.transaction.entry.CompensatingEntryInfo", "doc": "The avocation entry to be removed. That is, information related to the entry that is going to be removed."},
+      {"name": "pendingEntry", "type": ["null", "com.matera.dtw.event.transaction.entry.PendingEntryInfo"], "default": null, "doc": "Information related to the PendingRemoval entry that has been defined as a 'pending' entry. May be null if the entry was created already as 'posted'"},
+      {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"}
+    ]
+  }, {
+        "namespace": "com.matera.dtw.event.transaction.entry",
+        "type": "record",
+        "name": "BlockingEntry",
+        "doc": "Represents an blocking entry.",
+        "fields": [
+            {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc": "The account associated with the blocking entry."},
+            {"name": "balanceChanges", "type": {"type": "map", "values": "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+            {"name": "correlations", "type": {"type": "map", "values": "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+            {"name": "description", "type": ["null", "string"], "default": null, "doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+            {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc": "The ID of the newly-blocked entry."},
+            {"name": "kind", "type": "string", "default": "BLOCKING"},
+            {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+            {"name": "historyCode", "type": "int" , "doc": "Determine blocked credit type, might be shown on the statement with its description"},
+            {"name": "holdReasonId", "type": ["null","string"], "default": null, "doc": "Reason for the held credit amount"},
+            {"name": "asOfDate", "type": {"type": "int", "logicalType": "date"}, "doc": "Date when the entry happened"},
+            {"name": "amount", "type": "com.matera.dtw.event.common.financial.FinancialAmount" , "doc": "Amount"},
+            {"name": "pendingEntry", "type": ["null", "com.matera.dtw.event.transaction.entry.PendingEntryInfo"], "default": null, "doc": "Information related to the PendingBlocking entry that has been defined as a 'pending' entry. May be null if the entry was created already as 'posted'"},
+            {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"},
+            {"name": "blockingKind", "type": "com.matera.dtw.event.transaction.common.BlockingKind", "default": "BALANCE", "doc": "The kind of the given blocking entry. Defaults to 'BALANCE'"},
+            {"name": "target", "type": ["null", "com.matera.dtw.event.transaction.entry.CautionaryBlockTargetInfo"], "default": null, "doc": "The target of the given cautionary block entry. Required when 'blockingKind' is set to 'CAUTIONARY'"}
+        ]
+    },
+  {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "UnblockingEntry",
+    "doc": "Represents a unblocking entry.",
+    "fields": [
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc": "The account associated with the unblocking entry."},
+      {"name": "balanceChanges", "type": {"type": "map", "values": "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+      {"name": "correlations", "type": {"type": "map", "values": "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "description", "type": ["null", "string"], "default": null, "doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc": "The ID of the newly-unblocked entry."},
+      {"name": "kind", "type": "string", "default": "UNBLOCKING"},
+      {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "JSON with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "historyCode", "type": "int", "doc": "Determine unblocked credit type. Might be shown on the statement with its description."},
+      {"name": "holdReasonId", "type": ["null","string"], "default": null, "doc": "Reason for the unlock balance amount"},
+      {"name": "asOfDate", "type": {"type": "int", "logicalType": "date"}, "doc": "Date when the entry happened."},
+      {"name": "amount", "type": "com.matera.dtw.event.common.financial.FinancialAmount", "doc": "Amount."},
+      {"name": "pendingEntry", "type": ["null", "com.matera.dtw.event.transaction.entry.PendingEntryInfo"], "default": null, "doc": "Information related to the PendingUnblocking entry that has been defined as a 'pending' entry. May be null if the entry was created already as 'posted'"},
+      {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "PendingBlockingEntry",
+    "doc": "Represents a pending blocking entry.",
+    "fields": [
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc": "The account associated with the pending blocking entry."},
+      {"name": "balanceChanges", "type": {"type": "map", "values": "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+      {"name": "correlations", "type": {"type": "map", "values": "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "description", "type": ["null", "string"], "default": null, "doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc": "The ID of the newly-pending-blocked entry."},
+      {"name": "kind", "type": "string", "default": "PENDING_BLOCKING"},
+      {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "JSON with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "historyCode", "type": "int" , "doc": "Determine pending blocked credit type, might be shown on the statement with its description"},
+      {"name": "holdReasonId", "type": ["null", "string"], "default": null, "doc": "Reason for the held credit amount"},
+      {"name": "asOfDate", "type": {"type": "int", "logicalType": "date"}, "doc": "Date when the entry happened"},
+      {"name": "amount", "type": "com.matera.dtw.event.common.financial.FinancialAmount", "doc": "Amount"},
+      {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"},
+      {"name": "blockingKind", "type": "com.matera.dtw.event.transaction.common.BlockingKind", "default": "BALANCE", "doc": "The kind of the given blocking entry. Defaults to 'BALANCE'"},
+      {"name": "target", "type": ["null", "com.matera.dtw.event.transaction.entry.CautionaryBlockTargetInfo"], "default": null, "doc": "The target of the given cautionary block entry. Required when 'blockingKind' is set to 'CAUTIONARY'"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "PendingUnblockingEntry",
+    "doc": "Represents a pending unblocking entry.",
+    "fields": [
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc": "The account associated with the pending unblocking entry."},
+      {"name": "balanceChanges", "type": {"type": "map", "values": "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+      {"name": "correlations", "type": {"type": "map", "values": "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "description", "type": ["null", "string"], "default": null, "doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc": "The ID of the newly-pending-unblocked entry."},
+      {"name": "kind", "type": "string", "default": "PENDING_UNBLOCKING"},
+      {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "JSON with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "historyCode", "type": "int", "doc": "Determine pending unblocked credit type. Might be shown on the statement with its description."},
+      {"name": "holdReasonId", "type": ["null","string"], "default": null, "doc": "Reason for the unlock balance amount"},
+      {"name": "asOfDate", "type": {"type": "int", "logicalType": "date"}, "doc": "Date when the entry happened."},
+      {"name": "amount", "type": "com.matera.dtw.event.common.financial.FinancialAmount", "doc": "Amount."},
+      {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "PendingRemovalEntry",
+    "doc": "Represents a pending removal entry.",
+    "fields": [
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc": "The account associated with the pending removal entry."},
+      {"name": "balanceChanges", "type": {"type": "map", "values": "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+      {"name": "correlations", "type": {"type": "map", "values": "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "description", "type": ["null", "string"], "default": null, "doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc": "The ID of the newly-pending-removed entry."},
+      {"name": "kind", "type": "string", "default": "PENDING_REMOVAL"},
+      {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "JSON with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "compensatingEntry", "type": "com.matera.dtw.event.transaction.entry.CompensatingEntryInfo", "doc": "The avocation entry to be removed. That is, information related to the entry that is going to be removed."},
+      {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "PendingReversalEntry",
+    "doc": "Represents a pending reversal entry.",
+    "fields": [
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc": "The account associated with the pending removal entry."},
+      {"name": "balanceChanges", "type": {"type": "map", "values": "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+      {"name": "correlations", "type": {"type": "map", "values": "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "description", "type": ["null", "string"], "default": null, "doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc": "The ID of the newly-pending-removed entry."},
+      {"name": "kind", "type": "string", "default": "PENDING_REVERSAL"},
+      {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "JSON with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "reversedEntry", "type": "com.matera.dtw.event.transaction.entry.CompensatingEntryInfo", "doc": "The avocation entry to be removed. That is, information related to the entry that is going to be removed."},
+      {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"},
+      {"name": "asOfDate", "type": {"type": "int", "logicalType": "date"}, "doc": "The accounting date of the given entry"}
+    ]
+  }
+]

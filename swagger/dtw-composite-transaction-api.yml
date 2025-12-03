@@ -1,0 +1,1335 @@
+openapi: 3.0.0
+info:
+  title: Digital Twin Composite Transaction API
+  description: These endpoints deal with multiple operations like credit and debit to different accounts within the same transaction. They also deal with steps related with monitoring these transactions.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/v1
+
+tags:
+  - name: Composite transactions
+    description: You can use the Composite transactions API to efficiently add or delete credit and debit transactions across multiple accounts simultaneously within a single bundle operation.
+  - name: Monitoring
+    description: You can use the Monitoring API to release monitored funds into one account or a group of accounts.
+
+paths:
+  /transaction-bundles:
+    post:
+      tags:
+        - Composite transactions
+      summary: 'Add transactions into different accounts in a bundle operation'
+      description: >
+        A bundle represents the consolidation of both credits and debits occurring across various accounts, culminating in a single transaction.
+        This request requires a logged user with the *transact* role on both dtw-composite-transaction and dtw-transaction modules.
+      operationId: createTransactionBundle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bundleRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/entryBatchResponse'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '409':
+          $ref: '#/components/responses/conflict'
+        '410':
+          $ref: '#/components/responses/entryGone'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /transaction-bundles/{bundle}:
+    delete:
+      parameters:
+        - in: path
+          name: bundle
+          schema:
+            $ref: '#/components/schemas/correlationId'
+          description: 'The unique identifier of the bundle operation.'
+          required: true
+      tags:
+        - Composite transactions
+      summary: 'Delete transactions from different accounts in a bundle operation'
+      description: This request requires a logged user with the *transact* role on both dtw-composite-transaction and dtw-transaction modules.
+      operationId: deleteTransactionBundle
+      responses:
+        '204':
+          description: 'The transactions in the bundle operation were successfully deleted or marked for deletion.'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /accounts/{branch}/{account}/monitorings/{monitoringId}/release:
+    parameters:
+      - in: path
+        name: branch
+        schema:
+          $ref: '#/components/schemas/branch'
+        description: 'The account branch. The branch field in the account information should be set to 0 if it does not contain a branch number.'
+        required: true
+      - in: path
+        name: account
+        schema:
+          $ref: '#/components/schemas/account'
+        description: 'The account number or unique identifier representing the account.'
+        required: true
+      - in: path
+        name: monitoringId
+        schema:
+          $ref: '#/components/schemas/monitoringId'
+        description: 'The unique identifier of the monitoring service.'
+        required: true
+    post:
+      tags:
+        - Monitoring
+      summary: 'Release a monitored sum into an account'
+      description: >
+        It's possible to debit a sum in the same request by filling in the field "blueprints."
+        This request requires a logged user with the *release-monitorings*, *view-monitorings*, and *modify-monitorings* on dtw-transaction and the role *release-monitorings* on dtw-composite-transaction.
+      parameters:
+        - in: header
+          name: if-match
+          schema:
+            $ref: '#/components/schemas/ifMatch'
+          description: 'The last registered version for the monitoring service.'
+          required: true
+      operationId: accountMonitoringRelease
+      requestBody:
+        description: 'Account monitoring release request'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/monitoringReleaseRequest'
+      responses:
+        '200':
+          description: 'The monitored sum was successfully released into the account.'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The last registered version for the monitoring service.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/monitoringReleaseResponse'
+        '204':
+          description: 'The supplied monitoring/version was not processed. This may happen if this release has been already been processed (e.g. due to idempotency hits).'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /account-groups/{kind}/{membershipId}/monitorings/{monitoringId}/release:
+    parameters:
+      - in: path
+        name: kind
+        schema:
+          $ref: '#/components/schemas/groupKind'
+        description: 'Group kind'
+        required: true
+      - in: path
+        name: membershipId
+        schema:
+          $ref: '#/components/schemas/membershipId'
+        description: 'Group identifier'
+        required: true
+      - in: path
+        name: monitoringId
+        schema:
+          $ref: '#/components/schemas/monitoringId'
+        description: 'The unique identifier of the monitoring service.'
+        required: true
+    post:
+      tags:
+        - Monitoring
+      summary: 'Release a monitored sum into a group of accounts'
+      description: >
+        It's possible to debit a sum in the same request by filling in the field "blueprints."
+        This request requires a logged user with the *release-monitorings*, *view-monitorings*, and *modify-monitorings* on dtw-transaction and the role *release-monitorings* on dtw-composite-transaction.
+      parameters:
+        - in: header
+          name: if-match
+          schema:
+            $ref: '#/components/schemas/ifMatch'
+          description: 'The last registered version for the monitoring service.'
+          required: true
+      operationId: accountGroupMonitoringRelease
+      requestBody:
+        description: 'Account group monitoring release request'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/monitoringReleaseRequest'
+      responses:
+        '200':
+          description: 'The monitored sum was successfully released into the account.'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The last registered version for the monitoring service.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/monitoringReleaseResponse'
+        '204':
+          description: 'The supplied monitoring/version was not processed. This may happen if this release has been already been processed (e.g. due to idempotency hits).'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+components:
+  responses:
+    conflict:
+      description: 'There was a conflict while processing a bundle. This might happen due to idempotency hits or discrepancies between pending and posted bundle operations.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            conflict:
+              $ref: '#/components/examples/conflictingBundle'
+            rolledBack:
+              $ref: '#/components/examples/rolledBackBundle'
+            rollingBack:
+              $ref: '#/components/examples/rollingBackBundle'
+            onGoingTransaction:
+              $ref: '#/components/examples/onGoingTransaction'
+    badRequest:
+      description: 'The request failed because there is an invalid attribute.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            badRequest:
+              $ref: '#/components/examples/badRequest'
+            unparsableError:
+              $ref: '#/components/examples/unparsableError'
+    unauthorizedRequest:
+      description: 'The request failed because of an authentication error.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            unauthorizedRequest:
+              $ref: '#/components/examples/unauthorizedRequest'
+    forbiddenRequest:
+      description: 'The request failed because of lack of user permissions.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            unauthorizedRequest:
+              $ref: '#/components/examples/forbiddenRequest'
+    notFound:
+      description: 'Resource not found.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            notFound:
+              $ref: '#/components/examples/notFound'
+    unexpectedError:
+      description: 'The request failed because there was an unexpected error. For instance, the connection to the database may have timed out.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            unexpectedError:
+              $ref: '#/components/examples/unexpectedError'
+    paymentRequired:
+      description: 'The request failed due to insufficient funds.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            paymentRequired:
+              $ref: '#/components/examples/paymentRequired'
+    gone:
+      description: 'Access to the target resource is no longer available and this is likely to be permanent. It seems to be removed earlier.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            paymentRequired:
+              $ref: '#/components/examples/gone'
+    entryGone:
+      description: 'The request failed because the entry or transaction is no longer accessible, likely permanently. It seems to have been previously removed.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            paymentRequired:
+              $ref: '#/components/examples/entryGone'
+    entryBatchResponse:
+      description: 'The transactions were added to the account(s). The JSON response body contains detailed information about them.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/entryBundleGroupResponse'
+  examples:
+    conflictingBundle:
+      value:
+        type: http://dtw.matera.com/composite-transaction/conflicting-bundles
+        title: Conflicting bundle operation processing
+        status: 409
+        detail: The bundle operation A=123 cannot be processed because its content is different than expected. 
+        firstBundle:
+          correlation:
+            correlationId: 123
+            originator: A
+            signature: 123456
+        secondBundle:
+          correlation:
+            correlationId: 123
+            originator: A
+            signature: 123458
+      summary: Conflicting bundle operation processing 
+      description: A bundle operation with the same correlation ID has been detected, although it contains distinct data (i.e., they have different signatures).
+    rolledBackBundle:
+      value:
+        type: http://dtw.matera.com/composite-transaction/rolled-back-bundle
+        title: Bundle operation rollback error
+        status: 409
+        detail: The bundle operation with ID 12313 has already been rolled back.
+        bundle:
+          correlation:
+            originator: foo
+            correlationId: bar
+      summary: Bundle operation rollback error
+      description: The bundle operation with ID 12313 has already been rolled back.
+    rollingBackBundle:
+      value:
+        type: http://dtw.matera.com/composite-transaction/rolling-back-bundle
+        title:  Bundle operation rollback in progress
+        status: 409
+        detail: The bundle operation 12313 rollback is in progress.
+        bundle:
+          correlation:
+            originator: foo
+            correlationId: bar
+      summary: Bundle operation rollback in progress
+      description: The bundle operation with this correlation ID is already rolling back.
+    onGoingTransaction:
+      value:
+        type: http://dtw.matera.com/composite-transaction/on-going-transaction
+        title: Ongoing transaction
+        status: 409
+        detail: The bundle operation with ID 12313 was part of an ongoing transaction; it should be reprocessed.
+        bundle:
+          correlation:
+            originator: foo
+            correlationId: bar
+      summary: Bundle operation processing
+      description: The provided bundle operation ID is currently in an ongoing transaction processing.
+    unparsableError:
+      value:
+        type: http://dtw.matera.com/composite-transaction/unparsable-error
+        title: Unparsable error
+        status: 400
+        detail: An unparsable error occurred while processing this operation. See log for more details.
+      summary: Unparsable error response
+    badRequest:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Bad Request
+        status: 400
+        detail: Invalid attribute
+      summary: Bad request response
+    unauthorizedRequest:
+      value:
+        title: Unauthorized
+        status: 401
+        detail: Unauthorized request
+      summary: Unauthorized request response
+    forbiddenRequest:
+      value:
+        title: Forbidden
+        status: 403
+        detail: Access is denied
+      summary: The given user does not have the required role/authority to perform the underlying action
+    paymentRequired:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Payment Required
+        status: 402
+        detail: Insufficient funds
+      summary: Not Found response
+    gone:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: The resource does not exists anymore, it was previously deleted
+        status: 410
+        detail: Access to the target resource is no longer available and this is likely to be permanent. It seems to be removed earlier.
+      summary: The resource does not exists.
+    entryGone:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Entry does not exists anymore, it was previously deleted
+        status: 410
+        detail: Access to the entry is no longer available and this is likely to be permanent. It seems to be removed earlier.
+      summary: Entry does not exists.
+    notFound:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Not Found
+        status: 404
+        detail: Resource not found
+      summary: Not Found request response
+    unexpectedError:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Unexpected Error
+        status: 500
+        detail: Connection to database timed out
+      summary: Bad request response
+  securitySchemes:
+    oAuth2ClientCredentials:
+      type: oauth2
+      description: Default OAuth2 client credentials flow. See https://datatracker.ietf.org/doc/html/rfc6749#section-4.4
+      flows:
+        clientCredentials:
+          tokenUrl: https://localhost:7443/oauth2/token/
+          scopes: {}
+  schemas:
+    description:
+      description: |
+        The description of the transaction. This description will end up on the customer statement.
+        This is a free-to-enter field and MUST NOT store personal information.
+        Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados).
+      minLength: 1
+      maxLength: 40
+      type: string
+      example: 'ATM withdraw'
+    correlationId:
+      description: 'The unique identifier of the operation.'
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: 'c6675439-25e1-4435-8449-5a17fa967d5c'
+    initiatorId:
+      description: 'The unique identifier of the initiator.'
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: 'be2ff146-430d-49fd-bc52-63962fc1c547'
+    initiator:
+      description: The entry/transaction that will initiate the deferred transaction.
+      properties:
+        id:
+          $ref: '#/components/schemas/initiatorId'
+        correlations:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/correlationId'
+          example: {"dummy-originator": "839bb00f-ed02-4d8c-b5c8-77c762ea3832"}
+    branch:
+      description: 'The account branch. The branch field in the account information should be set to 0 if it does not contain a branch number.'
+      type: integer
+      format: int32
+      minimum: 0
+      example: 4919
+    account:
+      description: 'The account number or unique identifier representing the account.'
+      type: integer
+      format: int64
+      minimum: 0
+      example: 223166
+    groupKind:
+      description: 'Kind of group.'
+      type: string
+      example: 'HOLDER'
+    membershipId:
+      description: 'The identifier of group.'
+      type: string
+      example: '12345678'
+    problemResponse: # Can be referenced as '#/components/schemas/problemResponse'
+      type: object
+      required:
+        - status
+        - title
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+          format: uri
+          description: |
+            An Uniform Resource Identifier (URI) that identifies the problem type. When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          default: 'about:blank'
+          example: 'https://zalando.github.io/problem/constraint-violation'
+        title:
+          type: string
+          description: The title of the problem summarizing the encountered issue, such as 'Service Unavailable'. It could either adopt the title recommended by RFC 7807 or encompass more specific details relevant to the issue.
+        status:
+          type: integer
+          format: int32
+          description: The HTTP status code produced by the server in response to this specific problem instance.
+          minimum: 100
+          maximum: 600
+          exclusiveMaximum: true
+          example: 503
+        detail:
+          type: string
+          description: A clear, understandable description for this particular problem instance.
+          example: Connection to database timed out
+    bundleRequest:
+      type: object
+      discriminator:
+        propertyName: kind
+        mapping:
+          regular: '#/components/schemas/regularBundleRequest'
+          removal: '#/components/schemas/removalBundleRequest'
+      properties:
+        bundle:
+          $ref: '#/components/schemas/bundleId'
+        kind:
+          $ref: '#/components/schemas/bundleKind'
+        status:
+          $ref: '#/components/schemas/bundleStatus'
+      required:
+        - bundle
+        - kind
+    regularBundleRequest:
+      allOf:
+        - $ref: '#/components/schemas/bundleRequest'
+        - type: object
+          properties:
+            entries:
+              $ref: '#/components/schemas/entriesRequest'
+          required:
+            - entries
+    removalBundleRequest:
+      allOf:
+        - $ref: '#/components/schemas/bundleRequest'
+        - type: object
+          properties:
+            bundleToRemove:
+              $ref: '#/components/schemas/bundleToRemove'
+          required:
+            - bundleToRemove
+    bundleStatus:
+      description: |
+        The status of the bundle operation:
+        * POSTED: The transactions in the bundle operation have been successfully posted to the accounts, resulting in the confirmation of the debit or credit.
+        * PENDING: The transactions in the bundle operation are processing. In case of a debit transaction, the transaction amount is held from the account. If it is a credit transaction, the transaction amount is not added to the account until the transaction is classified as 'POSTED'.
+      type: string
+      default: POSTED
+      enum:
+        - POSTED
+        - PENDING
+    bundleStatusResponse:
+      description: |
+        The status of the bundle operation:
+        * POSTED: The transactions in the bundle operation have been successfully posted to the accounts, resulting in the confirmation of the debit or credit.
+        * PENDING: The transactions in the bundle operation are processing. In case of a debit transaction, the transaction amount is held from the account. If it is a credit transaction, the transaction amount is not added to the account until the transaction is classified as 'POSTED' 
+        * NEW: A new bundle operation yet to be processed. 
+        * ROLLED BACK: The bundle operation has been rolled back due to failures within any of the associated transactions.
+      type: string
+      enum:
+        - POSTED
+        - PENDING
+        - POSTING
+        - NEW
+        - PENDING_ROLLBACK
+        - ROLLED_BACK
+        - EXCLUDING
+        - ROLLING_BACK
+    monitoringReleaseRequest:
+      type: object
+      properties:
+        settlementInfo:
+          $ref: '#/components/schemas/settlementInfoRequest'
+        status:
+          $ref: '#/components/schemas/monitoringStatus'
+        blueprints:
+          description: Information regarding the debiting of the held amount from the account.
+          $ref: '#/components/schemas/monitoringReleaseEntriesRequest'
+        metaData:
+          $ref: '#/components/schemas/metaData'
+      required:
+        - settlementInfo
+    monitoringReleaseEntriesRequest:
+      type: array
+      items:
+        $ref: '#/components/schemas/monitoringReleaseEntryRequest'
+      minItems: 0
+      maxItems: 100
+    monitoringReleaseEntryRequest:
+      type: object
+      discriminator:
+        propertyName: entryKind
+        mapping:
+          ledger: '#/components/schemas/ledgerEntryDebitRequest'
+      properties:
+        entryKind:
+          $ref: '#/components/schemas/entryKind'
+        correlationId:
+          $ref: '#/components/schemas/correlationId'
+        metaData:
+          $ref: '#/components/schemas/metaData'
+        description:
+          $ref: '#/components/schemas/description'
+      required:
+        - entryKind
+    ledgerEntryDebitRequest:
+      allOf:
+        - $ref: '#/components/schemas/monitoringReleaseEntryRequest'
+        - type: object
+          properties:
+            historyCode:
+              $ref: '#/components/schemas/historyCode'
+            settlementInfo:
+              $ref: '#/components/schemas/settlementInfoRequest'
+          required:
+            - historyCode
+            - settlementInfo
+    fulfillment:
+      type: string
+      description: 'The designated criteria specifying the settlement amount for the transaction.'
+      enum:
+        - TOTAL
+        - PARTIAL
+      default: 'TOTAL'
+      example: 'TOTAL'
+    settlementInfoRequest:
+      type: object
+      description: 'Information of the transaction amount to settle.'
+      discriminator:
+        propertyName: fulfillment
+        mapping:
+          TOTAL: '#/components/schemas/amountSettlementInfoRequest'
+          PARTIAL: '#/components/schemas/amountRangeSettlementInfoRequest'
+      properties:
+        fulfillment:
+          $ref: '#/components/schemas/fulfillment'
+      required:
+        - fulfillment
+    amountRangeSettlementInfoRequest:
+      allOf:
+        - $ref: '#/components/schemas/settlementInfoRequest'
+        - type: object
+          properties:
+            amountRange:
+              $ref: '#/components/schemas/amountRange'
+          required:
+            - amountRange
+    amountSettlementInfoRequest:
+      allOf:
+        - $ref: '#/components/schemas/settlementInfoRequest'
+        - type: object
+          properties:
+            amount:
+              $ref: '#/components/schemas/amount'
+          required:
+            - amount
+    amountRange:
+      type: object
+      description: 'Amount Range'
+      properties:
+        min:
+          type: integer
+          format: int64
+          example: 1
+          description: The minimum range value
+          minimum: 1
+        max:
+          type: integer
+          format: int64
+          example: 100000
+          description: The maximum range value
+        currency:
+          $ref: '#/components/schemas/currencyISO4217'
+      required:
+        - min
+        - max
+        - currency
+    monitoringReleaseResponse:
+      type: object
+      properties:
+        monitoringId:
+          $ref: '#/components/schemas/monitoringId'
+        correlations:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/correlationId'
+          example: { "dummy-originator": "130e2a5a-0c34-4810-b72f-dca85defe51e" }
+        status:
+          $ref: '#/components/schemas/monitoringStatus'
+        releasedAmount:
+          $ref: '#/components/schemas/releasedAmount'
+        metaData:
+          $ref: '#/components/schemas/metaData'
+        totalAmount:
+          $ref: '#/components/schemas/totalAmount'
+        amountDue:
+          $ref: '#/components/schemas/amountDue'
+        totalReleased:
+          $ref: '#/components/schemas/totalReleased'
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/monitoringReleaseEntryResponse'
+    entriesRequest:
+      type: array
+      items:
+        $ref: '#/components/schemas/entryRequest'
+      minItems: 1
+      maxItems: 100
+    entryRequest:
+      type: object
+      discriminator:
+        propertyName: entryKind
+        mapping:
+          ledger: '#/components/schemas/ledgerEntryRequest'
+          release: '#/components/schemas/releaseEntryRequest'
+          reversal: '#/components/schemas/reversalEntryRequest'
+          removal: '#/components/schemas/removalEntryRequest'
+          blocking: '#/components/schemas/blockingEntryRequest'
+          unblocking: '#/components/schemas/unblockingEntryRequest'
+      properties:
+        branch:
+          $ref: '#/components/schemas/branch'
+        account:
+          $ref: '#/components/schemas/account'
+        entryKind:
+          $ref: '#/components/schemas/entryKind'
+        correlationId:
+          $ref: '#/components/schemas/correlationId'
+        metaData:
+          $ref: '#/components/schemas/metaData'
+        description:
+          $ref: '#/components/schemas/description'
+        dependsOn:
+          $ref: '#/components/schemas/dependsOn'
+        asOfDate:
+          $ref: '#/components/schemas/asOfDate'
+      required:
+        - branch
+        - account
+        - entryKind
+        - correlationId
+    releaseEntryRequest:
+      allOf:
+        - $ref: '#/components/schemas/entryRequest'
+        - type: object
+          properties:
+            amount:
+              $ref: '#/components/schemas/amount'
+            entryToRelease:
+              $ref: '#/components/schemas/entryToRelease'
+          required:
+            - amount
+            - entryToRelease
+    reversalEntryRequest:
+      allOf:
+        - $ref: '#/components/schemas/entryRequest'
+        - type: object
+          properties:
+            holdReasonId:
+              $ref: '#/components/schemas/debitHoldReasonId'
+            entryToReverse:
+              $ref: '#/components/schemas/entryToReverse'
+          required:
+            - entryToReverse
+    ledgerEntryRequest:
+      allOf:
+        - $ref: '#/components/schemas/entryRequest'
+        - type: object
+          properties:
+            description:
+              $ref: '#/components/schemas/description'
+            historyCode:
+              $ref: '#/components/schemas/historyCode'
+            amount:
+              $ref: '#/components/schemas/amount'
+            uponCreationHeldAs:
+              $ref: '#/components/schemas/cautionaryBlockInformation'
+          required:
+            - historyCode
+            - amount
+    blockingEntryRequest:
+      allOf:
+        - $ref: '#/components/schemas/entryRequest'
+        - type: object
+          properties:
+            description:
+              $ref: '#/components/schemas/description'
+            amount:
+              $ref: '#/components/schemas/amount'
+            holdReasonId:
+              $ref: '#/components/schemas/creditHoldReasonId'
+          required:
+            - amount
+            - holdReasonId
+    removalEntryRequest:
+      allOf:
+        - $ref: '#/components/schemas/entryRequest'
+        - type: object
+          properties:
+            entryToRemove:
+              $ref: '#/components/schemas/entryToRemove'
+          required:
+            - entryToRemove
+    unblockingEntryRequest:
+      allOf:
+        - $ref: '#/components/schemas/entryRequest'
+        - type: object
+          properties:
+            description:
+              $ref: '#/components/schemas/description'
+            amount:
+              $ref: '#/components/schemas/amount'
+            holdReasonId:
+              $ref: '#/components/schemas/holdReasonId'
+            uponCreationHeldAs:
+              $ref: '#/components/schemas/cautionaryBlockInformation'
+            releasing:
+              $ref: '#/components/schemas/cautionaryUnblockInformation'
+          required:
+            - amount
+    entryKind:
+      type: string
+      enum:
+        - ledger
+        - release
+        - reversal
+        - removal
+        - blocking
+        - unblocking
+    entryKindResponse:
+      type: string
+      enum:
+        - ledger
+        - release
+        - reversal
+        - removal
+        - blocking
+        - unblocking
+        - exclusion
+    entryToRelease:
+      description: 'The correlation ID of which entry is the release desired.'
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: '45246410-220546'
+    entryToReverse:
+      description: 'The correlation ID of which entry is the reverse desired.'
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: '45246410-220546'
+    entryToRemove:
+      description: 'Avocation ID representing the desired remove entry.'
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: '77776410-220999'
+    creditHoldReasonId:
+      description: 'Reason for the held amount. Used only in kind blocking.'
+      type: string
+      example: '123'
+    debitHoldReasonId:
+      description: 'Reason for the held amount. Used only in kind blocking.'
+      type: string
+      example: '123'
+    bundleId:
+      description: 'The unique identifier of the bundle operation.'
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: '65461321315'
+    bundleKind:
+      description: |
+        The kind of bundle operation:
+        * REGULAR: A regular bundle operation such as a transaction that involves transferring funds from one account to another. 
+        * REMOVAL: The bundle operation is removed, which means that credits and debits within the involved accounts are reversed.
+      type: string
+      enum:
+        - regular
+        - removal
+        - exclusion
+    bundleToRemove:
+      description: 'Bundle identifier of which should have his entries removed.'
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: '6534565444'
+    metaData:
+      description: |
+        A set of key-value pairs that you can attach to an object. This can be useful for storing additional information about the object in a structured format. This is a free-to-enter field and MUST NOT store personal information.
+        Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados).
+      type: object
+      additionalProperties: true
+    historyCode:
+      description: 'A code that categorizes the transaction type as credit or debit.'
+      type: integer
+      format: int64
+      minimum: 0
+      example: 4919
+    monitoringStatus:
+      description: |
+        The status of the monitoring service for once its release is completed:
+        * ACTIVE: Indicates that the monitoring service is currently operational.
+        * INACTIVE: Indicates that the monitoring service is not currently operational.
+      type: string
+      default: INACTIVE
+      enum:
+        - ACTIVE
+        - INACTIVE
+        - EXCLUDED
+        - REALIZED
+    ifMatch:
+      description: 'If-Match pass the version of the monitoring'
+      type: string
+      example: '1'
+    monitoringId:
+      description: 'The unique identifier of the monitoring service.'
+      type: string
+      example: 'fd18bfce-5112-4221-ae54-818de9c2cdca'
+    amount:
+      type: object
+      description: 'The operation amount.'
+      properties:
+        value:
+          type: integer
+          format: int64
+          example: 100000
+          description: The actual amount.
+          minimum: 1
+        currency:
+          $ref: '#/components/schemas/currencyISO4217'
+      required:
+        - value
+        - currency
+    amountDue:
+      type: object
+      description: 'The outstanding amount for the ongoing monitoring service.'
+      properties:
+        value:
+          type: integer
+          format: int64
+          example: 100000
+          description: The actual amount.
+          minimum: 1
+        currency:
+          $ref: '#/components/schemas/currencyISO4217'
+      required:
+        - value
+        - currency
+    releasedAmount:
+      type: object
+      description: 'The monitored amount released in this operation.'
+      properties:
+        value:
+          type: integer
+          format: int64
+          example: 100000
+          description: The actual amount.
+          minimum: 1
+        currency:
+          $ref: '#/components/schemas/currencyISO4217'
+      required:
+        - value
+        - currency
+    totalReleased:
+      type: object
+      description: 'The total amount already released after being monitored.'
+      properties:
+        value:
+          type: integer
+          format: int64
+          example: 100000
+          description: The actual amount.
+          minimum: 1
+        currency:
+          $ref: '#/components/schemas/currencyISO4217'
+      required:
+        - value
+        - currency
+    totalAmount:
+          type: object
+          description: 'The total amount to be monitored by this service.'
+          properties:
+            value:
+              type: integer
+              format: int64
+              example: 100000
+              description: The actual amount.
+              minimum: 1
+            currency:
+              $ref: '#/components/schemas/currencyISO4217'
+          required:
+          - value
+          - currency
+    currencyISO4217:
+      type: string
+      description: 'Currency code as in ISO 4217 standard (eg. BRL)'
+      example: 'BRL'
+      enum: [
+        AED,
+        AFN,
+        ALL,
+        AMD,
+        ANG,
+        AOA,
+        ARS,
+        AUD,
+        AWG,
+        AZN,
+        BAM,
+        BBD,
+        BDT,
+        BGN,
+        BHD,
+        BIF,
+        BMD,
+        BND,
+        BOB,
+        BOV,
+        BRL,
+        BSD,
+        BTN,
+        BWP,
+        BYR,
+        BZD,
+        CAD,
+        CDF,
+        CHE,
+        CHF,
+        CHW,
+        CLF,
+        CLP,
+        CNY,
+        COP,
+        COU,
+        CRC,
+        CUC,
+        CUP,
+        CVE,
+        CZK,
+        DJF,
+        DKK,
+        DOP,
+        DZD,
+        ECS,
+        EGP,
+        ERN,
+        ETB,
+        EUR,
+        FJD,
+        FKP,
+        GBP,
+        GEL,
+        GHS,
+        GIP,
+        GMD,
+        GNF,
+        GTQ,
+        GYD,
+        HKD,
+        HNL,
+        HRK,
+        HTG,
+        HUF,
+        IDR,
+        ILS,
+        INR,
+        IQD,
+        IRR,
+        ISK,
+        JMD,
+        JOD,
+        JPY,
+        KES,
+        KGS,
+        KHR,
+        KMF,
+        KPW,
+        KRW,
+        KWD,
+        KYD,
+        KZT,
+        LAK,
+        LBP,
+        LKR,
+        LRD,
+        LSL,
+        LTL,
+        LVL,
+        LYD,
+        MAD,
+        MDL,
+        MGA,
+        MKD,
+        MMK,
+        MNT,
+        MOP,
+        MRO,
+        MUR,
+        MVR,
+        MWK,
+        MXN,
+        MXV,
+        MYR,
+        MZN,
+        NAD,
+        NGN,
+        NIO,
+        NOK,
+        NPR,
+        NZD,
+        OMR,
+        PAB,
+        PEN,
+        PGK,
+        PHP,
+        PKR,
+        PLN,
+        PYG,
+        QAR,
+        RON,
+        RSD,
+        RUB,
+        RWF,
+        SAR,
+        SBD,
+        SCR,
+        SDG,
+        SEK,
+        SGD,
+        SHP,
+        SLL,
+        SOS,
+        SRD,
+        STD,
+        SVC,
+        SYP,
+        SZL,
+        THB,
+        TJS,
+        TMT,
+        TND,
+        TOP,
+        TRY,
+        TTD,
+        TWD,
+        TZS,
+        UAH,
+        UGX,
+        USD,
+        USN,
+        USS,
+        UYI,
+        UYU,
+        UZS,
+        VEF,
+        VND,
+        VUV,
+        WST,
+        XAF,
+        XAG,
+        XAU,
+        XBA,
+        XBB,
+        XBC,
+        XBD,
+        XCD,
+        XDR,
+        XFU,
+        XOF,
+        XPD,
+        XPF,
+        XPT,
+        XTS,
+        XXX,
+        YER,
+        ZAR,
+        ZMW,
+        ZWL
+      ]
+    asOfDate:
+      description: The date when the bundle operation was requested. It serves accounting purposes exclusively, as it doesn't affect the approval process, which relies on the actual balance at that time.
+      type: string
+      format: date
+      example: '2021-05-22'
+    createdAt:
+      description: |
+        The date when the entry was created on the database. 
+        As it is timestamped, the response is formatted in the UTC time zone.
+      type: string
+      format: date-time
+      example: '2017-07-21T17:32:28Z'
+    entryBundleGroupResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        bundleId:
+          $ref: '#/components/schemas/bundleId'
+        status:
+          $ref: '#/components/schemas/bundleStatusResponse'
+        bundleEntries:
+          type: array
+          items:
+            $ref: '#/components/schemas/bundleEntries'
+    entryResponse:
+      properties:
+        id:
+          $ref: '#/components/schemas/correlationId'
+        entryKind:
+          $ref: '#/components/schemas/entryKindResponse'
+        historyCode:
+          $ref: '#/components/schemas/historyCode'
+        holdReasonId:
+          $ref: '#/components/schemas/holdReasonId'
+        status:
+          $ref: '#/components/schemas/entryStatus'
+        description:
+          $ref: '#/components/schemas/description'
+        asOfDate:
+          $ref: '#/components/schemas/asOfDate'
+        correlations:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/correlationId'
+          example: {"dummy-originator": "86c2ed79-c141-4545-b319-f58c665ed6b8"}
+        initiator:
+          $ref: '#/components/schemas/initiator'
+        balanceChanges:
+          description: 'The balances modified following a transaction.'
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/amount'
+          example: {"AVAILABLE": { "value": "12", "currency": "BRL" }}
+        amount:
+          $ref: '#/components/schemas/amount'
+        metaData:
+          $ref: '#/components/schemas/metaData'
+    monitoringReleaseEntryResponse:
+      allOf:
+        - type: object
+          properties:
+            branch:
+              $ref: '#/components/schemas/branch'
+            account:
+              $ref: '#/components/schemas/account'
+            createdAt:
+              $ref: '#/components/schemas/createdAt'
+        - $ref: '#/components/schemas/entryResponse'
+    balance:
+      type: object
+      description: 'Information of the updated account balances.'
+      properties:
+        amount:
+          $ref: '#/components/schemas/amount'
+    entryStatus:
+      description: |
+        Status of entry where:
+        * POSTED: means an available entry.
+        * PENDING: on the other hand, means the entry credit or debit will be held.
+        * ON_HOLD: triggers a cautionary hold on the given entry.
+        * DEFERRED: is related to a entry that will be executed after some criteria described on required "deferredUntil" field.
+      type: string
+      default: POSTED
+      enum:
+        - POSTED
+        - PENDING
+        - ON_HOLD
+        - DEFERRED
+    balanceType:
+      type: string
+      description: 'Identifies which kind of balance'
+      example: 'REAL'
+    role:
+      description: 'The role of the given batch'
+      type: string
+      default: PRIMARY
+      enum:
+        - PRIMARY
+        - ANNEX
+      example: PRIMARY
+    bundleEntries:
+      properties:
+        branch:
+          $ref: '#/components/schemas/branch'
+        account:
+          $ref: '#/components/schemas/account'
+        createdAt:
+          $ref: '#/components/schemas/createdAt'
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/entryResponse'
+        balances:
+          type: object
+          description: The updated balances following the transaction. This field provides the requested balances based on the applied query filters.
+          additionalProperties:
+            $ref: '#/components/schemas/balance'
+    dependsOn:
+      description: 'The correlation ID of the entry that the transaction depends on.'
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: '45246410-220546'
+    cautionaryBlockInformation:
+      type: object
+      description: >
+        Information of the cautionary block associated with the transaction. This field must only be completed when the status of the transaction is 'ON_HOLD'.
+        Use the correlation ID within this field to unblock/release the transaction value. 
+      properties:
+        holdReasonId:
+          $ref: '#/components/schemas/holdReasonId'
+        correlationId:
+          $ref: '#/components/schemas/correlationId'
+      required:
+        - holdReasonId
+        - correlationId
+    cautionaryUnblockInformation:
+      type: object
+      description: >
+        Informs an entry to be released. The entry must be cautionary-blocked (i.e., its status must be ON_HOLD)
+        
+        
+        **IMPORTANT:** The correlation ID within this tag matches the one passed in the 'uponCreationHeldAs' tag during creation.
+      properties:
+        correlationId:
+          $ref: '#/components/schemas/correlationId'
+
+      required:
+        - correlationId
+    holdReasonId:
+      description: 'The reason for the held amount.'
+      type: string
+      example: '123'

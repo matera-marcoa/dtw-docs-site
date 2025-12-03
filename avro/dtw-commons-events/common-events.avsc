@@ -1,0 +1,22 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.base.common",
+    "type": "record",
+    "name": "BaseEventContent",
+    "fields": [
+      {"name": "source", "type": "string", "doc": "Identifies the system (module) where the event was originated from (ie.: checking-account-system)."},
+      {"name": "eventId", "type": {"type": "string", "logicalType": "uuid"}, "doc": "Event Id on the originating system."},
+      {"name": "createdAtUtc", "type": {"type": "long", "logicalType": "local-timestamp-millis"}, "doc": "Timestamp with milliseconds when the event was generated in UTC."},
+      {"name": "kind", "type": "string", "doc": "The kind (type) of the underlying event. It description should (preferably) include which aggregate the event is associated with (ie.: account-change-type)."}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.base.common",
+    "type": "record",
+    "name": "BaseEvent",
+    "fields": [
+      {"name": "content", "type": "com.matera.dtw.event.base.common.BaseEventContent", "doc": "Event data."},
+      {"name": "parents", "default": [], "type": {"type": "array", "items": {"name": "parent", "type": "com.matera.dtw.event.base.common.BaseEventContent"}, ",doc": "The events that originated the underlying event. These events are disposed in an order on which the oldest event come first. The first event is the originating event."}}
+    ]
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.common.feature",
+    "type": "enum",
+    "name": "FeatureType",
+    "doc": "types accepted by the feature value",
+    "symbols": [
+      "BOOLEAN",
+      "STRING",
+      "DECIMAL",
+      "DATE",
+      "DATE_RANGE"
+    ],
+    "default" : "STRING"
+  },
+  {
+    "namespace": "com.matera.dtw.event.common.feature",
+    "type": "record",
+    "name": "DateRange",
+    "doc": "Date range type for feature value. Inclusive range.",
+    "fields": [
+      {"name": "startDate", "type": ["null",{"type": "long", "logicalType": "local-timestamp-millis"}] , "default": null, "doc": "Start date value"},
+      {"name": "endDate", "type": ["null",{"type": "long", "logicalType": "local-timestamp-millis"}] , "default": null, "doc": "End date value"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.common.feature",
+    "type": "record",
+    "name": "FeatureValue",
+    "doc": "Transport generic data of different types",
+    "fields": [
+      {"name": "type", "type": "com.matera.dtw.event.common.feature.FeatureType", "default": "STRING"},
+      {"name": "booleanValue", "type": ["null","boolean"], "default": null, "doc": "boolean value"},
+      {"name": "stringValue", "type": ["null","string"], "default": null, "doc": "string value"},
+      {"name": "decimalValue", "type": ["null",{"type": "bytes", "logicalType": "decimal", "precision": 19}], "default": null, "doc": "decimal value with 19 precision"},
+      {"name": "dateValue", "type": ["null",{"type": "int", "logicalType": "date"}], "default": null, "doc": "date value"},
+      {"name": "dateRangeValue", "type": ["null","com.matera.dtw.event.common.feature.DateRange"], "default": null, "doc": "Date range value"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.common.feature",
+    "type": "record",
+    "name": "FeatureEntry",
+    "doc": "Transport generic data of different types",
+    "fields": [
+      {"name": "name", "type": "string", "doc":  "Feature name"},
+      {"name": "value", "type": "com.matera.dtw.event.common.feature.FeatureValue", "doc":  "Feature value"}
+    ]
+  }
+]

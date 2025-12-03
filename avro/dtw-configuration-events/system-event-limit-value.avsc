@@ -1,0 +1,22 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "name": "SystemConfigurationLimitChangeEvent",
+    "type": "record",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "systemConfiguration", "type": "com.matera.dtw.event.configuration.SystemConfigurationKey", "doc": "The unique identifier to system configuration record"},
+      {"name": "limit", "type": "com.matera.dtw.event.common.financial.Limit", "doc": "The limit amount range. For example, for an overdraft limit of 100 it would be minimum -100 and maximum 0"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "name": "SystemConfigurationLimitDeleteEvent",
+    "type": "record",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "systemConfiguration", "type": "com.matera.dtw.event.configuration.SystemConfigurationKey", "doc": "The unique identifier to system configuration record"},
+      {"name": "limitType", "type": "string"}
+    ]
+  }
+]

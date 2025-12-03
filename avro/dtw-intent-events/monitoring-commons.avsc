@@ -1,0 +1,90 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.monitoring.common",
+    "type": "enum",
+    "name": "MonitoringStatus",
+    "doc": "The monitoring status can be \"ACTIVE\", \"INACTIVE\", \"CANCELLED\", \"REALIZED\" or \"EXCLUDED\".",
+    "symbols": [
+      "ACTIVE",
+      "INACTIVE",
+      "CANCELLED",
+      "REALIZED",
+      "EXCLUDED"
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.monitoring.common",
+    "type": "enum",
+    "name": "MonitoringKind",
+    "doc": "The entry type of monitoring.",
+    "symbols": [
+      "LEDGER",
+      "BLOCKING"
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.monitoring.common",
+    "type": "record",
+    "name": "MonitoringCreateDataRequest",
+    "doc": "Data associated with a monitoring create request.",
+    "fields": [
+      {"name": "kind", "type": "com.matera.dtw.event.monitoring.common.MonitoringKind", "doc": "The entry type of monitoring."},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the soon-to-be-created monitoring"},
+      {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations."},
+      {"name": "description", "type": ["null", "string"], "default": null, "doc": "Description of the monitoring."},
+      {"name": "status", "type": "com.matera.dtw.event.monitoring.common.MonitoringStatus", "default": "ACTIVE", "doc": "Whether the created monitoring is ACTIVE or INACTIVE."},
+      {"name": "historyCode", "type": ["null","int"], "default": null, "doc": "Determines the history code to be used for entries created by the monitoring."},
+      {"name": "holdReasonId", "type": ["null","string"], "default": null, "doc": "Reason for the block credit amount."},
+      {"name": "amount", "type": "com.matera.dtw.event.common.financial.FinancialAmount" , "doc": "The total amount for monitoring"},
+      {"name": "source", "type": "string", "doc": "Which system requested to create a monitoring."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.monitoring.common",
+    "type": "record",
+    "name": "MonitoringDataResponse",
+    "doc": "Data associated with a monitoring response.",
+    "fields": [
+      {"name": "id", "type":{ "type" : "string","logicalType":"uuid"} , "doc": "The monitoring id of the created monitoring."},
+      {"name": "version", "type": ["null","string"] , "doc": "The monitoring version of the created monitoring."},
+      {"name": "amount", "type": "com.matera.dtw.event.common.financial.FinancialAmount" , "doc": "The total amount of the created monitoring."},
+      {"name": "amountDue", "type": "com.matera.dtw.event.common.financial.FinancialAmount" , "doc": "The due amount associated with the created monitoring."},
+      {"name": "priority", "type": ["null","int"], "doc": "The monitoring priority"},
+      {"name": "blueprint", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with blueprint. Might be used for the entry type the monitoring will be create."},
+      {"name": "metaData", "type": ["null", {"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations."},
+      {"name": "status", "type": "com.matera.dtw.event.monitoring.common.MonitoringStatus", "default": "ACTIVE", "doc": "Whether the created entry is ACTIVE or INACTIVE."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.monitoring.common",
+    "type": "record",
+    "name": "MonitoringChangeDataRequest",
+    "doc": "Data associated with a monitoring change request.",
+    "fields": [
+      {"name": "id", "type":{ "type" : "string","logicalType":"uuid"}, "default": "00000000-0000-0000-0000-000000000000", "doc": "*DEPRECATED* The id of monitoring that should be changed. Needs to use the criterion"},
+      {"name": "version", "type": "string" , "doc": "The version of monitoring that should be changed."},
+      {"name": "status", "type": "com.matera.dtw.event.monitoring.common.MonitoringStatus", "default": "ACTIVE", "doc": "The new status of monitoring."},
+      {"name": "amount", "type": "com.matera.dtw.event.common.financial.FinancialAmount" , "doc": "The new total amount of monitoring"},
+      {"name": "source", "type": ["null", "string"], "default": null, "doc": "Which system had created the intent"},
+      {"name": "criteria", "type": ["null", "com.matera.dtw.command.transaction.intent.ByCorrelationIdCriteria", "com.matera.dtw.command.transaction.intent.ByIdCriteria"], "default": null, "doc": "Criteria to use when looking for which intent to change (e.g., byId, byCorrelation."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.monitoring.common",
+    "type": "record",
+    "name": "MonitoringReleaseDataRequest",
+    "doc": "Data associated with a monitoring release request.",
+    "fields": [
+      {"name": "source", "type": "string", "doc": "Which system had created the intent"},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of monitoring release"},
+      {"name": "criteria", "type": ["null", "com.matera.dtw.command.transaction.intent.ByCorrelationIdCriteria", "com.matera.dtw.command.transaction.intent.ByIdCriteria"], "default": null, "doc": "Criteria to use when looking for which intent to release (e.g., byId, byCorrelation."},
+      {"name": "settlement", "type": ["com.matera.dtw.command.transaction.command.TotalSettlementInfo", "com.matera.dtw.command.transaction.command.PartialSettlementInfo"], "doc": "Amount rule information for a release request"},
+      {"name": "blueprints", "type": {"type": "array", "items": ["com.matera.dtw.command.transaction.command.LedgerEntryRequestData"]}, "default": [],"doc": "List of blueprint entries to be executed with released balance"},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations"}
+    ]
+  }, {
+      "namespace": "com.matera.dtw.event.monitoring.common",
+      "type": "record",
+      "name": "MonitoringCancelDataRequest",
+      "doc": "Data associated with a monitoring cancel request.",
+      "fields": [
+        {"name": "source", "type": "string", "doc": "Which system had created the intent"},
+        {"name": "criteria", "type": ["null", "com.matera.dtw.command.transaction.intent.ByCorrelationIdCriteria", "com.matera.dtw.command.transaction.intent.ByIdCriteria"], "default": null, "doc": "Criteria to use when looking for which intent to cancel (e.g., byId, byCorrelation."}
+      ]
+    }
+]

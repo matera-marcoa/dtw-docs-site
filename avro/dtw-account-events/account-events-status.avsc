@@ -1,0 +1,13 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.account.status",
+    "type": "record",
+    "name": "AccountStatusChangeEvent",
+    "doc": "Event to change the status of an account.",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "active", "type": "boolean", "doc": "global account status"}
+    ]
+  }
+]

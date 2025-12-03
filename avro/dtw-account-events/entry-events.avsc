@@ -1,0 +1,109 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "EntryCreationEvent",
+    "doc": "Represents a regular entry (debit/credit) on a given account",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "entry", "type": "com.matera.dtw.event.transaction.entry.LedgerEntry"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "EntryExclusionEvent",
+    "doc": "Represents the exclusion of an entry on a given account",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "entry", "type": "com.matera.dtw.event.transaction.entry.ExclusionEntry"}
+    ]
+  }, {
+     "namespace": "com.matera.dtw.event.transaction.entry",
+     "type": "record",
+     "name": "PendingEntryCreationEvent",
+     "doc": "Represents a regular entry credit on a given account that was created in the 'pending' state",
+     "fields": [
+       {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+       {"name": "entry", "type": "com.matera.dtw.event.transaction.entry.PendingLedgerEntry"}
+     ]
+  }, {
+          "namespace": "com.matera.dtw.event.transaction.entry",
+          "type": "record",
+          "name": "EntryReversalEvent",
+          "doc": "Represents a reversal entry",
+          "fields": [
+            {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+            {"name": "entry", "type": "com.matera.dtw.event.transaction.entry.ReversalEntry"}
+          ]
+       },
+  {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "EntryRemovalEvent",
+    "doc": "Represents a removal entry event.",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "entry", "type": "com.matera.dtw.event.transaction.entry.RemovalEntry"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "BlockingEntryEvent",
+    "doc": "Represents a blocking entry",
+    "fields": [
+        {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+        {"name": "entry", "type": "com.matera.dtw.event.transaction.entry.BlockingEntry"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "UnblockingEntryEvent",
+    "doc": "Represents a unblocking entry event.",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "entry", "type": "com.matera.dtw.event.transaction.entry.UnblockingEntry"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "PendingBlockingEntryEvent",
+    "doc": "Represents a pending blocking entry event.",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "entry", "type": "com.matera.dtw.event.transaction.entry.PendingBlockingEntry"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "PendingUnblockingEntryEvent",
+    "doc": "Represents a pending unblocking entry event.",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "entry", "type": "com.matera.dtw.event.transaction.entry.PendingUnblockingEntry"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.transaction.entry",
+    "type": "record",
+    "name": "PendingEntryRemovalEvent",
+    "doc": "Represents a pending removal entry event.",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "entry", "type": "com.matera.dtw.event.transaction.entry.PendingRemovalEntry"}
+    ]
+  },
+  {
+      "namespace": "com.matera.dtw.event.transaction.entry",
+      "type": "record",
+      "name": "PendingReversalEntryEvent",
+      "doc": "Represents a pending reversal entry event.",
+      "fields": [
+        {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+        {"name": "entry", "type": "com.matera.dtw.event.transaction.entry.PendingReversalEntry"}
+      ]
+    }
+]

@@ -1,0 +1,119 @@
+[
+  {
+    "namespace": "com.matera.dtw.command.transaction.monitoring",
+    "type": "record",
+    "name": "CreateMonitoringCommandSuccessResult",
+    "doc": "Represents the successful result of a monitoring command.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandSuccessResult"},
+      {"name": "target", "type": ["com.matera.dtw.event.account.common.AccountKey","com.matera.dtw.event.account.group.common.AccountGroupKey"], ",doc" : "The account or account-group which the balance is being monitored."},
+      {"name": "source", "type": "string", "doc": "Which system had created the monitoring"},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of monitoring"},
+      {"name": "intent", "type": ["null","com.matera.dtw.event.monitoring.common.MonitoringDataResponse"], "doc": "The monitoring intent."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.monitoring",
+    "type": "record",
+    "name": "CreateMonitoringCommandFailureResult",
+    "doc": "Represents a rejected result of a monitoring command.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandFailureResult"},
+      {"name": "target", "type": ["com.matera.dtw.event.account.common.AccountKey","com.matera.dtw.event.account.group.common.AccountGroupKey"], ",doc" : "The account or account-group which the balance should be monitored."},
+      {"name": "source", "type": "string", "doc": "Which system that had created the monitoring"},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of monitoring"},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.monitoring",
+    "type": "record",
+    "name": "ChangeMonitoringCommandSuccessResult",
+    "doc": "Represents the successful result of a monitoring change command.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandSuccessResult"},
+      {"name": "target", "type": ["com.matera.dtw.event.account.common.AccountKey","com.matera.dtw.event.account.group.common.AccountGroupKey"], ",doc" : "The account or account-group which the balance is being monitored."},
+      {"name": "source", "type": ["null","string"], "doc": "Which system had created the monitoring"},
+      {"name": "correlationId", "type": ["null","string"], "doc": "The correlation id of monitoring"},
+      {"name": "intent", "type": ["null","com.matera.dtw.event.monitoring.common.MonitoringDataResponse"], "doc": "The monitoring intent."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.monitoring",
+    "type": "record",
+    "name": "ChangeMonitoringCommandFailureResult",
+    "doc": "Represents a rejected result of a monitoring change command.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandFailureResult"},
+      {"name": "target", "type": ["com.matera.dtw.event.account.common.AccountKey","com.matera.dtw.event.account.group.common.AccountGroupKey"], ",doc" : "The account or account-group which the balance should be monitored."},
+      {"name": "id", "type":{ "type" : "string","logicalType":"uuid"}, "default": "00000000-0000-0000-0000-000000000000", "doc": "*DEPRECATED* The id of monitoring that should be changed."},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations"},
+      {"name": "criteria", "type": ["null", "com.matera.dtw.command.transaction.intent.ByCorrelationIdCriteria", "com.matera.dtw.command.transaction.intent.ByIdCriteria"], "default": null, "doc": "Criteria to use when looking for which intent to delete (e.g., byId, byCorrelation."}
+    ]
+  },  {
+    "namespace": "com.matera.dtw.command.transaction.monitoring",
+    "type": "record",
+    "name": "ReleaseMonitoringCommandSuccessResult",
+    "doc": "Represents the successful result of a monitoring release command.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandSuccessResult"},
+      {"name": "target", "type": ["com.matera.dtw.event.account.common.AccountKey","com.matera.dtw.event.account.group.common.AccountGroupKey"], ",doc" : "The account or account-group whose balance is monitored."},
+      {"name": "source", "type": "string", "doc": "Which system had created the monitoring"},
+      {"name": "correlations", "type": {"type": "map", "values": "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "releaseCorrelations", "type": {"type": "map", "values": "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "entries", "type": {"type": "array", "items": ["null", "com.matera.dtw.event.command.intent.commons.MonitoringRelatedEntry"]}, ",default": [], "doc": "All related entries of requested monitoring release (BlockingEntry, UnblockingEntry and LedgerEntry"},
+      {"name": "releasedAmount", "default": null, "type": ["null", "com.matera.dtw.event.common.financial.FinancialAmount"] , "doc": "The released amount of monitoring"},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations"}
+    ]
+   },  {
+    "namespace": "com.matera.dtw.command.transaction.monitoring",
+    "type": "record",
+    "name": "ReleaseMonitoringCommandFailureResult",
+    "doc": "Represents a rejected result of a monitoring release command.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandFailureResult"},
+      {"name": "target", "type": ["com.matera.dtw.event.account.common.AccountKey","com.matera.dtw.event.account.group.common.AccountGroupKey"], ",doc" : "The account or account-group whose balance is monitored."},
+      {"name": "source", "type": "string", "doc": "Which system that had created the monitoring"},
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the release request"},
+      {"name": "criteria", "type": [ "com.matera.dtw.command.transaction.intent.ByCorrelationIdCriteria", "com.matera.dtw.command.transaction.intent.ByIdCriteria"], ",doc": "Used criteria to look for which intent to release (e.g., byId, byCorrelation."},
+      {"name": "settlement", "type": ["com.matera.dtw.command.transaction.command.TotalSettlementInfo", "com.matera.dtw.command.transaction.command.PartialSettlementInfo"], "doc": "Amount rule information for a release request"},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations"}
+    ]
+  },  {
+    "namespace": "com.matera.dtw.command.transaction.monitoring",
+    "type": "record",
+    "name": "CancelMonitoringCommandSuccessResult",
+    "doc": "Represents the successful result of a monitoring cancel command.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandSuccessResult"},
+      {"name": "target", "type": ["com.matera.dtw.event.account.common.AccountKey","com.matera.dtw.event.account.group.common.AccountGroupKey"], ",doc" : "The account or account-group whose balance is monitored."},
+      {"name": "source", "type": "string", "doc": "Which system had created the monitoring"},
+      {"name": "criteria", "type": [ "com.matera.dtw.command.transaction.intent.ByCorrelationIdCriteria", "com.matera.dtw.command.transaction.intent.ByIdCriteria"], ",doc": "Used criteria to look for which intent to release (e.g., byId, byCorrelation."},
+      {"name": "id", "type":{ "type" : "string","logicalType":"uuid"}, "default": "00000000-0000-0000-0000-000000000000", "doc": "The id of monitoring that should be changed."},
+      {"name": "correlations", "type": {"type": "map", "values": "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "status", "type": "com.matera.dtw.event.monitoring.common.MonitoringStatus", "default": "CANCELLED", "doc": "Whether the created entry is CANCELLED."},
+      {"name": "amount", "type": "com.matera.dtw.event.common.financial.FinancialAmount" , "doc": "The total amount of the cancelled monitoring."},
+      {"name": "releasedAmount", "default": null, "type": ["null", "com.matera.dtw.event.common.financial.FinancialAmount"] , "doc": "The released amount of cancelled monitoring"},
+      {"name": "entries", "type": {"type": "array", "items": ["null", "com.matera.dtw.event.command.intent.commons.MonitoringRelatedEntry"]}, ",default": [], "doc": "All related entries of requested monitoring cancel (UnblockingEntry)"},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations"}
+    ]
+   },  {
+    "namespace": "com.matera.dtw.command.transaction.monitoring",
+    "type": "record",
+    "name": "CancelMonitoringCommandFailureResult",
+    "doc": "Represents a rejected result of a monitoring cancel command.",
+    "fields": [
+      {"name": "baseResult", "type": "com.matera.dtw.command.base.common.BaseCommandFailureResult"},
+      {"name": "target", "type": ["com.matera.dtw.event.account.common.AccountKey","com.matera.dtw.event.account.group.common.AccountGroupKey"], ",doc" : "The account or account-group whose balance is monitored."},
+      {"name": "source", "type": "string", "doc": "Which system that had created the monitoring"},
+      {"name": "criteria", "type": [ "com.matera.dtw.command.transaction.intent.ByCorrelationIdCriteria", "com.matera.dtw.command.transaction.intent.ByIdCriteria"], ",doc": "Used criteria to look for which intent to cancel (e.g., byId, byCorrelation."}
+    ]
+  },  {
+    "namespace": "com.matera.dtw.command.transaction.monitoring",
+    "type": "record",
+    "name": "MonitoringRequestCommand",
+    "doc": "A command to request to a monitoring.",
+    "fields": [
+      {"name": "baseCommand", "type": "com.matera.dtw.command.base.common.BaseCommand"},
+      {"name": "target", "type": ["com.matera.dtw.event.account.common.AccountKey","com.matera.dtw.event.account.group.common.AccountGroupKey"], ",doc" : "The account or account-group which the balance should be monitored."},
+      {"name": "monitoring", "type": ["com.matera.dtw.event.monitoring.common.MonitoringChangeDataRequest","com.matera.dtw.event.monitoring.common.MonitoringCreateDataRequest","com.matera.dtw.event.monitoring.common.MonitoringReleaseDataRequest","com.matera.dtw.event.monitoring.common.MonitoringCancelDataRequest"], "doc": "The monitoring request command data."}
+    ]
+  }
+]

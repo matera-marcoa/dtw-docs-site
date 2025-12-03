@@ -1,0 +1,57 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.conciliation.balance",
+    "type": "record",
+    "name": "BalanceSnapshotEvent",
+    "doc": "Represents a balance snapshot event on a given account. If a particular balance is not found within this event. One may assume its value to be zero",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "balances", "type" : {"type": "map", "values" : "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "The values of the balances of an account at a point of time."},
+      {"name": "asOfDate", "type": ["null",{"type": "int", "logicalType": "date"}], "default": null, "doc": "Represents which date this balance snapshot is related to. If not present, represents the most up-to-date position"},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "correlations", "type": {"type": "map", "values": "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "lastEntryId", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc": "The id of the last created entry that composed this snapshot balances value"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.conciliation.enrichment",
+    "type": "record",
+    "name": "EnrichmentEvent",
+    "doc": "Create an enrichment event related to a previous event",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "correlations", "type" : {"type": "map", "values" : "string"}, "doc": "Correlation map to unique identify the events in correspondent systems.  Ex. DTW=12321564, MP=124888"},
+      {"name": "balanceChanges", "type" : {"type": "map", "values" : "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Which balances were changed. May be empty if no such information is available."},
+      {"name": "asOfDate", "type": ["null",{"type": "int", "logicalType": "date"}], "default": null, "doc": "Date when the entry happened."},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.conciliation.balance",
+    "type": "record",
+    "name": "BalanceConciliationSuccessEvent",
+    "doc": "Represents an event on which the balances were successfully conciliated",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc": "The account associated with current balances"},
+      {"name": "asOfDate", "type": ["null",{"type": "int", "logicalType": "date"}], "default": null, "doc": "Represents which date this balance snapshot is related to. If not present, represents the most up-to-date position"},
+      {"name": "snapshots", "type": {"type": "array", "items": ["com.matera.dtw.event.conciliation.balance.BalanceSnapshotEvent"]}, "default":[], "doc": "Represents the balance snapshots used by this conciliation"},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.conciliation.balance",
+    "type": "record",
+    "name": "BalanceConciliationFailureEvent",
+    "doc": "Represents an event on which the balances were *not* successfully conciliated",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc": "The account associated with current balances"},
+      {"name": "asOfDate", "type": ["null",{"type": "int", "logicalType": "date"}], "default": null, "doc": "Represents which date this balance snapshot is related to. If not present, represents the most up-to-date position"},
+      {"name": "snapshots", "type": {"type": "array", "items": ["com.matera.dtw.event.conciliation.balance.BalanceSnapshotEvent"]}, "default":[], "doc": "Represents the balance snapshots used by this conciliation"},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "failureInfo", "type": "com.matera.dtw.command.base.common.FailureInfo", "doc": "Give some information on what went wrong with the given balance conciliation"}
+    ]
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "name": "AccountTypeChangeEvent",
+    "type": "record",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "accountType", "type": "com.matera.dtw.event.configuration.AccountTypeKey", "doc": "The unique identifier to account type record"},
+      {"name": "description", "type": "string", "doc": "A String to represents a more detailed description to an account Type. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "categoryType", "type": "string", "doc": "A String to represents category to an account type"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "name": "AccountTypeDeleteEvent",
+    "type": "record",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "accountType", "type": "com.matera.dtw.event.configuration.AccountTypeKey", "doc": "The unique identifier to account type record"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "name": "AccountTypeFeatureChangeEvent",
+    "type": "record",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "accountType", "type": "com.matera.dtw.event.configuration.AccountTypeKey", "doc": "The unique identifier to account type record"},
+      {"name": "feature", "type" : "com.matera.dtw.event.common.feature.FeatureEntry", "doc": "feature to be changed. For example SPI_CATEGORY"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.configuration",
+    "name": "AccountTypeFeatureDeleteEvent",
+    "type": "record",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "accountType", "type": "com.matera.dtw.event.configuration.AccountTypeKey", "doc": "The unique identifier to account type record"},
+      {"name": "featureName", "type" : "string", "doc": "feature name to be deleted"}
+    ]
+  }
+]

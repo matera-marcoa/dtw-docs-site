@@ -1,0 +1,24 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.account.feature",
+    "type": "record",
+    "name": "AccountFeatureChangeEvent",
+    "doc": "",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "feature", "type" : "com.matera.dtw.event.common.feature.FeatureEntry", "doc": "feature to be changed. For example BLOCKED_FOR_CREDIT"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.account.feature",
+    "type": "record",
+    "name": "AccountFeatureDeleteEvent",
+    "doc": "",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "featureName", "type" : "string", "doc": "feature name to be deleted"}
+    ]
+  }
+]

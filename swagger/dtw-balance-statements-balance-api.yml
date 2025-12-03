@@ -1,0 +1,928 @@
+openapi: 3.0.3
+info:
+  version: @project.version@
+  title: Digital Twin Balance Services API
+  description: This endpoint retrieves information regarding balances from an account or group of accounts.
+servers:
+  - url: http://localhost:8181/v1
+paths:
+  /balances:
+    get:
+      tags:
+        - Balances
+      operationId: queryBalancesBatch
+      summary: List balances for a group of accounts
+      description: >
+        > **Important:** This operation requires a logged user with the *view-balances* role
+      parameters:
+        - in: query
+          name: accountKeys
+          description: |
+            A list of account keys, each one composed by BranchNumber and AccountNumber separated by a slash (/).
+            Use commas to separate multiple account keys. Account keys list shouldn't be empty, at least one account key should be provided.
+            Attention: When an account key is invalid, an error message will be returned.
+             Also, when one or more account keys in the list are not found, the response will be returned containing only those found.
+          required: true
+          style: form
+          explode: false
+          example: 1234/12345,1234/678901
+          schema:
+            type: array
+            items:
+              type: string
+              pattern: '^\d+\/\d+$' # Validate the pattern for branch/account (e.g., 1/100)
+        - in: query
+          name: initialDate
+          description: |
+            The initial date by which balances should be returned. Format: YYYY-MM-DD.
+            If the objective is to obtain the current account balance, do not inform the initialDate and finalDate parameters.
+            However, if a specific initial date is provided, the finalDate must also be specified to establish the date range.
+          required: false
+          schema:
+            $ref: '#/components/schemas/date'
+        - in: query
+          name: finalDate
+          description: |
+            The final date by which balances should be returned. Format: YYYY-MM-DD. 
+            This parameter is mandatory when using the initialDate field to define a date range for balance retrieval.
+            If the objective is to obtain the current account balance, do not inform the initialDate and finalDate parameters.
+          required: false
+          schema:
+            $ref: '#/components/schemas/date'
+        - in: query
+          name: balanceTypes
+          description: 'The balances that the request should return, separated by commas (e.g. AVAILABLE, BLOCKED, HELD, BOOK). All balance types will be returned by default.'
+          required: false
+          schema:
+            $ref: '#/components/schemas/balances'
+          style: form
+          explode: false
+        - in: query
+          name: currency
+          description: 'The currency code as in ISO 4217 standard (e.g. USD for United State Dollar). If not specified, it defaults to the currency configured in the system.'
+          required: false
+          schema:
+            $ref: '#/components/schemas/currencyISO4217'
+        - in: query
+          name: page
+          description: Number of the current page as required (min 0).
+          required: false
+          schema:
+            $ref: "#/components/schemas/page"
+        - in: query
+          name: size
+          description: The maximum number of items to return per page, specified from 1 to 100.
+          required: false
+          schema:
+            $ref: "#/components/schemas/size"
+      responses:
+        200:
+          $ref: '#/components/responses/balancesBatchResponse'
+        400:
+          $ref: '#/components/responses/badRequest'
+        404:
+          $ref: '#/components/responses/notFound'
+        500:
+          $ref: '#/components/responses/unexpectedError'
+  /accounts/{branch}/{account}/balances:
+    get:
+      tags:
+        - Balances
+      summary: Get balances list grouped by date for an account
+      operationId: queryBalances
+      description: >
+        > **Important:** This operation requires a logged user with the *view-account-balances* role
+      parameters:
+        - in: path
+          name: branch
+          description: 'The branch number.'
+          schema:
+            $ref: '#/components/schemas/branch'
+          required: true
+        - in: path
+          name: account
+          description: 'Current account number.'
+          schema:
+            $ref: '#/components/schemas/account'
+          required: true
+        - in: query
+          name: initialDate
+          description: 'Indicates the start reference date that balances should be returned. Format: YYYY-MM-DD.'
+          required: true
+          schema:
+            $ref: '#/components/schemas/date'
+        - in: query
+          name: finalDate
+          description: 'Indicates the final reference date that balances should be returned. Format: YYYY-MM-DD.'
+          required: true
+          schema:
+            $ref: '#/components/schemas/date'
+        - in: query
+          name: balanceTypes
+          description: 'Types of balances, separated by comma, desired on return (Ex: AVAILABLE,BLOCKED,HELD,BOOK)'
+          required: true
+          schema:
+            $ref: '#/components/schemas/balances'
+          style: form
+          explode: false
+        - in: query
+          name: currency
+          description: 'Inform the currency in the ISO 4217 standard (Ex: USD to US$)'
+          required: true
+          schema:
+            $ref: '#/components/schemas/currencyISO4217'
+        - in: query
+          name: page
+          description: Number of the current page as required (min 0).
+          required: false
+          schema:
+            $ref: "#/components/schemas/page"
+        - in: query
+          name: size
+          description: Size of the pages as required (min 1 max 100).
+          required: false
+          schema:
+            $ref: "#/components/schemas/size"
+      responses:
+        200:
+          $ref: '#/components/responses/balancesResponse'
+        400:
+          $ref: '#/components/responses/badRequest'
+        404:
+          $ref: '#/components/responses/notFound'
+        500:
+          $ref: '#/components/responses/unexpectedError'
+  /accounts/{branch}/{account}/limits:
+    get:
+      tags:
+        - Limits
+      summary: List saved limits for an account.
+      operationId: queryLimits
+      description: >
+        > **Important:** This operation requires a logged user with the *view-account-limits* role
+      parameters:
+        - in: path
+          name: branch
+          description: 'The branch number.'
+          schema:
+            $ref: '#/components/schemas/branch'
+          required: true
+        - in: path
+          name: account
+          description: 'Current account number.'
+          schema:
+            $ref: '#/components/schemas/account'
+          required: true
+        - in: query
+          name: limitType
+          description: 'Limit type searched'
+          required: true
+          schema:
+            $ref: "#/components/schemas/limitType"
+        - in: query
+          name: initialDueDate
+          description: 'Indicates the initial due reference date that limits should be returned. Format: YYYY-MM-DD.'
+          required: false
+          schema:
+            $ref: '#/components/schemas/date'
+        - in: query
+          name: finalDueDate
+          description: 'Indicates the final due reference date that limits should be returned. Format: YYYY-MM-DD.'
+          required: false
+          schema:
+            $ref: '#/components/schemas/date'
+        - in: query
+          name: page
+          description: Number of the current page as required (min 0).
+          required: false
+          schema:
+            $ref: "#/components/schemas/page"
+        - in: query
+          name: size
+          description: Size of the pages as required (min 1 max 100).
+          required: false
+          schema:
+            $ref: "#/components/schemas/size"
+      responses:
+        200:
+          $ref: '#/components/responses/limitsResponse'
+        400:
+          $ref: '#/components/responses/badRequest'
+        404:
+          $ref: '#/components/responses/notFound'
+        500:
+          $ref: '#/components/responses/unexpectedError'
+  /cubes/balances:
+    get:
+      tags:
+        - Cubes Generic Query
+      summary: 'Endpoint that provides OLAP cubes for querying balances by MDX'
+      description: >
+        Get balances per query by providing a Multidimensional Expression (MDX)
+        
+        > **Important:** This operation requires a logged user with the *view-balance-cube* role
+      operationId: findBalancesByGenericMDX
+      parameters:
+        - in: query
+          name: mdxQuery
+          description: 'The API takes an MDX and returns a balance data by query'
+          schema:
+            $ref: '#/components/schemas/mdxQuery'
+          required: true
+      responses:
+        200:
+          $ref: '#/components/responses/cubeResponse'
+        400:
+          $ref: '#/components/responses/querySyntaxInvalidRequest'
+        500:
+          $ref: '#/components/responses/unexpectedError'
+        504:
+          $ref: '#/components/responses/gatewayTimeout'
+components:
+  responses:
+    balancesBatchResponse:
+      description: |
+        Successful request. Returns a list with the requested balances.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/balancesBatchResponse'
+          examples:
+            balancesResponse:
+              $ref: '#/components/examples/balancesBatchResponse'
+    balancesResponse:
+      description: |
+        Checking account balances
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/balancesResponse'
+          examples:
+            balancesResponse:
+              $ref: '#/components/examples/balancesResponse'
+      headers:
+        'X-Total-Elements':
+          $ref: '#/components/headers/xTotalElements'
+        'X-Total-Pages':
+          $ref: '#/components/headers/xTotalPages'
+        'X-Has-Next':
+          $ref: '#/components/headers/xHasNext'
+    limitsResponse:
+      description: |
+        Successful request. It returns a list with the requested limits.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/limitsResponse'
+          examples:
+            limitsResponse:
+              $ref: '#/components/examples/limitsResponse'
+      headers:
+        'X-Total-Elements':
+          $ref: '#/components/headers/xTotalElements'
+        'X-Total-Pages':
+          $ref: '#/components/headers/xTotalPages'
+        'X-Has-Next':
+          $ref: '#/components/headers/xHasNext'
+    cubeResponse:
+      description: 'Successful request. It returns an array of balance data by multidimensional expression (MDX).'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/cubeResponse'
+          examples:
+            genericCubeResponse:
+              $ref: '#/components/examples/genericCubeResponse'
+            cubeResponse:
+              $ref: '#/components/examples/cubeResponse'
+    badRequest:
+      description: The request failed because there is one or more invalid parameters.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            badRequest:
+              $ref: '#/components/examples/badRequest'
+            invalidAccountKey:
+              $ref: '#/components/examples/invalidAccountKey'
+            accountNotFound:
+              $ref: '#/components/examples/accountNotFound'
+    notFound:
+      description: 'The requested resource was not found.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            notFound:
+              $ref: '#/components/examples/notFound'
+    unexpectedError:
+      description: 'The request failed due to an unexpected error. For example, the database connection may have timed out. The error-context field allows to find more information about the error in the application logs.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            unexpectedError:
+              $ref: '#/components/examples/unexpectedError'
+    unauthorized:
+      description: Authentication Failed
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            unauthorized:
+              $ref: '#/components/examples/unauthorized'
+    forbidden:
+      description: Permission denied
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            unauthorized:
+              $ref: '#/components/examples/forbidden'
+    gatewayTimeout:
+      description: 'The request failed due to a gateway timeout error (system installation parameter).'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            gatewayTimeout:
+              $ref: '#/components/examples/gatewayTimeout'
+    querySyntaxInvalidRequest:
+      description: 'The request failed because the query syntax is invalid.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            badRequest:
+              $ref: '#/components/examples/querySyntaxError'
+  headers:
+    xHasNext:
+      schema:
+        type: boolean
+      description: A 'true' value means there's a next page with items to query forward.
+    xTotalElements:
+      schema:
+        type: integer
+        format: int64
+      description: The total number of items based on the applied query filters.
+    xTotalPages:
+      schema:
+        type: integer
+        format: int32
+      description: The total number of pages based on the applied query filters and page size.
+  schemas:
+    cubeResponse:
+      type: object
+      description: 'Cube schema'
+      properties:
+        rows:
+          type: integer
+          format: int32
+          description: 'The number of rows the MDX query result data contains.'
+        result:
+          type: object
+          description: 'The result of que query.'
+    branch:
+      type: integer
+      minimum: 0
+      example: 4919
+      properties:
+        branch:
+          description: The branch number.
+          type: integer
+    account:
+      type: integer
+      format: int64
+      minimum: 0
+      example: 223166
+      properties:
+        account:
+          description: The account number.
+          type: integer
+          format: int64
+    date:
+      type: string
+      format: date
+      properties:
+        date:
+          description: The date of the resquested balances.
+          type: string
+          format: date
+    balances:
+      description: The requested balances based on the applied query filters.
+      type: array
+      items:
+        type: string
+      example: 'AVAILABLE,BLOCKED,HELD,BOOK'
+    currencyISO4217:
+      type: string
+      description: 'The currency code as in ISO 4217 standard (e.g. USD for United State Dollar).'
+      example: 'USD'
+      enum: [
+        AED,
+        AFN,
+        ALL,
+        AMD,
+        ANG,
+        AOA,
+        ARS,
+        AUD,
+        AWG,
+        AZN,
+        BAM,
+        BBD,
+        BDT,
+        BGN,
+        BHD,
+        BIF,
+        BMD,
+        BND,
+        BOB,
+        BOV,
+        BRL,
+        BSD,
+        BTN,
+        BWP,
+        BYR,
+        BZD,
+        CAD,
+        CDF,
+        CHE,
+        CHF,
+        CHW,
+        CLF,
+        CLP,
+        CNY,
+        COP,
+        COU,
+        CRC,
+        CUC,
+        CUP,
+        CVE,
+        CZK,
+        DJF,
+        DKK,
+        DOP,
+        DZD,
+        ECS,
+        EGP,
+        ERN,
+        ETB,
+        EUR,
+        FJD,
+        FKP,
+        GBP,
+        GEL,
+        GHS,
+        GIP,
+        GMD,
+        GNF,
+        GTQ,
+        GYD,
+        HKD,
+        HNL,
+        HRK,
+        HTG,
+        HUF,
+        IDR,
+        ILS,
+        INR,
+        IQD,
+        IRR,
+        ISK,
+        JMD,
+        JOD,
+        JPY,
+        KES,
+        KGS,
+        KHR,
+        KMF,
+        KPW,
+        KRW,
+        KWD,
+        KYD,
+        KZT,
+        LAK,
+        LBP,
+        LKR,
+        LRD,
+        LSL,
+        LTL,
+        LVL,
+        LYD,
+        MAD,
+        MDL,
+        MGA,
+        MKD,
+        MMK,
+        MNT,
+        MOP,
+        MRO,
+        MUR,
+        MVR,
+        MWK,
+        MXN,
+        MXV,
+        MYR,
+        MZN,
+        NAD,
+        NGN,
+        NIO,
+        NOK,
+        NPR,
+        NZD,
+        OMR,
+        PAB,
+        PEN,
+        PGK,
+        PHP,
+        PKR,
+        PLN,
+        PYG,
+        QAR,
+        RON,
+        RSD,
+        RUB,
+        RWF,
+        SAR,
+        SBD,
+        SCR,
+        SDG,
+        SEK,
+        SGD,
+        SHP,
+        SLL,
+        SOS,
+        SRD,
+        STD,
+        SVC,
+        SYP,
+        SZL,
+        THB,
+        TJS,
+        TMT,
+        TND,
+        TOP,
+        TRY,
+        TTD,
+        TWD,
+        TZS,
+        UAH,
+        UGX,
+        USD,
+        USN,
+        USS,
+        UYI,
+        UYU,
+        UZS,
+        VEF,
+        VND,
+        VUV,
+        WST,
+        XAF,
+        XAG,
+        XAU,
+        XBA,
+        XBB,
+        XBC,
+        XBD,
+        XCD,
+        XDR,
+        XFU,
+        XOF,
+        XPD,
+        XPF,
+        XPT,
+        XTS,
+        XXX,
+        YER,
+        ZAR,
+        ZMW,
+        ZWL
+      ]
+    balance:
+      description: Query Balance
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          description: The date of the displayed result.
+        balances:
+          type: object
+          description: The requested balances based on the applied query filters.
+          additionalProperties:
+            $ref: '#/components/schemas/amount'
+          example: { "AVAILABLE": { "value": "12", "currency": "USD" } }
+    balanceBatch:
+      properties:
+        branch:
+          $ref: '#/components/schemas/branch'
+        account:
+          $ref: '#/components/schemas/account'
+        balances:
+          type: array
+          items:
+            $ref: '#/components/schemas/balance'
+    limit:
+      description: Query Limit
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/currencyISO4217'
+        min:
+          type: integer
+          format: int64
+          example: 100
+          description: The minimum allowable value for the account limit.
+          minimum: 0
+        max:
+          type: integer
+          format: int64
+          example: 100000
+          description: The maximum allowable value for the account limit.
+          minimum: 0
+        startAt:
+          type: string
+          format: date
+          description: The initial date when the limit starts or becomes active.
+        dueAt:
+          type: string
+          format: date
+          description: The concluding date when the limit ends or becomes inactive.
+    amount:
+      type: object
+      description: 'The actual amount.'
+      properties:
+        value:
+          type: integer
+          format: int64
+          example: 100000
+          description: The actual value
+          minimum: 1
+        currency:
+          $ref: '#/components/schemas/currencyISO4217'
+      required:
+        - value
+        - currency
+    mdxQuery:
+      description: 'MDX Query'
+      type: string
+      example: 'WITH SET [~ROWS] AS {[BALANCE TYPE].[Available Balance]} SELECT NON EMPTY {[Measures].[AMOUNT]} ON COLUMNS, NON EMPTY [~ROWS] ON ROWS FROM [DTW_BST_BALANCE] WHERE {[ENTRY DATE].[20220107]:[ENTRY DATE].[20220107]}'
+    balancesResponse:
+      properties:
+        balances:
+          type: array
+          items:
+            $ref: '#/components/schemas/balance'
+    balancesBatchResponse:
+      properties:
+        balances:
+          type: array
+          items:
+            $ref: '#/components/schemas/balanceBatch'
+    limitsResponse:
+      properties:
+        limits:
+          type: array
+          items:
+            $ref: '#/components/schemas/limit'
+    page:
+      description: Number of the current page as required (min 0).
+      type: integer
+      format: int32
+      minimum: 0
+      default: 0
+    size:
+      description: The maximum number of items to return per page.
+      type: integer
+      format: int32
+      minimum: 1
+      maximum: 100
+      default: 20
+    limitType:
+      description: Limit type.
+      type: string
+      example: 'OVERDRAFT'
+    ProblemResponse:
+      type: object
+      description: Response Based on [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807)
+      required:
+        - status
+        - title
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A Uniform Resource Identifier (URI) that identifies the problem type. When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          default: 'about:blank'
+          example: 'https://zalando.github.io/problem/constraint-violation'
+  examples:
+    balancesResponse:
+      value:
+        balances:
+          - date: 2022-07-06
+            balances:
+              AVAILABLE:
+                value: 3000
+                currency: USD
+              HELD:
+                value: 2000
+                currency: USD
+              BLOCKED:
+                value: 500
+                currency: USD
+              BOOK:
+                value: 200
+                currency: USD
+          - date: 2022-07-07
+            balances:
+              AVAILABLE:
+                value: 3001
+                currency: USD
+              HELD:
+                value: 2001
+                currency: USD
+              BLOCKED:
+                value: 501
+                currency: USD
+              BOOK:
+                value: 201
+                currency: USD
+      summary: 'Balances Response'
+    balancesBatchResponse:
+      value:
+        {
+          "balances" : [
+            {
+              "branch": 1,
+              "account": 100,
+              "balances": [
+                {
+                  "date": "2024-01-01",
+                  "balances": {
+                    "AVAILABLE": {
+                      "value": 1000,
+                      "currency": "USD"
+                    },
+                    "HELD": {
+                      "value": 0,
+                      "currency": "USD"
+                    }
+                  }
+                },
+                {
+                  "date": "2024-01-02",
+                  "balances": {
+                    "AVAILABLE": {
+                      "value": 1000,
+                      "currency": "USD"
+                    },
+                    "HELD": {
+                      "value": 100,
+                      "currency": "USD"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "branch": 1,
+              "account": 200,
+              "balances": [
+                {
+                  "date": "2024-01-01",
+                  "balances": {
+                    "AVAILABLE": {
+                      "value": 2000,
+                      "currency": "USD"
+                    },
+                    "HELD": {
+                      "value": 0,
+                      "currency": "USD"
+                    }
+                  }
+                },
+                {
+                  "date": "2024-01-02",
+                  "balances": {
+                    "AVAILABLE": {
+                      "value": 3000,
+                      "currency": "USD"
+                    },
+                    "HELD": {
+                      "value": 1000,
+                      "currency": "USD"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+    genericCubeResponse:
+      value: {
+        "rows": number,
+        "result": [
+          {
+            "key": value
+          }
+        ]
+      }
+      summary: 'Generic Cube Response'
+    limitsResponse:
+      value:
+        limits:
+          - currency: USD
+            min: 100
+            max: 100000
+            startAt: 2023-07-01
+          - currency: USD
+            min: 0
+            max: 10000
+            startAt: 2023-01-01
+            dueAt: 2023-06-30
+    cubeResponse:
+      value: {
+        "rows": 1,
+        "result": [
+          {
+            "AMOUNT": -200.0
+          }
+        ]
+      }
+      summary: 'Cube Example Response'
+    badRequest:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Bad Request
+        status: 400
+        detail: Invalid attribute
+      summary: Bad Request response
+    notFound:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Not Found
+        status: 404
+        detail: Resource not found
+      summary: Bad Request response
+    unexpectedError:
+      value:
+        type: http://dtw.matera.com/problem/internal-server-error
+        title: Internal Server Error
+        status: 500
+        detail: An unexpected/unrecoverable error has occurred
+        error-context: 1ced9bfc-8fef-4c4c-98ae-37bb8c81ab91
+      summary: Internal Server Error
+    unauthorized:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Unauthorized
+        status: 401
+        detail: Error code response for missing or invalid authentication token.
+      summary: Error code response for missing or invalid authentication token.
+    forbidden:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Forbidden
+        status: 403
+        detail: forbidden
+      summary: The request was a legal request, but the server is refusing to respond to it. Unlike a 401 Unauthorized response, authenticating will make no difference.
+    gatewayTimeout:
+      value:
+        title: Gateway Timeout Error
+        status: 504
+        detail: Gateway Timeout Error
+      summary: Gateway Timeout Error
+    querySyntaxError:
+      value:
+        type: https://zalando.github.io/problem/query-syntax-violation
+        title: 'Query syntax is invalid'
+        status: 400
+        detail: Invalid syntax
+      summary: 'Query syntax invalid response'
+    invalidAccountKey:
+      value:
+        type: http://dtw.matera.com/balance-statement/invalid-account-key
+        title: Invalid Account Key
+        status: 400
+        detail: The account key 1-1 is invalid
+      summary: Invalid Account Key response
+    accountNotFound:
+      value:
+        type: https://dtw.matera.com/balance-statement/account-not-found
+        title: Account Not Found
+        status: 404
+        detail: The account 213/213123 was not found
+        account: { number: "213123", branch: "213" }
+      summary: Account Not Found response

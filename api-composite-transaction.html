@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Composite Transaction API - DTW Documentation</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="stylesheet" href="assets/styles.css">
+    <style>
+        .api-detail {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+        .endpoint-block {
+            background: white;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+        .method {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 12px;
+            margin-right: 12px;
+        }
+        .method-get { background: #00D4AA; color: white; }
+        .method-post { background: #4F46E5; color: white; }
+        .method-put { background: #F59E0B; color: white; }
+        .method-delete { background: #EF4444; color: white; }
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+        .param-table th, .param-table td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #E0E0E0;
+        }
+        .param-table th {
+            background: #F8F9FA;
+            font-weight: 600;
+        }
+        .required { color: #EF4444; font-weight: 600; }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 24px;
+            color: #00D4AA;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="40" height="40" rx="8" fill="#00D4AA"/>
+                        <path d="M12 14h6c3.31 0 6 2.69 6 6s-2.69 6-6 6h-6V14zm6 10c2.21 0 4-1.79 4-4s-1.79-4-4-4h-3v8h3z" fill="white"/>
+                        <path d="M26 14h2v12h-2V14z" fill="white"/>
+                    </svg>
+                    <span class="logo-text">DTW Documentation</span>
+                </div>
+                <nav class="main-nav">
+                    <a href="index.html#home" class="nav-link">Home</a>
+                    <a href="index.html#apis" class="nav-link active">API Reference</a>
+                    <a href="index.html#events" class="nav-link">Events & Commands</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="api-detail">
+        <a href="index.html#apis" class="back-link">← Back to APIs</a>
+        <h1>Digital Twin Composite Transaction API</h1>
+        <p style="color: #666; font-size: 18px; margin: 16px 0 40px;">These endpoints deal with multiple operations like credit and debit to different accounts within the same transaction. They also deal with steps related with monitoring these transactions.</p>
+        
+        <div class="endpoint-block">
+            <h3>Base URL</h3>
+            <code>http://localhost:8080/v1</code>
+        </div>
+
+        <div class="endpoint-block">
+            <h2>
+                <span class="method method-post">POST</span>
+                /transaction-bundles
+            </h2>
+            <p style="color: #666; margin: 16px 0;">Add transactions into different accounts in a bundle operation</p>
+            <div style="background: #F8F9FA; padding: 16px; border-radius: 4px; margin: 16px 0;">
+                A bundle represents the consolidation of both credits and debits occurring across various accounts, culminating in a single transaction. This request requires a logged user with the *transact* role on both dtw-composite-transaction and dtw-transaction modules.
+
+            </div>
+        </div>
+
+        <div class="endpoint-block">
+            <h2>
+                <span class="method method-delete">DELETE</span>
+                /transaction-bundles/{bundle}
+            </h2>
+            <p style="color: #666; margin: 16px 0;">Delete transactions from different accounts in a bundle operation</p>
+            <div style="background: #F8F9FA; padding: 16px; border-radius: 4px; margin: 16px 0;">
+                This request requires a logged user with the *transact* role on both dtw-composite-transaction and dtw-transaction modules.
+            </div>
+
+            <h3 style="margin-top: 24px;">Parameters</h3>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>In</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td><strong>bundle</strong></td>
+                        <td><code>N/A</code></td>
+                        <td>path</td>
+                        <td><span class="required">Yes</span></td>
+                        <td>The unique identifier of the bundle operation.</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="endpoint-block">
+            <h2>
+                <span class="method method-post">POST</span>
+                /accounts/{branch}/{account}/monitorings/{monitoringId}/release
+            </h2>
+            <p style="color: #666; margin: 16px 0;">Release a monitored sum into an account</p>
+            <div style="background: #F8F9FA; padding: 16px; border-radius: 4px; margin: 16px 0;">
+                It's possible to debit a sum in the same request by filling in the field "blueprints." This request requires a logged user with the *release-monitorings*, *view-monitorings*, and *modify-monitorings* on dtw-transaction and the role *release-monitorings* on dtw-composite-transaction.
+
+            </div>
+
+            <h3 style="margin-top: 24px;">Parameters</h3>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>In</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td><strong>if-match</strong></td>
+                        <td><code>N/A</code></td>
+                        <td>header</td>
+                        <td><span class="required">Yes</span></td>
+                        <td>The last registered version for the monitoring service.</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="endpoint-block">
+            <h2>
+                <span class="method method-post">POST</span>
+                /account-groups/{kind}/{membershipId}/monitorings/{monitoringId}/release
+            </h2>
+            <p style="color: #666; margin: 16px 0;">Release a monitored sum into a group of accounts</p>
+            <div style="background: #F8F9FA; padding: 16px; border-radius: 4px; margin: 16px 0;">
+                It's possible to debit a sum in the same request by filling in the field "blueprints." This request requires a logged user with the *release-monitorings*, *view-monitorings*, and *modify-monitorings* on dtw-transaction and the role *release-monitorings* on dtw-composite-transaction.
+
+            </div>
+
+            <h3 style="margin-top: 24px;">Parameters</h3>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>In</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td><strong>if-match</strong></td>
+                        <td><code>N/A</code></td>
+                        <td>header</td>
+                        <td><span class="required">Yes</span></td>
+                        <td>The last registered version for the monitoring service.</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Digital Twin Platform</h4>
+                    <p>Enterprise-grade financial platform documentation</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Digital Twin Platform. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

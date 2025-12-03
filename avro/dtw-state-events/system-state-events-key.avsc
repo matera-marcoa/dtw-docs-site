@@ -1,0 +1,11 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.state",
+    "name": "SystemStateKey",
+    "type": "record",
+    "fields": [
+      {"name": "systemId", "type": "string", "doc": "The unique identifier to source system record"}
+    ]
+  }
+]
+

@@ -1,0 +1,1320 @@
+openapi: 3.0.3
+info:
+  version: @project.version@
+  title: Digital Twin Statement Services API
+  description: These endpoints retrieve transactions, to statement generation.
+servers:
+  - url: http://localhost:8182
+
+paths:
+  /v1/entries:
+    get:
+      deprecated: true
+      tags:
+        - Entries
+      summary: Get statements
+      description: >
+        List transactions from an account to get a statement and consolidate values.
+        
+        > **Important:** This operation requires a logged user with the *view-entries* role
+      operationId: entries
+      parameters:
+        - in: query
+          name: branch
+          description: |
+            The account branch.
+            Required if account are informed. If informed without an account, the branch will not be considered in the query.
+          schema:
+            $ref: '#/components/schemas/branch'
+        - in: query
+          name: account
+          description: |
+            The account number.
+            Required if branch are provided. If informed without an branch, the account will not be considered in the query.
+          schema:
+            $ref: '#/components/schemas/account'
+        - in: query
+          name: historyCode
+          description: |
+            A code that categorizes the transaction type as credit or debit.
+            If provided, the `operationType` parameter will be ignored because the `historyCode` already includes an `operationType`.
+            This `historyCode` field is mutually inclusive of the `historyCodes` field.
+
+            **DEPRECATED**: Deprecated in favor of using the `historyCodes` field.
+            Marked to be removed in a future version.
+          schema:
+            $ref: '#/components/schemas/historyCode'
+          deprecated: true
+        - in: query
+          name: historyCodes
+          description: |
+            A code list that categorizes the transaction types as credit or debit.
+            If provided, the `operationType` parameter will be ignored because the `historyCode` already includes an `operationType`.
+            
+            **WARNING**: The maximum number of history codes that can be provided is 1000. There may be a limitation when informed too many values as `historyCodes` parameter.
+            
+            **SINCE**: 1.1.0
+          schema:
+            $ref: '#/components/schemas/historyCodes'
+        - in: query
+          name: initialDate
+          description: 'The initial date by which transactions should be returned. Format: yyyy-mm-ddTHH:mm:ssZ. (ISO 8601)'
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          required: true
+        - in: query
+          name: finalDate
+          description: 'The final date by which transactions should be returned. Format: yyyy-mm-ddTHH:mm:ssZ. (ISO 8601)'
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          required: true
+        - in: query
+          name: dateType
+          description: |
+            If set to "ENTRY," the date filter focuses on the transaction reference date — the day the transaction impacted the balance. If set to "EVENT," the filter targets the date and time when the transaction was recorded in the system.
+          schema:
+            $ref: '#/components/schemas/dateType'
+          required: true
+        - in: query
+          name: operationType
+          description: |
+            The transaction type: "D" for debits or "C" for credits. If not provided, it will return both.
+            If the `historyCode` or `historyCodes` parameters are provided, the `operationType` will be ignored because the `historyCode` already includes an `operationType`.
+          schema:
+            $ref: '#/components/schemas/operationType'
+        - in: query
+          name: currency
+          description: 'The currency code as in ISO 4217 standard (e.g. USD for United States Dollar).'
+          schema:
+            $ref: '#/components/schemas/currencyISO4217'
+          required: true
+        - in: query
+          name: fields
+          description: |
+            The type of data to return:
+            * ENTRIES: Returns only the list of transactions.
+            * BALANCE_SUMMARY: Returns the synthetic sum. 
+            If none of the options is provided, the synthetic sum will be returned with transactions.
+          schema:
+            $ref: '#/components/schemas/fields'
+        - in: query
+          name: featureName
+          description: The indexed identifier within the transaction metadata that serves as a reference point for filtering transactions based on a specific grouping.
+            Required if featureValue are provided.
+          required: false
+          schema:
+            $ref: "#/components/schemas/featureName"
+        - in: query
+          name: featureValue
+          description: The specific value corresponding to the indexed featureName within transaction metadata.
+            Required if featureName are provided.
+          required: false
+          schema:
+            $ref: "#/components/schemas/featureValue"
+        - in: query
+          name: page
+          description: Number of the current page as required (min 0).
+          required: false
+          schema:
+            $ref: "#/components/schemas/page"
+        - in: query
+          name: size
+          description: The maximum number of items to return per page (min 1 max 100).
+          required: false
+          schema:
+            $ref: "#/components/schemas/size"
+        - in: header
+          name: X-Count-Omit
+          description: 'Controls the inclusion of pagination headers in the response.
+                       When `X-Count-Omit` is set to `true`, no pagination headers (such as `X-Total-Elements`, `X-Total-Pages`, `X-Has-Next`) are returned.
+                       When set to `false` or not set, pagination information headers are included in the response.'
+          schema:
+            type: boolean
+            default: false
+          required: false
+
+      responses:
+        200:
+          $ref: '#/components/responses/entriesResponse'
+        400:
+          $ref: '#/components/responses/badRequest'
+        404:
+          $ref: '#/components/responses/notFound'
+        500:
+          $ref: '#/components/responses/unexpectedError'
+        504:
+          $ref: '#/components/responses/gatewayTimeout'
+
+  /v2/entries:
+    get:
+      tags:
+        - Entries V2
+      summary: Get statements with segregated summaries
+      description: List transactions from an account to get a statement and consolidate values.
+      operationId: entriesV2
+      security:
+        - oauth2:
+            - view-entries
+      parameters:
+        - in: query
+          name: branch
+          description: |
+            The account branch.
+            Required if account are informed. If informed without an account, the branch will not be considered in the query.
+          schema:
+            $ref: '#/components/schemas/branch'
+        - in: query
+          name: account
+          description: |
+            The account number.
+            Required if branch are provided. If informed without an branch, the account will not be considered in the query.
+          schema:
+            $ref: '#/components/schemas/account'
+        - in: query
+          name: historyCodes
+          description: |
+            A code list that categorizes the transaction types as credit or debit.
+            If provided, the `operationType` parameter will be ignored because the `historyCode` already includes an `operationType`.
+
+            **WARNING**: The maximum number of history codes that can be provided is 1000. There may be a limitation when informed too many values as `historyCodes` parameter.
+
+            **SINCE**: 1.1.0
+          schema:
+            $ref: '#/components/schemas/historyCodes'
+        - in: query
+          name: initialDate
+          description: 'The initial date by which transactions should be returned. Format: yyyy-mm-ddTHH:mm:ssZ. (ISO 8601)'
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          required: true
+        - in: query
+          name: finalDate
+          description: 'The final date by which transactions should be returned. Format: yyyy-mm-ddTHH:mm:ssZ. (ISO 8601)'
+          schema:
+            $ref: '#/components/schemas/dateTime'
+          required: true
+        - in: query
+          name: dateType
+          description: |
+            If set to "ENTRY," the date filter focuses on the transaction reference date — the day the transaction impacted the balance. If set to "EVENT," the filter targets the date and time when the transaction was recorded in the system.
+          schema:
+            $ref: '#/components/schemas/dateType'
+          required: true
+        - in: query
+          name: operationType
+          description: |
+            The transaction type: "D" for debits or "C" for credits. If not provided, it will return both.
+            If the `historyCode` or `historyCodes` parameters are provided, the `operationType` will be ignored because the `historyCode` already includes an `operationType`.
+          schema:
+            $ref: '#/components/schemas/operationType'
+        - in: query
+          name: currency
+          description: 'The currency code as in ISO 4217 standard (e.g. USD for United States Dollar).'
+          schema:
+            $ref: '#/components/schemas/currencyISO4217'
+          required: true
+        - in: query
+          name: fields
+          description: |
+            The type of data to return:
+            * ENTRIES: Returns only the list of transactions.
+            * BALANCE_SUMMARY: Returns the synthetic sum. 
+            If none of the options is provided, the synthetic sum will be returned with transactions.
+          schema:
+            $ref: '#/components/schemas/fields'
+        - in: query
+          name: featureName
+          description: The indexed identifier within the transaction metadata that serves as a reference point for filtering transactions based on a specific grouping.
+            Required if featureValue are provided.
+          required: false
+          schema:
+            $ref: "#/components/schemas/featureName"
+        - in: query
+          name: featureValue
+          description: The specific value corresponding to the indexed featureName within transaction metadata.
+            Required if featureName are provided.
+          required: false
+          schema:
+            $ref: "#/components/schemas/featureValue"
+        - in: query
+          name: type
+          description: |
+            Filter entries by type: POSTED or PENDING. If not provided, both types are returned.
+          required: false
+          schema:
+            $ref: '#/components/schemas/entryType'
+        - in: query
+          name: page
+          description: Number of the current page as required (min 0).
+          required: false
+          schema:
+            $ref: "#/components/schemas/page"
+        - in: query
+          name: size
+          description: The maximum number of items to return per page (min 1 max 100).
+          required: false
+          schema:
+            $ref: "#/components/schemas/size"
+        - in: header
+          name: X-Count-Omit
+          description: 'Controls the inclusion of pagination headers in the response.
+                       When `X-Count-Omit` is set to `true`, no pagination headers (such as `X-Total-Elements`, `X-Total-Pages`, `X-Has-Next`) are returned.
+                       When set to `false` or not set, pagination information headers are included in the response.'
+          schema:
+            type: boolean
+            default: false
+          required: false
+
+      responses:
+        200:
+          $ref: '#/components/responses/entriesV2Response'
+        400:
+          $ref: '#/components/responses/badRequest'
+        404:
+          $ref: '#/components/responses/notFound'
+        500:
+          $ref: '#/components/responses/unexpectedError'
+        504:
+          $ref: '#/components/responses/gatewayTimeout'
+
+  /v1/entries/metadata:
+    get:
+      summary: List transaction metadata
+      description: >
+        Get transaction metadata by providing the transaction/entry ID. Multiple entry IDs can be provided within an array.
+        
+        > **Important:** This operation requires a logged user with the *view-entries-metadata* role
+      operationId: queryEntriesMetadata
+      tags:
+        - Entries
+      parameters:
+        - in: query
+          name: entriesId
+          required: true
+          description: 'Array of entry IDs.'
+          schema:
+            $ref: '#/components/schemas/entriesId'
+          style: form
+          explode: false
+      responses:
+        200:
+          description: Successful request. It returns a list with transaction metadata for the requested entries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entriesMetadataResponse'
+        400:
+          $ref: '#/components/responses/badRequest'
+        404:
+          $ref: '#/components/responses/notFound'
+        500:
+          $ref: '#/components/responses/unexpectedError'
+  /v1/cubes/entries:
+    get:
+      tags:
+        - Cubes Generic Query
+      summary: 'Get transaction data by providing an MDX query'
+      description: >
+        Get entries per query by providing a Multidimensional Expression (MDX)
+        
+        > **Important:** This operation requires a logged user with the *view-entry-cube* role
+      operationId: findEntriesByGenericMDX
+      parameters:
+        - in: query
+          name: mdxQuery
+          description: 'The Multidimensional Expression (MDX) to apply on OLAP Cube.'
+          schema:
+            $ref: '#/components/schemas/mdxQuery'
+          required: true
+      responses:
+        200:
+          $ref: '#/components/responses/cubeResponse'
+        400:
+          $ref: '#/components/responses/querySyntaxInvalidRequest'
+        500:
+          $ref: '#/components/responses/unexpectedError'
+        504:
+          $ref: '#/components/responses/gatewayTimeout'
+
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://localhost:7443/auth/realms/dtw/protocol/openid-connect/token
+          scopes:
+            view-entries: Query entries to return data - REST API - GET /v*/entries
+  responses:
+    entriesResponse:
+      description: |
+        Successful request. It returns a list with transactions and their details.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/entriesResponse'
+          examples:
+            entries-list-and-balance-summary-response:
+              $ref: '#/components/examples/entries-list-and-balance-summary-response'
+            entries-list-response:
+              $ref: '#/components/examples/entries-list-response'
+            compensating-entry-response:
+              $ref: '#/components/examples/compensating-entry-response'
+            balance-summary-response:
+              $ref: '#/components/examples/balance-summary-response'
+      headers:
+        'X-Total-Elements':
+          $ref: '#/components/headers/xTotalElements'
+        'X-Total-Pages':
+          $ref: '#/components/headers/xTotalPages'
+        'X-Has-Next':
+          $ref: '#/components/headers/xHasNext'
+        'X-Count-Limit-Exceeded':
+          $ref: '#/components/headers/xCountLimitExceeded'
+    cubeResponse:
+      description: 'Successful request. It returns an array of transaction in multidimensional format data.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/cubeResponse'
+          examples:
+            genericCubeResponse:
+              $ref: '#/components/examples/genericCubeResponse'
+            cubeResponse:
+              $ref: '#/components/examples/cubeResponse'
+
+    badRequest:
+      description: 'The request failed because there is an invalid attribute end/or parameter.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            badRequest:
+              $ref: '#/components/examples/badRequest'
+    notFound:
+      description: 'The requested/provided resource was not found.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            notFound:
+              $ref: '#/components/examples/notFound'
+    unexpectedError:
+      description: 'The request failed due to an unexpected error. For example, the database connection may have timed out. The error-context field allows to find more information about the error in the application logs.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            unexpectedError:
+              $ref: '#/components/examples/unexpectedError'
+    gatewayTimeout:
+      description: 'The request failed due to a gateway timeout error (system installation parameter).'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            gatewayTimeout:
+              $ref: '#/components/examples/gatewayTimeout'
+    querySyntaxInvalidRequest:
+      description: 'The request failed because the query syntax is invalid.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/problemResponse'
+          examples:
+            badRequest:
+              $ref: '#/components/examples/querySyntaxError'
+    entriesV2Response:
+      description: |
+        Successful request. It returns a list with transactions and their details for v2.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/entriesV2Response'
+          examples:
+            entries-v2-posted-response:
+              $ref: '#/components/examples/entries-v2-posted-response'
+            entries-v2-pending-response:
+              $ref: '#/components/examples/entries-v2-pending-response'
+            balance-summary-v2-response:
+              $ref: '#/components/examples/balance-summary-v2-response'
+      headers:
+        'X-Total-Elements':
+          $ref: '#/components/headers/xTotalElements'
+        'X-Total-Pages':
+          $ref: '#/components/headers/xTotalPages'
+        'X-Has-Next':
+          $ref: '#/components/headers/xHasNext'
+        'X-Count-Limit-Exceeded':
+          $ref: '#/components/headers/xCountLimitExceeded'
+
+  headers:
+    xHasNext:
+      schema:
+        type: boolean
+      description: A 'true' value means there's another page with items to query.
+    xTotalElements:
+      schema:
+        type: integer
+        format: int64
+      description: The total number of items based on the applied query filters. When the number of elements exceeds the count limit value, the total number of elements will be the value defined in the configuration.
+        <br> Example, If 7000 entries are returned in the query and the Count Limit value is 5000, the value of the X-Total-Elements header will be 5000, the header X-Count-Limit-Exceeded will be returned true and the total 7000 entries will be returned correctly.
+    xTotalPages:
+      schema:
+        type: integer
+        format: int32
+      description: The total number of pages based on the applied query filters and page size.
+        <br> When the number of entries exceeds the Count Limit value, the result of X-Total-Pages will be calculated according to the Count Limit value and the informed page size.
+    xCountOmit:
+      schema:
+        type: boolean
+        default: false
+      description: When X-Count-Omit equals true none of the headers of pagination are returned (X-Total-Elements, X-Total-Pages, X-Has-Next).
+    xCountLimitExceeded:
+      schema:
+        type: boolean
+      description: When X-Count-Limit-Exceeded equals true the pagination will limited by the maximum Count Limit value specified in the configuration. 
+        <br> And when this value is not informed, this limit was not exceeded.
+
+  schemas:
+    cubeResponse:
+      type: object
+      description: 'Cube schema'
+      properties:
+        rows:
+          type: integer
+          format: int32
+          description: 'The number of rows the OLAP Cube contains.'
+        result:
+          type: object
+          description: 'The result of query.'
+    branch:
+      description: 'The account branch.'
+      type: integer
+      format: int32
+      minimum: 0
+      example: 4919
+    account:
+      description: 'The account number or unique identifier representing the account.'
+      type: integer
+      format: int64
+      minimum: 0
+      example: 223166
+    entryId:
+      description: 'The unique identifier of the transaction.'
+      type: string
+    entriesId:
+      description: 'Array of entries id.'
+      type: array
+      items:
+        type: string
+    entryKind:
+      type: string
+      example: |
+        LEDGER
+        REMOVAL
+        BLOCKING
+        REVERSAL
+        EXCLUSION
+        UNBLOCKING
+        ADJUSTMENT_ENTRY
+        PENDING_LEDGER
+        PENDING_REMOVAL
+        PENDING_BLOCKING
+        PENDING_REVERSAL
+        PENDING_UNBLOCKING
+    entryDescription:
+      description: 'The description of the transaction type (e.g. Credit Card, Instant Payment, etc).'
+      type: string
+      example: 'Credit Card'
+      default: ''
+    historyCode:
+      description: 'A code that categorizes the transaction type as credit or debit.'
+      type: integer
+      example: 998
+    historyCodes:
+      description: |
+        A code list that categorizes the transaction types as credit or debit.
+
+        **WARNING**: The maximum number of history codes that can be provided is 1000.
+      type: array
+      items:
+        $ref: '#/components/schemas/historyCode'
+      maxItems: 1000
+      example: [997, 998]
+    historyDescription:
+      description: 'The description of the history code.'
+      type: string
+      example: 'DOC, TED, ACH, CHEQUE...'
+    documentTypeKey:
+      description: 'The history code feature.'
+      type: string
+      example: '9'
+    date:
+      description: 'The transaction reference date or the date when the transaction impacted the balance. Format: yyyy-mm-dd (ISO-8601).'
+      type: string
+      format: date
+      example: '2022-03-24'
+    dateTime:
+      description: 'The date and time when the transaction was recorded in the system. Format: yyyy-mm-ddTHH:mm:ssZ (ISO-8601).'
+      type: string
+      format: date-time
+      example: '2017-07-21T17:32:28Z'
+    dateType:
+      type: string
+      description: |
+        If set to "ENTRY," the date filter focuses on the transaction reference date — the day the transaction impacted the balance. If set to "EVENT," the filter targets the date and time when the transaction was recorded in the system.
+      enum:
+        - ENTRY
+        - EVENT
+      example: EVENT
+    operationType:
+      type: string
+      description: |
+        Transaction type "D" for debit entries or "C" for credit entries. If not provided, it will return both.
+      enum:
+        - C
+        - D
+      example: C
+    currencyISO4217:
+      type: string
+      description: 'The currency code as in ISO 4217 standard (e.g. USD for United State Dollar).'
+      example: 'USD'
+      enum: [
+        AED,
+        AFN,
+        ALL,
+        AMD,
+        ANG,
+        AOA,
+        ARS,
+        AUD,
+        AWG,
+        AZN,
+        BAM,
+        BBD,
+        BDT,
+        BGN,
+        BHD,
+        BIF,
+        BMD,
+        BND,
+        BOB,
+        BOV,
+        BRL,
+        BSD,
+        BTN,
+        BWP,
+        BYR,
+        BZD,
+        CAD,
+        CDF,
+        CHE,
+        CHF,
+        CHW,
+        CLF,
+        CLP,
+        CNY,
+        COP,
+        COU,
+        CRC,
+        CUC,
+        CUP,
+        CVE,
+        CZK,
+        DJF,
+        DKK,
+        DOP,
+        DZD,
+        ECS,
+        EGP,
+        ERN,
+        ETB,
+        EUR,
+        FJD,
+        FKP,
+        GBP,
+        GEL,
+        GHS,
+        GIP,
+        GMD,
+        GNF,
+        GTQ,
+        GYD,
+        HKD,
+        HNL,
+        HRK,
+        HTG,
+        HUF,
+        IDR,
+        ILS,
+        INR,
+        IQD,
+        IRR,
+        ISK,
+        JMD,
+        JOD,
+        JPY,
+        KES,
+        KGS,
+        KHR,
+        KMF,
+        KPW,
+        KRW,
+        KWD,
+        KYD,
+        KZT,
+        LAK,
+        LBP,
+        LKR,
+        LRD,
+        LSL,
+        LTL,
+        LVL,
+        LYD,
+        MAD,
+        MDL,
+        MGA,
+        MKD,
+        MMK,
+        MNT,
+        MOP,
+        MRO,
+        MUR,
+        MVR,
+        MWK,
+        MXN,
+        MXV,
+        MYR,
+        MZN,
+        NAD,
+        NGN,
+        NIO,
+        NOK,
+        NPR,
+        NZD,
+        OMR,
+        PAB,
+        PEN,
+        PGK,
+        PHP,
+        PKR,
+        PLN,
+        PYG,
+        QAR,
+        RON,
+        RSD,
+        RUB,
+        RWF,
+        SAR,
+        SBD,
+        SCR,
+        SDG,
+        SEK,
+        SGD,
+        SHP,
+        SLL,
+        SOS,
+        SRD,
+        STD,
+        SVC,
+        SYP,
+        SZL,
+        THB,
+        TJS,
+        TMT,
+        TND,
+        TOP,
+        TRY,
+        TTD,
+        TWD,
+        TZS,
+        UAH,
+        UGX,
+        USD,
+        USN,
+        USS,
+        UYI,
+        UYU,
+        UZS,
+        VEF,
+        VND,
+        VUV,
+        WST,
+        XAF,
+        XAG,
+        XAU,
+        XBA,
+        XBB,
+        XBC,
+        XBD,
+        XCD,
+        XDR,
+        XFU,
+        XOF,
+        XPD,
+        XPF,
+        XPT,
+        XTS,
+        XXX,
+        YER,
+        ZAR,
+        ZMW,
+        ZWL
+      ]
+    fields:
+      type: string
+      description: |
+        This parameter determines the type of data to be returned by the API. There are two options available:
+        
+        - ENTRIES: Returns only the list of individual transactions.
+        - BALANCE_SUMMARY: Returns the synthetic extract, which includes a summary of the overall balance.
+        
+        Note: If the 'operationType' is specified (with values 'C' or 'D'), the results will be filtered accordingly. Additionally, if none of the options (ENTRIES and BALANCE_SUMMARY) is provided, the API will return the synthetic sum, calculated as the total credits subtracted from the total debits.
+      enum:
+        - ENTRIES
+        - BALANCE_SUMMARY
+      example: ENTRIES
+    page:
+      description: Number of the current page as required (min 0).
+      type: integer
+      format: int32
+      minimum: 0
+      default: 0
+    size:
+      description: The maximum number of items to return per page.
+      type: integer
+      format: int32
+      minimum: 1
+      maximum: 100
+      default: 20
+
+    amount:
+      type: object
+      description: 'The transaction amount.'
+      properties:
+        value:
+          type: integer
+          format: int64
+          example: 100000
+          description: The actual amount.
+          minimum: 1
+        currency:
+          $ref: '#/components/schemas/currencyISO4217'
+      required:
+        - value
+        - currency
+
+    entriesResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/entry'
+        balanceSummary:
+          $ref: '#/components/schemas/amount'
+    metadata:
+      description: |
+        A set of key-value pairs that you can attach to an resource. This can be useful for storing additional information about the resource in a structured format. This is a free-to-enter field and MUST NOT store personal information.
+        Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados).
+      type: object
+      additionalProperties: true
+    correlations:
+      description: |
+        An resource consisting of key-value pairs that map transaction unique identifiers to their respective systems.
+      type: object
+      additionalProperties: true
+
+    entryMetadata:
+      type: object
+      properties:
+        id:
+          description: The unique identifier of the transaction.
+          type: string
+        metaData:
+          description: The transaction metadata. A set of key-value pairs that you can attach to an object. This can be useful for storing additional information about the resource in a structured format. This is a free-to-enter field and MUST NOT store personal information.
+          type: object
+    entriesMetadataResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/entryMetadata'
+
+    entry:
+      type: object
+      description: Entry
+      properties:
+        branch:
+          $ref: '#/components/schemas/branch'
+        account:
+          $ref: '#/components/schemas/account'
+        entryDate:
+          $ref: '#/components/schemas/date'
+        eventDate:
+          $ref: '#/components/schemas/dateTime'
+        operationType:
+          $ref: '#/components/schemas/operationType'
+        amount:
+          $ref: '#/components/schemas/amount'
+        entryId:
+          $ref: '#/components/schemas/entryId'
+        entryKind:
+          $ref: '#/components/schemas/entryKind'
+        entryDescription:
+          $ref: '#/components/schemas/entryDescription'
+        documentTypeKey:
+          $ref: '#/components/schemas/documentTypeKey'
+        historyCode:
+          $ref: '#/components/schemas/historyCode'
+        historyDescription:
+          $ref: '#/components/schemas/historyDescription'
+        metadata:
+          $ref: '#/components/schemas/metadata'
+        correlations:
+          $ref: '#/components/schemas/correlations'
+        compensatedEntry:
+          $ref: '#/components/schemas/entry'
+    mdxQuery:
+      description: 'MDX Query'
+      type: string
+      example: 'SELECT NON EMPTY {[Measures].[AMOUNT]} ON COLUMNS, NON EMPTY {[ACCOUNT CHECKING].[12].[35478]} ON ROWS FROM [ENTRY]'
+
+    problemResponse:
+      type: object
+      description: Response Based on [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807)
+      required:
+        - status
+        - title
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A Uniform Resource Identifier (URI) that identifies the problem type. When dereferenced, it SHOULD provide human-readable documentation for the problem type (e.g., using HTML).
+          default: 'about:blank'
+          example: 'https://zalando.github.io/problem/constraint-violation'
+
+        title:
+          type: string
+          description: The title of the problem summarizing the encountered issue, such as 'Service Unavailable'. It could either adopt the title recommended by RFC 7807 or encompass more specific details relevant to the issue.
+          example: Service Unavailable
+
+        status:
+          type: integer
+          format: int32
+          description: The HTTP status code produced by the server in response to this specific problem instance.
+          minimum: 100
+          maximum: 600
+          exclusiveMaximum: true
+          example: 503
+
+        detail:
+          type: string
+          description: A clear, understandable description for this particular problem instance.
+          example: Connection to database timed out
+    featureName:
+      type: string
+      maxLength: 64
+      example: 'thirdPartySpecificCode'
+      description: "The textual representation of the JSON field name used for the purpose of filtering entries."
+    featureValue:
+      type: string
+      maxLength: 256
+      example: '123456'
+      description: "The textual representation of the JSON field's value used for the purpose of filtering entries."
+    entryType:
+      type: string
+      description: 'Type of entry: POSTED or PENDING.'
+      enum:
+        - POSTED
+        - PENDING
+      example: POSTED
+    balanceSummaryV2:
+      type: object
+      properties:
+        sumOfPostedEntries:
+          $ref: '#/components/schemas/amount'
+        sumOfPendingDebitEntries:
+          $ref: '#/components/schemas/amount'
+        sumOfPendingCreditEntries:
+          $ref: '#/components/schemas/amount'
+    entryV2:
+      allOf:
+        - $ref: '#/components/schemas/entry'
+        - type: object
+          properties:
+            type:
+              $ref: '#/components/schemas/entryType'
+    entriesV2Response:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/entryV2'
+        balanceSummary:
+          $ref: '#/components/schemas/balanceSummaryV2'
+  examples:
+    entries-list-response:
+      value: {
+        entries: [
+          {
+            branch: 1,
+            account: 223166,
+            entryDate: "2022-03-24",
+            eventDate: "2017-07-21T17:32:28Z",
+            operationType: "C",
+            amount: {
+              value: 100000,
+              currency: "USD"
+            },
+            entryId: "string",
+            entryKind: LEDGER,
+            entryDescription: "Credit Card",
+            documentTypeKey: "9",
+            historyCode: 998,
+            historyDescription: "DOC",
+            "metadata": {
+              "additionalProp1": { },
+              "key":"value",
+              "key2": 1
+            },
+            "correlations": {
+              "CC": 123456789,
+              "TX": "e02bb9c2-2771-4f03-9299-16db85485ee1",
+            }
+          },
+          {
+            branch: 1,
+            account: 223166,
+            entryDate: "2022-03-25",
+            eventDate: "2017-11-21T17:32:28Z",
+            operationType: "D",
+            amount: {
+              value: 130000,
+              currency: "USD"
+            },
+            entryId: "string",
+            entryKind: LEDGER,
+            entryDescription: "Debit",
+            documentTypeKey: "9",
+            historyCode: 997,
+            historyDescription: "ACH",
+            "metadata": {
+              "additionalProp1": { },
+              "key": "value",
+              "key2": 1
+            },
+            "correlations": {
+              "CC": 123456789,
+              "TX": "e02bb9c2-2771-4f03-9299-16db85485ee1",
+            }
+          }
+        ]
+      }
+      summary: 'Entries List Response'
+    entries-list-and-balance-summary-response:
+      value: {
+        entries: [
+          {
+            branch: 1,
+            account: 230621,
+            entryDate: "2023-06-21",
+            eventDate: "2023-06-20T17:20:19Z",
+            operationType: "C",
+            amount: {
+              value: 200000,
+              currency: "USD"
+            },
+            entryId: "string",
+            entryKind: LEDGER,
+            entryDescription: "Credit Card",
+            documentTypeKey: "9",
+            historyCode: 998,
+            historyDescription: "DOC",
+            "metadata": {
+              "additionalProp1": { },
+              "key": "value",
+              "key2": 1
+            }
+          },
+          {
+            branch: 1,
+            account: 223166,
+            entryDate: "2023-06-12",
+            eventDate: "2013-06-12T08:22:56Z",
+            operationType: "D",
+            amount: {
+              value: 190000,
+              currency: "USD"
+            },
+            entryId: "string",
+            entryKind: LEDGER,
+            entryDescription: "Debit",
+            documentTypeKey: "9",
+            historyCode: 997,
+            historyDescription: "ACH",
+            "metadata": {
+              "additionalProp1": { },
+              "key": "value",
+              "key2": 1
+            },
+            "correlations": {
+              "CC": 123456789,
+              "TX": "e02bb9c2-2771-4f03-9299-16db85485ee1",
+            }
+          }
+        ],
+        balanceSummary: {
+          value: 10000,
+          currency: "USD"
+        }
+      }
+      summary: 'Entries List and Balance Summary Response'
+    balance-summary-response:
+      value: {
+        balanceSummary: {
+          value: 190000,
+          currency: "USD"
+        }
+      }
+      summary: 'Balance Summary Response'
+    compensating-entry-response:
+      value: {
+        entries: [
+          {
+            branch: 2024,
+            account: 7051138,
+            entryDate: "2024-05-07",
+            eventDate: "2024-05-07T11:18:28Z",
+            operationType: "D",
+            amount: {
+              value: 10000,
+              currency: "USD"
+            },
+            entryId: "1a3c5e7g9i",
+            entryKind: REVERSAL,
+            entryDescription: "Debit",
+            documentTypeKey: "9",
+            historyCode: 997,
+            historyDescription: "DOC",
+            "metadata": {
+              "additionalProp1": {},
+              "key": "value",
+              "key2": 1
+            },
+            "correlations": {
+              "CC": 123456789,
+              "TX": "e02bb9c2-2771-4f03-9299-16db85485ee1",
+            },
+            "compensatedEntry": {
+              branch: 2024,
+              account: 7051138,
+              entryDate: "2024-05-06",
+              eventDate: "2024-05-06T11:27:11Z",
+              operationType: "C",
+              amount: {
+                value: 10000,
+                currency: "USD"
+              },
+              entryId: "2b4d6f8h0j",
+              entryKind: LEDGER,
+              entryDescription: "Credit card",
+              documentTypeKey: "9",
+              historyCode: 998,
+              historyDescription: "DOC",
+              "metadata": {
+                "additionalProp1": {},
+                "key": "valued",
+                "key2": 2
+              },
+              "correlations": {
+                "CC": 987654321,
+                "TX": "4f93bffa-3d81-431d-a263-77eb736dc4d3",
+              }
+            }
+          }
+        ]
+      }
+      summary: 'Compensating entry Response'
+
+    entries-v2-posted-response:
+      summary: 'Entries v2 Response Posted Type'
+      description: Example response for POSTED entries, where balanceSummary of PENDING will not have a returned value.
+      value: {
+        entries: [
+          {
+            account: 230621,
+            amount: {
+              currency: "USD",
+              value: 20
+            },
+            branch: 1,
+            documentTypeKey: "9",
+            entryDate: "2023-06-21",
+            entryDescription: "Credit Card",
+            entryId: "string",
+            entryKind: "LEDGER",
+            eventDate: "2023-06-20T17:20:19Z",
+            historyCode: 998,
+            historyDescription: "DOC",
+            metadata: {
+              additionalProp1: {},
+              key: "value",
+              key2: 1
+            },
+            operationType: "C",
+            type: "POSTED"
+          }
+        ],
+        balanceSummary: {
+          sumOfPostedEntries: {
+            currency: "USD",
+            value: 20
+          },
+          sumOfPendingCreditEntries: {
+            currency: "USD",
+            value: 0
+          },
+          sumOfPendingDebitEntries: {
+            currency: "USD",
+            value: 0
+          }
+        }
+      }
+
+    entries-v2-pending-response:
+      summary: 'Entries v2 Response Pending Type'
+      description: Example response for PENDING entries, where balanceSummary of POSTED will not have a returned value.
+      value: {
+        entries: [
+          {
+            account: 230621,
+            amount: {
+              currency: "USD",
+              value: 100
+            },
+            branch: 1,
+            documentTypeKey: "9",
+            entryDate: "2023-06-21",
+            entryDescription: "Debit Card",
+            entryId: "string",
+            entryKind: "PENDING_LEDGER",
+            eventDate: "2023-06-20T17:20:19Z",
+            historyCode: 999,
+            historyDescription: "DOC D",
+            metadata: {
+              additionalProp1: {},
+              key: "value",
+              key2: 1
+            },
+            operationType: "D",
+            type: "PENDING"
+          }
+        ],
+        balanceSummary: {
+          sumOfPostedEntries: {
+            currency: "USD",
+            value: 0
+          },
+          sumOfPendingCreditEntries: {
+            currency: "USD",
+            value: 0
+          },
+          sumOfPendingDebitEntries: {
+            currency: "USD",
+            value: -100
+          }
+        }
+      }
+    balance-summary-v2-response:
+      summary: 'Balance Summary v2 Response'
+      description: |
+        Example response for Balance Summary v2.
+
+        The `balanceSummary` object contains three main fields:
+          - `sumOfPostedEntries`: The sum of all POSTED transactions, considering credits and debits according to the operation type.
+          - `sumOfPendingCreditEntries`: The sum of all PENDING transactions with operationType "C" (credit).
+          - `sumOfPendingDebitEntries`: The sum of all PENDING transactions with operationType "D" (debit).
+
+        Each field is an object with currency and value. The values are calculated by summing all transactions filtered by type and status, according to the request parameters.
+      value: {
+        balanceSummary: {
+          sumOfPendingCreditEntries: {
+            currency: "USD",
+            value: 100
+          },
+          sumOfPendingDebitEntries: {
+            currency: "USD",
+            value: -100
+          },
+          sumOfPostedEntries: {
+            currency: "USD",
+            value: 500
+          }
+        }
+      }
+
+    genericCubeResponse:
+      value: {
+        "rows": number,
+        "result": [
+          {
+            "key": value
+          }
+        ]
+      }
+      summary: 'Generic Cube Response'
+
+    cubeResponse:
+      value: {
+        "rows": 3,
+        "result": [
+          {
+            '[ACCOUNT CHECKING].[ACCOUNT]': '35478',
+            'AMOUNT': '979.0',
+            '[ACCOUNT CHECKING].[BRANCH]': '12'
+          }
+        ]
+      }
+      summary: 'Cube Example Response'
+
+    badRequest:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Bad Request
+        status: 400
+        detail: Invalid attribute
+      summary: Bad Request response
+    notFound:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Not Found
+        status: 404
+        detail: Resource not found
+      summary: Bad Request response
+    unexpectedError:
+      value:
+        type: http://dtw.matera.com/problem/internal-server-error
+        title: Internal Server Error
+        status: 500
+        detail: An unexpected/unrecoverable error has occurred
+        error-context: 1ced9bfc-8fef-4c4c-98ae-37bb8c81ab91
+      summary: Internal Server Error
+    gatewayTimeout:
+      value:
+        title: Gateway Timeout Error
+        status: 504
+        detail: Gateway Timeout Error
+      summary: Gateway Timeout Error
+    querySyntaxError:
+      value:
+        type: https://zalando.github.io/problem/query-syntax-violation
+        title: 'Query syntax is invalid'
+        status: 400
+        detail: Invalid syntax
+      summary: 'Query syntax invalid response'

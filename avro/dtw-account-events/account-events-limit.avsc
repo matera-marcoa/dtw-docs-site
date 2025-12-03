@@ -1,0 +1,49 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.account.limit",
+    "type": "record",
+    "name": "AccountLimitChangeEvent",
+    "doc": "Event to change a limit parameter for an account.",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "limit", "type": "com.matera.dtw.event.common.financial.Limit", "doc": "The limit amount range. For example, for an overdraft limit of 100 it would be minimum -100 and maximum 0"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.account.limit",
+    "type": "record",
+    "name": "AccountLimitDeleteEvent",
+    "doc": "Event to delete a limit for an account.",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "limitType", "type": "string"},
+      {"name": "feature", "type": {"type": "map", "values": "com.matera.dtw.event.common.feature.FeatureValue"}, "default": {}, "doc": "Additional limit features/information"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.account.limit",
+    "type": "record",
+    "name": "AuthorizedAccountLimitChangeEvent",
+    "doc": "Event to change an authorized limit for an account.",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "limit", "type": "com.matera.dtw.event.common.financial.Limit", "doc": "Limit data."},
+      {"name": "asOfDate", "type": ["null", {"type": "int", "logicalType": "date"}], "default": null, "doc": "Limit creation date."}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.account.limit",
+    "type": "record",
+    "name": "AuthorizedAccountLimitDeleteEvent",
+    "doc": "Event to delete an authorized limit for an account.",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "limitType", "type": "string"},
+      {"name": "asOfDate", "type": ["null", {"type": "int", "logicalType": "date"}], "default": null, "doc": "Limit creation date."}
+    ]
+  }
+]

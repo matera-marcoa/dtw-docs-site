@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTW Documentation - Digital Twin Platform</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="40" height="40" rx="8" fill="#00D4AA"/>
+                        <path d="M12 14h6c3.31 0 6 2.69 6 6s-2.69 6-6 6h-6V14zm6 10c2.21 0 4-1.79 4-4s-1.79-4-4-4h-3v8h3z" fill="white"/>
+                        <path d="M26 14h2v12h-2V14z" fill="white"/>
+                    </svg>
+                    <span class="logo-text">DTW Documentation</span>
+                </div>
+                <nav class="main-nav">
+                    <a href="#home" class="nav-link active">Home</a>
+                    <a href="#apis" class="nav-link">API Reference</a>
+                    <a href="#events" class="nav-link">Events & Commands</a>
+                    <a href="#getting-started" class="nav-link">Getting Started</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <section id="home" class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Digital Twin Platform</h1>
+                <p class="hero-subtitle">Comprehensive documentation for DTW APIs, Events, and Commands</p>
+                <div class="hero-buttons">
+                    <a href="#getting-started" class="btn btn-primary">Get Started</a>
+                    <a href="#apis" class="btn btn-secondary">Explore APIs</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="getting-started" class="content-section">
+        <div class="container">
+            <h2 class="section-title">Getting Started</h2>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                            <path d="M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <h3>RESTful APIs</h3>
+                    <p>Access comprehensive REST API documentation for balance management, transactions, and registry services.</p>
+                    <a href="#apis" class="card-link">View APIs →</a>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                    </div>
+                    <h3>Kafka Events</h3>
+                    <p>Explore event-driven architecture with detailed Avro schemas for all events and commands.</p>
+                    <a href="#events" class="card-link">View Events →</a>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                    </div>
+                    <h3>Quick Start</h3>
+                    <p>Get up and running quickly with our integration guides and authentication documentation.</p>
+                    <a href="#quick-start" class="card-link">Learn More →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="apis" class="content-section bg-light">
+        <div class="container">
+            <h2 class="section-title">API Reference</h2>
+            <p class="section-description">Explore our RESTful APIs for managing accounts, transactions, and balances</p>
+            
+            <div class="api-list">
+                <div class="api-item">
+                    <div class="api-header">
+                        <h3>Balance Statements API</h3>
+                        <span class="badge badge-success">v1</span>
+                    </div>
+                    <p class="api-description">Retrieve information regarding balances from an account or group of accounts.</p>
+                    <div class="api-actions">
+                        <a href="api-balance.html" class="btn btn-sm btn-primary">View Documentation</a>
+                        <code class="endpoint">GET /v1/balances</code>
+                    </div>
+                </div>
+
+                <div class="api-item">
+                    <div class="api-header">
+                        <h3>Transaction API</h3>
+                        <span class="badge badge-success">v1</span>
+                    </div>
+                    <p class="api-description">Manage and query transactions within the Digital Twin platform.</p>
+                    <div class="api-actions">
+                        <a href="api-transaction.html" class="btn btn-sm btn-primary">View Documentation</a>
+                        <code class="endpoint">GET /v1/transactions</code>
+                    </div>
+                </div>
+
+                <div class="api-item">
+                    <div class="api-header">
+                        <h3>Composite Transaction API</h3>
+                        <span class="badge badge-success">v1</span>
+                    </div>
+                    <p class="api-description">Handle complex multi-step transactions with composite operations.</p>
+                    <div class="api-actions">
+                        <a href="api-composite-transaction.html" class="btn btn-sm btn-primary">View Documentation</a>
+                        <code class="endpoint">POST /v1/composite-transactions</code>
+                    </div>
+                </div>
+
+                <div class="api-item">
+                    <div class="api-header">
+                        <h3>Balance Statements Entry API</h3>
+                        <span class="badge badge-success">v1</span>
+                    </div>
+                    <p class="api-description">Access detailed entry-level information for balance statements.</p>
+                    <div class="api-actions">
+                        <a href="api-balance-entry.html" class="btn btn-sm btn-primary">View Documentation</a>
+                        <code class="endpoint">GET /v1/entries</code>
+                    </div>
+                </div>
+
+                <div class="api-item">
+                    <div class="api-header">
+                        <h3>Registry API</h3>
+                        <span class="badge badge-success">v1</span>
+                    </div>
+                    <p class="api-description">Manage system registries and configuration data.</p>
+                    <div class="api-actions">
+                        <a href="api-registry.html" class="btn btn-sm btn-primary">View Documentation</a>
+                        <code class="endpoint">GET /v1/registry</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="events" class="content-section">
+        <div class="container">
+            <h2 class="section-title">Events & Commands</h2>
+            <p class="section-description">Kafka event schemas using Apache Avro format</p>
+            
+            <div class="events-grid">
+                <div class="event-category">
+                    <h3>Configuration Events</h3>
+                    <ul class="event-list">
+                        <li><a href="events-configuration.html#account-type">Account Type Events</a></li>
+                        <li><a href="events-configuration.html#system">System Events</a></li>
+                        <li><a href="events-configuration.html#history">History Events</a></li>
+                        <li><a href="events-configuration.html#generic">Generic Domain Events</a></li>
+                    </ul>
+                </div>
+
+                <div class="event-category">
+                    <h3>Account Events</h3>
+                    <ul class="event-list">
+                        <li><a href="events-account.html#status">Account Status Events</a></li>
+                        <li><a href="events-account.html#group">Account Group Events</a></li>
+                        <li><a href="events-account.html#account">Account Events</a></li>
+                    </ul>
+                </div>
+
+                <div class="event-category">
+                    <h3>State Events</h3>
+                    <ul class="event-list">
+                        <li><a href="events-state.html#system-state">System State Events</a></li>
+                    </ul>
+                </div>
+
+                <div class="event-category">
+                    <h3>Incident Events</h3>
+                    <ul class="event-list">
+                        <li><a href="events-incident.html">Incident Events</a></li>
+                    </ul>
+                </div>
+
+                <div class="event-category">
+                    <h3>Common Schemas</h3>
+                    <ul class="event-list">
+                        <li><a href="events-commons.html#financial">Common Financial</a></li>
+                        <li><a href="events-commons.html#commands">Common Commands</a></li>
+                        <li><a href="events-commons.html#feature">Common Feature</a></li>
+                        <li><a href="events-commons.html#events">Common Events</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Digital Twin Platform</h4>
+                    <p>Enterprise-grade financial platform documentation</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#apis">API Reference</a></li>
+                        <li><a href="#events">Events & Commands</a></li>
+                        <li><a href="#getting-started">Getting Started</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="https://matera.com">Matera Website</a></li>
+                        <li><a href="#">Contact Support</a></li>
+                        <li><a href="#">GitHub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Digital Twin Platform. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/script.js"></script>
+</body>
+</html>

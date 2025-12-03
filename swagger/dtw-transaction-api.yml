@@ -1,0 +1,3096 @@
+openapi: 3.0.0
+info:
+  title: Digital Twin Transaction Services API
+  description: These endpoints credit and debit accounts on Digital Twin, approve/decline transaction requests, update limits and balances as well as set up monitoring for credits to accounts.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Accounts
+    description: You can use the Accounts API to manage account transactions and monitoring services. The Accounts API enables you to add and delete transactions, as well as retrieve, set up, delete, and update monitoring services for an individual account.
+  - name: Account groups
+    description: You can use the Account groups API to manage monitoring services for multiple accounts within a group. The Account groups API enables you to retrieve, set up, delete, and update monitoring services for these groups of accounts.
+
+paths:
+  /v1/accounts/{branch}/{account}/batches:
+    parameters:
+      - in: path
+        name: branch
+        schema:
+          $ref: '#/components/schemas/Branch'
+        description: 'The account branch. The branch field in the account information should be set to 0 if it does not contain a branch number.'
+        required: true
+      - in: path
+        name: account
+        schema:
+          $ref: '#/components/schemas/Account'
+        description: 'The account number or unique identifier representing the account.'
+        required: true
+    post:
+      tags:
+        - Accounts
+      summary: 'Add transactions to an account'
+      operationId: createBatch
+      description: This request approves or declines transactions as a group. It requires a logged user with the *transact* role assigned.
+      parameters:
+        - $ref: '#/components/parameters/generateSnapshot'
+        - $ref: '#/components/parameters/returnedBalances'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntryBatchRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/entryBatchResponse'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '410':
+          $ref: '#/components/responses/entryGone'
+        '422':
+          $ref: '#/components/responses/unprocessedEntity'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /v1/accounts/{branch}/{account}/entries:
+    parameters:
+      - in: path
+        name: branch
+        schema:
+          $ref: '#/components/schemas/Branch'
+        description: 'The account branch. The branch field in the account information should be set to 0 if it does not contain a branch number.'
+        required: true
+      - in: path
+        name: account
+        schema:
+          $ref: '#/components/schemas/Account'
+        description: 'The account number or unique identifier representing the account.'
+        required: true
+      - in: query
+        name: correlationId
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/CorrelationId'
+          minItems: 1
+          maxItems: 100
+        description: 'A list of correlation IDs representing the transactions to delete.'
+        required: true
+    delete:
+      tags:
+        - Accounts
+      summary: 'Delete transactions from an account'
+      description: This request requires a logged user with the *transact* role assigned.
+      operationId: deleteEntries
+      responses:
+        '204':
+          description: 'The transactions were successfully deleted or marked for deletion.'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /v1/accounts/{branch}/{account}/monitorings:
+    parameters:
+      - in: path
+        name: branch
+        schema:
+          $ref: '#/components/schemas/Branch'
+        description: 'The account branch. The branch field in the account information should be set to 0 if it does not contain a branch number.'
+        required: true
+      - in: path
+        name: account
+        schema:
+          $ref: '#/components/schemas/Account'
+        description: 'The account number or unique identifier representing the account.'
+        required: true
+    get:
+      tags:
+        - Accounts
+      summary: 'List monitoring services setup for the account'
+      description: This request requires a logged user with the *view-monitorings* role assigned.
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/size"
+        - in: query
+          name: correlationIds
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/CorrelationId'
+            minItems: 1
+            maxItems: 100
+          description: 'A list of correlation IDs representing the monitoring services.'
+      operationId: getAccountMonitorings
+      responses:
+        '200':
+          $ref: '#/components/responses/monitoringsAccountResponse'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '404':
+          $ref: '#/components/responses/notFound'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+    post:
+      tags:
+        - Accounts
+      summary: 'Set up monitoring service for an account'
+      description: This request requires a logged user with the *modify-monitorings* role assigned.
+      operationId: createAccountMonitoring
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonitoringRequest'
+      responses:
+        '201':
+          description: 'The monitoring service has successfully been set up.'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The registered version for the monitoring service.
+            location:
+              schema:
+                type: string
+              description: The redirected location URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringResponse'
+        '204':
+          description: The provided batch of monitoring services is empty, so it couldn't be processed. This could occur if every entry in the batch has already been processed before (e.g. due to idempotency hits).
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '410':
+          $ref: '#/components/responses/entryGone'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+    patch:
+      tags:
+        - Accounts
+      summary: 'Update monitoring service'
+      description: This request requires a logged user with the *modify-monitorings* role assigned.
+      parameters:
+        - in: header
+          name: if-match
+          schema:
+            $ref: '#/components/schemas/IfMatch'
+          description: 'The current monitoring registry version. This parameter value has to be equal to the last monitoring version.'
+          required: true
+        - in: query
+          name: correlationId
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/CorrelationId'
+            minItems: 1
+            maxItems: 1
+          description: 'Correlation ID'
+          required: false
+      operationId: updateAccountMonitoringByCorrelationId
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/MonitoringPatchRequest'
+      responses:
+        '200':
+          description: 'Monitoring successfully updated.'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The registered version for the monitoring service.
+            location:
+              schema:
+                type: string
+              description: The redirected location URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringResponse'
+        '204':
+          description: The provided batch of transactions is empty, so it couldn't be processed. This could occur if every entry in the batch has already been processed before (e.g. due to idempotency hits).
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '410':
+          $ref: '#/components/responses/entryGone'
+        '412':
+          $ref: '#/components/responses/preconditionFailed'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /v1/accounts/{branch}/{account}/monitorings/{id}/entries:
+    parameters:
+      - in: path
+        name: branch
+        schema:
+          $ref: '#/components/schemas/Branch'
+        description: 'The account branch. The branch field in the account information should be set to 0 if it does not contain a branch number.'
+        required: true
+      - in: path
+        name: account
+        schema:
+          $ref: '#/components/schemas/Account'
+        description: 'The account number or unique identifier representing the account.'
+        required: true
+      - in: path
+        name: id
+        schema:
+          $ref: '#/components/schemas/Id'
+        description: 'The monitoring service ID.'
+        required: true
+      - $ref: "#/components/parameters/page"
+      - $ref: "#/components/parameters/size"
+    get:
+      tags:
+        - Accounts
+      summary: 'List monitored transactions for an account'
+      description: This request requires a logged user with the *view-monitorings* role assigned.
+      operationId: getAccountMonitoringEntries
+      responses:
+        '200':
+          $ref: '#/components/responses/monitoringAccountEntriesResponse'
+        '400':
+          $ref: '#/components/responses/notFound'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /v1/accounts/{branch}/{account}/monitorings/{id}:
+    parameters:
+      - in: path
+        name: branch
+        schema:
+          $ref: '#/components/schemas/Branch'
+        description: 'The account branch. The branch field in the account information should be set to 0 if it does not contain a branch number.'
+        required: true
+      - in: path
+        name: account
+        schema:
+          $ref: '#/components/schemas/Account'
+        description: 'The account number or unique identifier representing the account.'
+        required: true
+      - in: path
+        name: id
+        schema:
+          $ref: '#/components/schemas/Id'
+        description: 'The monitoring service ID.'
+        required: true
+    get:
+      tags:
+        - Accounts
+      summary: 'Find monitoring service for an account by ID'
+      description: This request requires a logged user with the *view-monitorings* role assigned.
+      operationId: getAccountMonitoring
+      responses:
+        '200':
+          description: 'Successful request. The JSON response body contains detailed information about the monitoring service.'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The registered version for the monitoring service.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringResponse'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+    patch:
+      tags:
+        - Accounts
+      summary: 'Update a monitoring associated with an account.'
+      description: This request requires a logged user with the *modify-monitorings* role assigned.
+      parameters:
+        - in: header
+          name: if-match
+          schema:
+            $ref: '#/components/schemas/IfMatch'
+          description: 'The current monitoring registry version. This parameter value has to be equal to the last monitoring version.'
+          required: true
+      operationId: updateAccountMonitoring
+      requestBody:
+        description: 'Entry monitoring request.'
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/MonitoringPatchRequest'
+      responses:
+        '200':
+          description: 'Monitoring successfully updated.'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The registered version for the monitoring service.
+            location:
+              schema:
+                type: string
+              description: The redirected location URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringResponse'
+        '204':
+          description: The provided batch of transactions is empty, so it couldn't be processed. This could occur if every entry in the batch has already been processed before (e.g. due to idempotency hits).
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '410':
+          $ref: '#/components/responses/entryGone'
+        '412':
+          $ref: '#/components/responses/preconditionFailed'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /v1/accounts/{branch}/{account}/monitorings/cancel:
+    parameters:
+      - in: path
+        name: branch
+        schema:
+          $ref: '#/components/schemas/Branch'
+        description: 'The account branch. The branch field in the account information should be set to 0 if it does not contain a branch number.'
+        required: true
+      - in: path
+        name: account
+        schema:
+          $ref: '#/components/schemas/Account'
+        description: 'The account number or unique identifier representing the account.'
+        required: true
+      - in: query
+        name: id
+        schema:
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/Id'
+        description: 'The unique identifier of the monitoring service to be cancelled. Only a single value is allowed.'
+        required: false
+      - in: query
+        name: correlationId
+        schema:
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/CorrelationId'
+        description: 'The correlation ID of the monitoring service to be cancelled. Only a single value is allowed.'
+        required: false
+    post:
+      tags:
+        - Accounts
+      summary: 'Cancel a monitoring service into an account.'
+      description: >
+        Cancel a monitoring service related to an account.
+        > **Important:** This operation requires a logged user with the *modify-monitorings* role
+      operationId: cancelAccountMonitoring
+      responses:
+        '200':
+          description: 'Monitoring service successfully cancelled.'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The registered version for the monitoring service.
+            location:
+              schema:
+                type: string
+              description: The redirected location URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringResponse'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '410':
+          $ref: '#/components/responses/entryGone'
+        '412':
+          $ref: '#/components/responses/preconditionFailed'
+        '422':
+          $ref: '#/components/responses/cancelUnprocessedEntity'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /v1/accounts/{branch}/{account}/monitorings/{id}/release:
+    parameters:
+      - in: path
+        name: branch
+        schema:
+          $ref: '#/components/schemas/Branch'
+        description: 'The account branch. The branch field in the account information should be set to 0 if it does not contain a branch number.'
+        required: true
+      - in: path
+        name: account
+        schema:
+          $ref: '#/components/schemas/Account'
+        description: 'The account number or unique identifier representing the account.'
+        required: true
+      - in: path
+        name: id
+        schema:
+          $ref: '#/components/schemas/Id'
+        description: 'The monitoring service ID.'
+        required: true
+      - in: header
+        name: if-match
+        schema:
+          $ref: '#/components/schemas/IfMatch'
+        description: The registered version for the monitoring service.
+        required: true
+    post:
+      deprecated: true
+      tags:
+        - Accounts
+      summary: 'Release a monitored sum into an account'
+      description: >
+        It's possible to debit a sum in the same request by filling in the field "blueprints."
+        This request requires a logged user with the *release-monitorings* role assigned.
+      operationId: releaseAccountMonitoringV1
+      requestBody:
+        description: 'Entry batch request.'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonitoringReleaseRequestV1'
+      responses:
+        '200':
+          description: 'Monitoring successfully updated.'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The registered version for the monitoring service.
+            location:
+              schema:
+                type: string
+              description: The redirected location URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringReleaseResponse'
+        '204':
+          description: The provided batch of transactions is empty, so it couldn't be processed. This could occur if every entry in the batch has already been processed before (e.g. due to idempotency hits).
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '410':
+          $ref: '#/components/responses/entryGone'
+        '412':
+          $ref: '#/components/responses/preconditionFailed'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /v2/accounts/{branch}/{account}/monitorings/{id}/release:
+    parameters:
+      - in: path
+        name: branch
+        schema:
+          $ref: '#/components/schemas/Branch'
+        description: 'The account branch. The branch field in the account information should be set to 0 if it does not contain a branch number.'
+        required: true
+      - in: path
+        name: account
+        schema:
+          $ref: '#/components/schemas/Account'
+        description: 'The account number or unique identifier representing the account.'
+        required: true
+      - in: path
+        name: id
+        schema:
+          $ref: '#/components/schemas/Id'
+        description: 'The monitoring service ID.'
+        required: true
+    post:
+      tags:
+        - Accounts
+      summary: 'Release a monitored sum into an account'
+      description: This request requires a logged user with the *release-monitorings* role assigned.
+      operationId: releaseAccountMonitoringById
+      requestBody:
+        description: 'Entry batch request.'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonitoringReleaseRequest'
+      responses:
+        '200':
+          description: 'The release of the monitoring service was successfully processed.'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The registered version for the monitoring service.
+            location:
+              schema:
+                type: string
+              description: The redirected location URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringReleaseResponse'
+        '204':
+          description: The provided batch of transactions is empty, so it couldn't be processed. This could occur if every entry in the batch has already been processed before (e.g. due to idempotency hits).
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '409':
+          $ref: '#/components/responses/conflictResponse'
+        '410':
+          $ref: '#/components/responses/entryGone'
+        '412':
+          $ref: '#/components/responses/preconditionFailed'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /v2/accounts/{branch}/{account}/monitorings/release:
+    parameters:
+      - in: path
+        name: branch
+        schema:
+          $ref: '#/components/schemas/Branch'
+        description: 'The account branch. The branch field in the account information should be set to 0 if it does not contain a branch number.'
+        required: true
+      - in: path
+        name: account
+        schema:
+          $ref: '#/components/schemas/Account'
+        description: 'The account number or unique identifier representing the account.'
+        required: true
+      - in: query
+        name: correlationId
+        schema:
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/CorrelationId'
+        description: 'The correlation ID of the monitoring service. Only a single value is allowed.'
+        required: true
+    post:
+      tags:
+        - Accounts
+      summary: 'Release a monitored sum into an account'
+      description: >
+        It's possible to debit a sum in the same request by filling in the field "blueprints."
+        This request requires a logged user with the *release-monitorings* role assigned.
+      operationId: releaseAccountMonitoringByCorrelation
+      requestBody:
+        description: 'Entry batch request.'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonitoringReleaseRequest'
+      responses:
+        '200':
+          description: 'Monitoring successfully updated.'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The registered version for the monitoring service.
+            location:
+              schema:
+                type: string
+              description: The redirected location URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringReleaseResponse'
+        '204':
+          description: The provided batch of transactions is empty, so it couldn't be processed. This could occur if every entry in the batch has already been processed before (e.g. due to idempotency hits).
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '409':
+          $ref: '#/components/responses/conflictResponse'
+        '410':
+          $ref: '#/components/responses/entryGone'
+        '412':
+          $ref: '#/components/responses/preconditionFailed'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /v1/account-groups/{kind}/{membershipId}/monitorings:
+    parameters:
+      - in: path
+        name: kind
+        schema:
+          $ref: '#/components/schemas/GroupKind'
+        description: 'The kind of account group to return.'
+        required: true
+      - in: path
+        name: membershipId
+        schema:
+          $ref: '#/components/schemas/MembershipId'
+        description: 'The unique ID to identify the account group.'
+        required: true
+    get:
+      tags:
+        - Account groups
+      summary: 'List monitoring services setup for the account group'
+      description: This request requires a logged user with the *view-monitorings* role assigned.
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/size"
+        - in: query
+          name: correlationIds
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/CorrelationId'
+            minItems: 1
+            maxItems: 100
+          description: 'A list of correlation IDs representing the monitoring services.'
+      operationId: getAccountGroupMonitorings
+      responses:
+        '200':
+          $ref: '#/components/responses/monitoringsAccountResponse'
+        '400':
+          $ref: '#/components/responses/notFound'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+    post:
+      tags:
+        - Account groups
+      summary: 'Set up monitoring service for a group of accounts'
+      description: This request requires a logged user with the *modify-monitorings* role assigned.
+      operationId: createAccountGroupMonitoring
+      requestBody:
+        description: 'Entry monitoring request.'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonitoringRequest'
+      responses:
+        '201':
+          description: 'The monitoring service has successfully been set up.'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The registered version for the monitoring service.
+            location:
+              schema:
+                type: string
+              description: The redirected location URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringResponse'
+        '204':
+          description: The provided batch of transactions is empty, so it couldn't be processed. This could occur if every entry in the batch has already been processed before (e.g. due to idempotency hits).
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '410':
+          $ref: '#/components/responses/entryGone'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+    patch:
+      tags:
+        - Account groups
+      summary: 'Update monitoring service for a group of accounts'
+      description: This request requires a logged user with the *modify-monitorings* role assigned.
+      parameters:
+        - in: header
+          name: if-match
+          schema:
+            $ref: '#/components/schemas/IfMatch'
+          description: 'The current monitoring registry version. This parameter value has to be equal to the last monitoring version.'
+          required: true
+        - in: query
+          name: correlationId
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/CorrelationId'
+            minItems: 1
+            maxItems: 1
+          description: 'Correlation ID'
+          required: false
+      operationId: updateAccountGroupMonitoringByCorrelationId
+      requestBody:
+        description: 'Entry monitoring request.'
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/MonitoringPatchRequest'
+      responses:
+        '200':
+          description: 'The monitoring service was successfully updated.'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The registered version for the monitoring service.
+            location:
+              schema:
+                type: string
+              description: The redirected location URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringResponse'
+        '204':
+          description: The provided batch of transactions is empty, so it couldn't be processed. This could occur if every entry in the batch has already been processed before (e.g. due to idempotency hits).
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '410':
+          $ref: '#/components/responses/entryGone'
+        '412':
+          $ref: '#/components/responses/preconditionFailed'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /v1/account-groups/{kind}/{membershipId}/monitorings/{id}/entries:
+    parameters:
+      - in: path
+        name: kind
+        schema:
+          $ref: '#/components/schemas/GroupKind'
+        description: 'The kind of account group to return.'
+        required: true
+      - in: path
+        name: membershipId
+        schema:
+          $ref: '#/components/schemas/MembershipId'
+        description: 'The unique ID to identify the account group.'
+        required: true
+      - in: path
+        name: id
+        schema:
+          $ref: '#/components/schemas/Id'
+        description: 'The monitoring service ID.'
+        required: true
+      - $ref: "#/components/parameters/page"
+      - $ref: "#/components/parameters/size"
+    get:
+      tags:
+        - Account groups
+      summary: 'List monitored transactions across a group of accounts'
+      description: This request requires a logged user with the *view-monitorings* role assigned.
+      operationId: getAccountGroupMonitoringEntries
+      responses:
+        '200':
+          $ref: '#/components/responses/monitoringAccountEntriesResponse'
+        '400':
+          $ref: '#/components/responses/notFound'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /v1/account-groups/{kind}/{membershipId}/monitorings/{id}:
+    parameters:
+      - in: path
+        name: kind
+        schema:
+          $ref: '#/components/schemas/GroupKind'
+        description: 'The kind of account group to return.'
+        required: true
+      - in: path
+        name: membershipId
+        schema:
+          $ref: '#/components/schemas/MembershipId'
+        description: 'The unique ID to identify the account group.'
+        required: true
+      - in: path
+        name: id
+        schema:
+          $ref: '#/components/schemas/Id'
+        description: 'The monitoring service ID.'
+        required: true
+    get:
+      tags:
+        - Account groups
+      summary: 'Find monitoring service for a group of accounts by ID'
+      description: This request requires a logged user with the *view-monitorings* role assigned.
+      operationId: getAccountGroupMonitoring
+      responses:
+        '200':
+          description: 'Successful request. The JSON response body contains detailed information about the monitoring service.'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The registered version for the monitoring service.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringResponse'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+    patch:
+      tags:
+        - Account groups
+      summary: 'Update a monitoring associated with an account group'
+      description: This request requires a logged user with the *modify-monitorings* role assigned.
+      parameters:
+        - in: header
+          name: if-match
+          schema:
+            $ref: '#/components/schemas/IfMatch'
+          description: The registered version for the monitoring service.
+          required: true
+      operationId: updateAccountGroupMonitoring
+      requestBody:
+        description: 'Entry monitoring request.'
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/MonitoringPatchRequest'
+      responses:
+        '200':
+          description: 'Monitoring successfully updated.'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The registered version for the monitoring service.
+            location:
+              schema:
+                type: string
+              description: The redirected location URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringResponse'
+        '204':
+          description: The provided batch of transactions is empty, so it couldn't be processed. This could occur if every entry in the batch has already been processed before (e.g. due to idempotency hits).
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '410':
+          $ref: '#/components/responses/entryGone'
+        '412':
+          $ref: '#/components/responses/preconditionFailed'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /v1/account-groups/{kind}/{membershipId}/monitorings/cancel:
+    parameters:
+      - in: path
+        name: kind
+        schema:
+          $ref: '#/components/schemas/GroupKind'
+        description: 'The kind of account group to return.'
+        required: true
+      - in: path
+        name: membershipId
+        schema:
+          $ref: '#/components/schemas/MembershipId'
+        description: 'The unique ID to identify the account group.'
+        required: true
+      - in: query
+        name: id
+        schema:
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/Id'
+        description: 'The unique identifier of the monitoring service to be cancelled. Only a single value is allowed.'
+        required: false
+      - in: query
+        name: correlationId
+        schema:
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/CorrelationId'
+        description: 'The correlation ID of the monitoring service to be cancelled. Only a single value is allowed.'
+        required: false
+    post:
+      tags:
+        - Account groups
+      summary: 'Cancel a monitoring into an group of account.'
+      description: >
+        Cancel a monitoring related to an account group
+
+        > **Important:** This operation requires a logged user with the *modify--monitorings* role
+      operationId: cancelAccountGroupMonitoring
+      responses:
+        '200':
+          description: 'Monitoring successfully cancelled.'
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The monitoring registry version.
+            location:
+              schema:
+                type: string
+              description: The location URL redirected.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringResponse'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '410':
+          $ref: '#/components/responses/entryGone'
+        '412':
+          $ref: '#/components/responses/preconditionFailed'
+        '422':
+          $ref: '#/components/responses/cancelUnprocessedEntity'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /v1/account-groups/{kind}/{membershipId}/monitorings/{id}/release:
+    parameters:
+      - in: path
+        name: kind
+        schema:
+          $ref: '#/components/schemas/GroupKind'
+        description: 'The kind of account group to return.'
+        required: true
+      - in: path
+        name: membershipId
+        schema:
+          $ref: '#/components/schemas/MembershipId'
+        description: 'The unique ID to identify the account group.'
+        required: true
+      - in: path
+        name: id
+        schema:
+          $ref: '#/components/schemas/Id'
+        description: 'The monitoring service ID.'
+        required: true
+      - in: header
+        name: if-match
+        schema:
+          $ref: '#/components/schemas/IfMatch'
+        description: The registered version for the monitoring service.
+        required: true
+    post:
+      deprecated: true
+      tags:
+        - Account groups
+      summary: 'Release a monitored sum into a group of accounts'
+      description: >
+        It's possible to debit a sum in the same request by filling in the field "blueprints."
+        This request requires a logged user with the *release-monitorings* role assigned.
+      operationId: releaseAccountGroupMonitoringV1
+      requestBody:
+        description: 'Entry monitoring request.'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonitoringReleaseRequestV1'
+      responses:
+        '200':
+          description: The monitored sum was successfully released into the group of accounts.
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The registered version for the monitoring service.
+            location:
+              schema:
+                type: string
+              description: The redirected location URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringReleaseResponse'
+        '204':
+          description: The provided batch of transactions is empty, so it couldn't be processed. This could occur if every entry in the batch has already been processed before (e.g. due to idempotency hits).
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '410':
+          $ref: '#/components/responses/entryGone'
+        '412':
+          $ref: '#/components/responses/preconditionFailed'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /v2/account-groups/{kind}/{membershipId}/monitorings/{id}/release:
+    parameters:
+      - in: path
+        name: kind
+        schema:
+          $ref: '#/components/schemas/GroupKind'
+        description: 'The kind of account group to return.'
+        required: true
+      - in: path
+        name: membershipId
+        schema:
+          $ref: '#/components/schemas/MembershipId'
+        description: 'The unique ID to identify the account group.'
+        required: true
+      - in: path
+        name: id
+        schema:
+          $ref: '#/components/schemas/Id'
+        description: 'The monitoring service ID.'
+        required: true
+    post:
+      tags:
+        - Account groups
+      summary: 'Release a monitored sum into a group of accounts'
+      description: >
+        It's possible to debit a sum in the same request by filling in the field "blueprints."
+        This request requires a logged user with the *release-monitorings* role assigned.
+      operationId: releaseAccountGroupMonitoringById
+      requestBody:
+        description: 'Request for monitoring transactions.'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonitoringReleaseRequest'
+      responses:
+        '200':
+          description: The monitored sum was successfully released into the group of accounts.
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The registered version for the monitoring service.
+            location:
+              schema:
+                type: string
+              description: The redirected location URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringReleaseResponse'
+        '204':
+          description: The provided batch of transactions is empty, so it couldn't be processed. This could occur if every entry in the batch has already been processed before (e.g. due to idempotency hits).
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '409':
+          $ref: '#/components/responses/conflictResponse'
+        '410':
+          $ref: '#/components/responses/entryGone'
+        '412':
+          $ref: '#/components/responses/preconditionFailed'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+  /v2/account-groups/{kind}/{membershipId}/monitorings/release:
+    parameters:
+      - in: path
+        name: kind
+        schema:
+          $ref: '#/components/schemas/GroupKind'
+        description: 'The kind of account group to return.'
+        required: true
+      - in: path
+        name: membershipId
+        schema:
+          $ref: '#/components/schemas/MembershipId'
+        description: 'The unique ID to identify the account group.'
+        required: true
+      - in: query
+        name: correlationId
+        schema:
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/CorrelationId'
+        description: 'The correlation ID of the monitoring service. Only a single value is allowed.'
+        required: true
+    post:
+      tags:
+        - Account groups
+      summary: 'Release a monitored sum into a group of accounts'
+      description: >
+        It's possible to debit a sum in the same request by filling in the field "blueprints."
+        This request requires a logged user with the *release-monitorings* role
+      operationId: releaseAccountGroupMonitoringByCorrelation
+      requestBody:
+        description: 'Entry monitoring request.'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonitoringReleaseRequest'
+      responses:
+        '200':
+          description: The monitored sum was successfully released into the group of accounts.
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The registered version for the monitoring service.
+            location:
+              schema:
+                type: string
+              description: The redirected location URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringReleaseResponse'
+        '204':
+          description: The provided batch of transactions is empty, so it couldn't be processed. This could occur if every entry in the batch has already been processed before (e.g. due to idempotency hits).
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '401':
+          $ref: '#/components/responses/unauthorizedRequest'
+        '402':
+          $ref: '#/components/responses/paymentRequired'
+        '403':
+          $ref: '#/components/responses/forbiddenRequest'
+        '409':
+          $ref: '#/components/responses/conflictResponse'
+        '410':
+          $ref: '#/components/responses/entryGone'
+        '412':
+          $ref: '#/components/responses/preconditionFailed'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          $ref: '#/components/responses/unexpectedError'
+components:
+  responses:
+    unprocessedEntity:
+      description: The request failed despite the server's ability to comprehend it. For instance, this may occur if the operation has already been completed previously.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            alreadyBlockedCautionaryBlockTarget:
+              $ref: '#/components/examples/alreadyBlockedCautionaryBlockTarget'
+            alreadyCompensatedCautionaryBlockTarget:
+              $ref: '#/components/examples/alreadyCompensatedCautionaryBlockTarget'
+            invalidCautionaryBlockProblem:
+              $ref: '#/components/examples/invalidCautionaryBlockProblem'
+            invalidCautionaryBlockTargetCorrelationIdProblem:
+              $ref: '#/components/examples/invalidCautionaryBlockTargetCorrelationIdProblem'
+            invalidCautionaryBlockTargetKindProblem:
+              $ref: '#/components/examples/invalidCautionaryBlockTargetKindProblem'
+            invalidCautionaryBlockTargetStatusProblem:
+              $ref: '#/components/examples/invalidCautionaryBlockTargetStatusProblem'
+            invalidCompensationTargetProblem:
+              $ref: '#/components/examples/invalidCompensationTargetProblem'
+            activeCompensationEntryProblem:
+              $ref: '#/components/examples/activeCompensationEntryProblem'
+            alreadyUnblockedCautionaryBlockTargetProblem:
+              $ref: '#/components/examples/alreadyUnblockedCautionaryBlockTargetProblem'
+            amountBasedCautionaryBlockParameterMismatchProblem:
+              $ref: '#/components/examples/amountBasedCautionaryBlockParameterMismatchProblem'
+            holdReasonBasedCautionaryBlockParameterMismatchProblem:
+              $ref: '#/components/examples/holdReasonBasedCautionaryBlockParameterMismatchProblem'
+            settlementMistmachProblem:
+              $ref: '#/components/examples/settlementMistmachProblem'
+            invalidSettlementProblemWithTotalSettlement:
+              $ref: '#/components/examples/invalidSettlementProblemWithTotalSettlement'
+            invalidSettlementProblemWithPartialSettlement:
+              $ref: '#/components/examples/invalidSettlementProblemWithPartialSettlement'
+            notImplementedWithTentativeVersion:
+              $ref: '#/components/examples/notImplementedWithTentativeVersion'
+            notImplementedWithoutTentativeVersion:
+              $ref: '#/components/examples/notImplementedWithoutTentativeVersion'
+            activeCompensationTriggeredIntent:
+              $ref: '#/components/examples/activeCompensatingTriggeredIntent'
+            duplicatedCompensationEntryProblem:
+              $ref: '#/components/examples/duplicatedCompensatingEntry'
+            entryCompensationPeriodExceededProblem:
+              $ref: '#/components/examples/entryCompensationPeriodExceeded'
+    cancelUnprocessedEntity:
+      description: 'Unprocessed Entity'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            forbiddenMonitoringCancellationProblem:
+              $ref: '#/components/examples/forbiddenMonitoringCancellation'
+    badRequest:
+      description: 'The request failed because there is an invalid attribute.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            badRequest:
+              $ref: '#/components/examples/badRequest'
+            accountNotFound:
+              $ref: '#/components/examples/accountNotFound'
+            balancesNotConfigured:
+              $ref: '#/components/examples/balancesNotConfigured'
+            entryNotFound:
+              $ref: '#/components/examples/entryNotFound'
+            holdReasonNotAllowed:
+              $ref: '#/components/examples/holdReasonNotAllowed'
+            holdReasonNotFound:
+              $ref: '#/components/examples/holdReasonNotFound'
+            illegalFulFillmentCapableAmount:
+              $ref: '#/components/examples/illegalFulFillmentCapableAmount'
+            inactiveAccount:
+              $ref: '#/components/examples/inactiveAccount'
+            insufficientFunds:
+              $ref: '#/components/examples/insufficientFunds'
+            operationNotAllowedProblem:
+              $ref: '#/components/examples/operationNotAllowedProblem'
+            invalidEntryBatchMetadata:
+              $ref: '#/components/examples/invalidEntryBatchMetadata'
+            debitBasedCautionaryBlockTarget:
+              $ref: '#/components/examples/debitBasedCautionaryBlockTarget'
+            missingCautionaryBlockCorrelationIdProblem:
+              $ref: '#/components/examples/missingCautionaryBlockCorrelationIdProblem'
+            pendingEntryCompensationProblem:
+              $ref: '#/components/examples/pendingEntryCompensationProblem'
+            illegalReleaseAmount:
+              $ref: '#/components/examples/illegalReleaseAmount'
+            illegalRelatedAmountEntries:
+              $ref: '#/components/examples/illegalRelatedAmountEntries'
+            invalidMonitoringRelatedEntryKind:
+              $ref: '#/components/examples/invalidMonitoringRelatedEntryKind'
+            invalidMonitoringRelatedEntryType:
+              $ref: '#/components/examples/invalidMonitoringRelatedEntryType'
+            unknownBalanceType:
+              $ref: '#/components/examples/unknownBalanceType'
+            invalidReturnedBalanceType:
+              $ref: '#/components/examples/invalidReturnedBalanceType'
+            currencyMismatchProblem:
+              $ref: '#/components/examples/currencyMismatch'
+            illegalArgumentParseProblem:
+              $ref: '#/components/examples/illegalArgumentParse'
+            illegalMonitoringReleaseProblem:
+              $ref: '#/components/examples/illegalMonitoringRelease'
+    unauthorizedRequest:
+      description: 'The request failed because of an authentication error.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            unauthorizedRequest:
+              $ref: '#/components/examples/unauthorizedRequest'
+    forbiddenRequest:
+      description: 'The request failed because of lack of user permissions.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            unauthorizedRequest:
+              $ref: '#/components/examples/forbiddenRequest'
+    notFound:
+      description: 'The provided resource was not found.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            notFound:
+              $ref: '#/components/examples/notFound'
+    unexpectedError:
+      description: 'The request failed because there was an unexpected error. For instance, the connection to the database may have timed out.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            unexpectedError:
+              $ref: '#/components/examples/unexpectedError'
+    paymentRequired:
+      description: 'The request failed due to insufficient funds.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            paymentRequired:
+              $ref: '#/components/examples/paymentRequired'
+    gone:
+      description: 'Access to the target resource is no longer available and this is likely to be permanent. It seems to be removed earlier.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            paymentRequired:
+              $ref: '#/components/examples/gone'
+    entryGone:
+      description: 'Access to the target resource is no longer available and this is likely to be permanent. It seems to be removed earlier.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            paymentRequired:
+              $ref: '#/components/examples/entryGone'
+    preconditionFailed:
+      description: 'Precondition Failed.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            monitoringIntentVersionMismatchException:
+              $ref: '#/components/examples/monitoringIntentVersionMismatchException'
+            illegalMonitoringStatus:
+              $ref: '#/components/examples/illegalMonitoringStatus'
+    serviceUnavailable:
+      description: 'Service Unavailable.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            accountUnavailable:
+              $ref: '#/components/examples/accountUnavailable'
+            tooManyConcurrentRequests:
+              $ref: '#/components/examples/tooManyConcurrentRequests'
+            balanceSnapshotConflict:
+              $ref: '#/components/examples/balanceSnapshotConflict'
+            balancesLocker:
+              $ref: '#/components/examples/balancesLocker'
+            optimisticLockingFailure:
+              $ref: '#/components/examples/optimisticLockingFailure'
+    conflictResponse:
+      description: 'Response for conflicted request'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemResponse'
+          examples:
+            conflictCorrelationProblem:
+              $ref: '#/components/examples/conflictCorrelation'
+    monitoringsAccountResponse:
+      description: 'Successful request. It returns a list with all the monitoring services that have been set up, and some important details about each of them.'
+      headers:
+        'X-Total-Items':
+          $ref: '#/components/headers/xTotalItems'
+        'X-Total-Pages':
+          $ref: '#/components/headers/xTotalPages'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MonitoringsAccountResponse'
+    monitoringAccountEntriesResponse:
+      description: 'Successful request. It returns a list with the monitored transactions for one account the some important details about each of them.'
+      headers:
+        'X-Total-Items':
+          $ref: '#/components/headers/xTotalItems'
+        'X-Total-Pages':
+          $ref: '#/components/headers/xTotalPages'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MonitoringAccountEntriesResponse'
+    entryBatchResponse:
+      description: 'Successful request. The transactions were added to the account. The JSON response body contains detailed information about them.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EntryBatchGroupResponse'
+  examples:
+    accountNotFound:
+      value:
+        type: http://dtw.matera.com/transaction/account-not-found
+        title: Account Not Found
+        status: 400
+        detail: The account 213/213123 was not found
+        account: {number: 213123, branch: 213}
+      summary: Account not found response
+    accountUnavailable:
+      value:
+        type: http://dtw.matera.com/transaction/account-temporarily-unavailable
+        title: Account temporarily unavailable
+        status: 503
+        detail: The account 213/213123 is temporarily unavailable.
+        account: { number: 213123, branch: 213 }
+      summary: Account temporarily unavailable
+    tooManyConcurrentRequests:
+      value:
+        title: Service Unavailable
+        status: 503
+        detail: Too many concurrent requests
+      summary: Too many concurrent requests
+    balanceSnapshotConflict:
+      value:
+        title: Service Unavailable
+        status: 503
+        detail: 'Since a new balance snapshot was created during the given batch processing, it should be retried [account: %s]'
+      summary: Balance snapshot conflict
+    balancesLocker:
+      value:
+        title: Service Unavailable
+        status: 503
+        detail: An error occurred when trying to lock current transaction balances
+      summary: Balances locker
+    optimisticLockingFailure:
+      value:
+        title: Service Unavailable
+        status: 503
+        detail: Entry batch for account 213/123213 cannot be created, concurrent entries were detected
+      summary: Optimistic locking failure 
+    balancesNotConfigured:
+      value:
+        type: http://dtw.matera.com/transaction/balances-not-configured
+        title: No balances were affected by the given entry's profile
+        status: 400
+        detail: No balance configured to the account 213/123213 with entry type 456
+        accountType: 7890
+        historyCode: 456
+      summary: Balances not configured
+    entryNotFound:
+      value:
+        type: http://dtw.matera.com/transaction/entry-not-found
+        title: Entry Not Found
+        status: 400
+        detail: Could not found entry of id 123123123 with account 22/9982
+        entry: { originator: dummy-originator, id: 123123123 }
+      summary: Entry not found
+    holdReasonNotAllowed:
+      value:
+        type: http://dtw.matera.com/transaction/hold-reason-not-allowed
+        title: Hold reason not allowed
+        status: 400
+        detail: The hold reason 345 is not allowed for given status PENDING
+        holdReasonId: 345
+        entryStatus: PENDING
+      summary: Hold reason not allowed
+    holdReasonNotFound:
+      value:
+        type: http://dtw.matera.com/transaction/hold-reason-not-found
+        title: Hold reason not found
+        status: 400
+        detail: The hold reason of id 1234 was not found
+        holdReasonId: 345
+      summary: Hold reason not found
+    illegalFulFillmentCapableAmount:
+      value:
+        type: http://dtw.matera.com/transaction/illegal-fulfillment-capable-amount
+        title: Illegal fulfillment capable amount
+        status: 400
+        detail: The fulfillment capable entry value must have the same amount as the related 'PENDING' entry [USD 500.00 and USD 600.00, respectively]
+        currentEntryValue: {currency: USD, value: 50000 }
+        originalEntryValue: {currency: USD, value: 60000 }
+      summary: Illegal fulfillment capable amount
+    inactiveAccount:
+      value:
+        type: http://dtw.matera.com/transaction/inactive-account
+        title: Inactive account
+        status: 400
+        detail: The account 213/213213 is marked as inactive
+        account: {number: 213213, branch: 213, status: ACTIVE }
+    insufficientFunds:
+      value:
+        type: http://dtw.matera.com/transaction/insufficient-funds
+        title: Insufficient funds
+        status: 400
+        detail: Insufficient funds on balance REAL while trying to process account 123/123213
+        requiredAmount: {currency: USD, value: 50000 }
+        availableAmount: {currency: USD, value: 30000 }
+        balanceType: CRON_BASED_ACCOUNT_BALANCE
+        nextRefreshAt: 521-06-08T14:00:00Z
+      summary: Insufficient funds
+    operationNotAllowedProblem:
+      value:
+        type: http://dtw.matera.com/transaction/operation-not-allowed
+        title: Operation not allowed
+        status: 400
+        detail: The operation kind [CREDIT] is not allowed on account [123/123213]
+        operationKind: CREDIT
+      summary: Operation not allowed
+    invalidEntryBatchMetadata:
+      value:
+        title: Invalida Batch
+        status: 400
+        detail: 'Error: Invalid metadata for this batch'
+        account: {number: 123213, branch: 123 }
+      summary: Invalid entry batch
+    pendingEntryCompensationProblem:
+      value:
+        type: http://dtw.matera.com/transaction/pending-entry-compensation
+        title: Compensation of entries with status PENDING is not allowed
+        status: 400
+        detail: The status of the given compensation target forbids its compensation
+        compensationEntry:
+          kind: exclusion-entry
+          originator: target-originator
+          correlationId: target-correlation-id
+          compensatingEntry:
+            kind: ledger-entry
+            status: ON_HOLD
+            originator: target-originator
+            correlationId: target-correlation-id
+      summary: Only entries whose status is POSTED may be compensated
+    invalidCompensationTargetProblem:
+      value:
+        type: http://dtw.matera.com/transaction/invalid-compensation-target
+        title: Invalid compensation target
+        status: 422
+        detail: The status of the given compensation target forbids its compensation
+        compensationEntry:
+          kind: exclusion-entry
+          originator: target-originator
+          correlationId: target-correlation-id
+          compensatingEntry:
+            kind: ledger-entry
+            status: ON_HOLD
+            originator: target-originator
+            correlationId: target-correlation-id
+      summary: Only entries whose status is POSTED may be cautionary blocked
+    activeCompensationEntryProblem:
+      value:
+        type: http://dtw.matera.com/transaction/active-compensation
+        title: Entry that is already compensated, or that has an active compensation, is not allowed
+        status: 422
+        detail: The entry 01811fb4-2802-e445-2d46-e94d98613fe7 has already been compensated by 01811fb6-449c-205f-fb80-e95383231e6f.
+        compensationEntryId: 01811fb4-2802-e445-2d46-e94d98613fe7
+        kind: reversal-entry
+        correlations:
+          originator: compensation-originator
+          correlationId: compensation-correlation-id
+      summary: Entry that is already compensated, or that has an active compensation
+    alreadyUnblockedCautionaryBlockTargetProblem:
+      value:
+        type: http://dtw.matera.com/transaction/invalid-cautionary-block-target/target-already-unblocked
+        title: Invalid cautionary block target
+        status: 422
+        detail: The designated target for cautionary blocking is invalid as it was already unblocked.
+        target:
+          kind: ledger-entry
+          correlationIds: [{ originator: foo, correlationId: bar }]
+          unblockingEntry:
+            kind: unblocking-entry
+            correlationIds: [{ originator: foo, correlationId: bar2 }]
+      summary: A cautionary-blocked entry may be unblocked only once
+    amountBasedCautionaryBlockParameterMismatchProblem:
+      value:
+        type: http://dtw.matera.com/transaction/cautionary-block-parameter-mismatch
+        title: Cautionary block parameter mismatch
+        status: 422
+        detail: The value from field amount on entries null and null does not match (USD 100.00 and USD 101.00, respectively)
+        target:
+          offendingField: amount
+          firstEntry:
+            value: 10000
+            currency: USD
+          secondEntry:
+            value: 10100
+            currency: USD
+      summary: Both the blocking and unblocking entries of cautionary block operation must have the same amount
+    holdReasonBasedCautionaryBlockParameterMismatchProblem:
+      value:
+        type: http://dtw.matera.com/transaction/cautionary-block-parameter-mismatch
+        title: Cautionary block parameter mismatch
+        status: 422
+        detail: The value from field holdReason on entries null and null does not match (1 and 2, respectively)
+        target:
+          offendingField: holdReason
+          firstEntry:
+            value: 1
+          secondEntry:
+            value: 2
+      summary: Both the blocking and unblocking entries of cautionary block operation must have the same hold reason
+    settlementMistmachProblem:
+      value:
+        type: http://dtw.matera.com/transaction/settlement-mismatch
+        title: Settlement mismatch
+        status: 422
+        detail: The entry capable of fulfillment and the corresponding fulfilling entry must align in their settlement types [PARTIAL and TOTAL, respectively] for compatibility.
+        originalValue: TOTAL
+        currentValue: PARTIAL
+      summary: The settlement of a pending entry does not match with the settlement of its post entry.
+    invalidSettlementProblemWithTotalSettlement:
+      value:
+        type: http://dtw.matera.com/transaction/invalid-settlement
+        title: Invalid settlement
+        status: 422
+        detail: The given entry of kind 'posted-ledger-entry' and balance update strategy 'CONDITIONAL' does not support settlements of type 'TOTAL'.
+        target:
+          kind: ledger-entry
+          originator: foo
+          correlationId: bar
+        settlement:
+          fulfillment: TOTAL
+      summary: The given entry does not support a settlement whose type is 'TOTAL'.
+    invalidSettlementProblemWithPartialSettlement:
+      value:
+        type: http://dtw.matera.com/transaction/invalid-settlement
+        title: Invalid settlement
+        status: 422
+        detail: The given entry of kind 'posted-ledger-entry' and balance update strategy 'CONDITIONAL' does not support settlements of type 'PARTIAL'.
+        target:
+          kind: ledger-entry
+          originator: foo
+          correlationId: bar
+        settlement:
+          fulfillment: PARTIAL
+          amountRange:
+            minimum:
+              amount: 100.25
+              currency: USD
+            maximum:
+              amount: 102.25
+              currency: USD
+      summary: The given entry does not support a settlement whose type is 'PARTIAL'.
+    missingCautionaryBlockCorrelationIdProblem:
+      value:
+        type: http://dtw.matera.com/transaction/invalid-cautionary-block-target/missing-cautionary-block-correlation-id
+        title: Missing correlation ID of cautionary block entry
+        status: 400
+        detail: The cautionary blocking does not have a correlation ID.
+        target:
+          correlationIds: [{ originator: foo, correlationId: bar }]
+      summary: An additional correlation ID is required when a newly-created entry must be cautionary blocked
+    invalidCautionaryBlockProblem:
+      value:
+        type: http://dtw.matera.com/transaction/invalid-cautionary-block
+        title: Invalid cautionary block target
+        status: 412
+        detail: The blocking entry foo=bar is invalid because its correlation ID has already been used.
+        blocking:
+          correlationIds: [{ originator: foo, correlationId: bar }]
+        target:
+          correlationIds: [{ originator: foo, correlationId: bar2 }]
+      summary: An cautionary block should be created using a correlationId that wasn't used before.
+    invalidCautionaryBlockTargetStatusProblem:
+      value:
+        type: http://dtw.matera.com/transaction/invalid-cautionary-block-target/invalid-status
+        title: Invalid cautionary block target
+        status: 422
+        detail: The given cautionary blocking target is invalid due to it being on an invalid status (it must be posted)
+        target:
+          status: PENDING
+          correlationIds: [{ originator: foo, correlationId: bar }]
+      summary: Only entries whose status is POSTED may be cautionary blocked
+    invalidCautionaryBlockTargetKindProblem:
+      value:
+        type: http://dtw.matera.com/transaction/invalid-cautionary-block-target/invalid-entry-kind
+        title: Invalid cautionary block target
+        status: 422
+        detail: The given cautionary blocking target is invalid due to it being of an unblockable type
+        target:
+          kind: reversal-entry
+          correlationIds: [{ originator: foo, correlationId: bar }]
+      summary: Only ledger and unblocking entries maybe be cautionary blocked
+    invalidCautionaryBlockTargetCorrelationIdProblem:
+      value:
+        type: http://dtw.matera.com/transaction/invalid-cautionary-block-target/invalid-correlation-id
+        title: Invalid cautionary block target
+        status: 409
+        detail: The entry or transaction matches the cautionary block correlation ID, so it's not valid.
+        target:
+          correlationIds: [{ originator: foo, correlationId: bar }]
+      summary: Blocking entry and it's target must have different correlationIds
+    debitBasedCautionaryBlockTarget:
+      value:
+        type: http://dtw.matera.com/transaction/invalid-cautionary-block-target/debit-based-entry
+        title: Invalid cautionary block target
+        status: 400
+        detail: The given cautionary blocking target is invalid due to it being a debit
+        historyCode: 1234
+      summary: Only credits may be cautionary blocked
+    notImplementedWithTentativeVersion:
+      value:
+        type: http://dtw.matera.com/transaction/not-implemented/dummy-operation
+        title: Not implemented
+        status: 422
+        detail: Dummy operation was not implemented yet
+        tentativeVersion: -supplied
+        dummy-key: dummy-value
+      summary: Return showing that the 'dummy-operation' has not being implemented yet (according to the result, the version on which the aforementioned operation is implemented is not currently known
+    notImplementedWithoutTentativeVersion:
+      value:
+        type: http://dtw.matera.com/transaction/not-implemented/dummy-operation
+        title: Not implemented
+        status: 422
+        detail: Dummy operation was not implemented yet
+        tentativeVersion: 1.2.3
+        dummy-key: dummy-value
+      summary: Return showing that the 'dummy-operation' has not being implemented yet (according to the result, it should be ready at version 1.2.3)
+    alreadyBlockedCautionaryBlockTarget:
+      value:
+        type: http://dtw.matera.com/transaction/invalid-cautionary-block-target/target-already-blocked
+        title: Invalid cautionary block target
+        status: 422
+        detail: The given cautionary blocking target is invalid due to it being already blocked
+        target:
+          correlationIds: [{ originator: foo, correlationId: bar }]
+          blockingEntry:
+            kind: ledger-entry
+            correlationIds: [{ originator: foo, correlationId: bar2 }]
+      summary: Cautionary block target has already been blocked
+    alreadyCompensatedCautionaryBlockTarget:
+      value:
+        type: http://dtw.matera.com/transaction/invalid-cautionary-block-target/target-already-compensated
+        title: Invalid cautionary block target
+        status: 422
+        detail: The given cautionary blocking target is invalid due to it being already compensated
+        target:
+          status: EXCLUDED
+          correlationIds: [{ originator: foo, correlationId: bar }]
+          compensationEntry:
+            kind: exclusion-entry
+            correlationIds: [{ originator: foo, correlationId: bar2 }]
+      summary: Cautionary block target has already been compensated
+    badRequest:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Bad Request
+        status: 400
+        detail: Invalid attribute
+      summary: Bad request
+    unauthorizedRequest:
+      value:
+        title: Unauthorized
+        status: 401
+        detail: Unauthorized request
+      summary: Unauthorized request
+    forbiddenRequest:
+      value:
+        title: Forbidden
+        status: 403
+        detail: Access is denied
+      summary: The user doesn't have the necessary role or authority to perform the action.
+    paymentRequired:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Payment Required
+        status: 402
+        detail: Insufficient funds
+      summary: Not found
+    gone:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: The resource does not exists anymore, it was previously deleted
+        status: 410
+        detail: Access to the target resource is no longer available and this is likely to be permanent. It seems to be removed earlier.
+      summary: The resource does not exists.
+    entryGone:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Entry does not exists anymore, it was previously deleted
+        status: 410
+        detail: Access to the entry is no longer available and this is likely to be permanent. It seems to be removed earlier.
+      summary: Entry does not exists.
+    notFound:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Not Found
+        status: 404
+        detail: The provided resource was not found.
+      summary: Not Found request
+    unexpectedError:
+      value:
+        type: https://zalando.github.io/problem/constraint-violation
+        title: Unexpected Error
+        status: 500
+        detail: Connection to database timed out
+      summary: Bad request
+    illegalReleaseAmount:
+      value:
+        type: http://dtw.matera.com/transaction/illegal-release-amount
+        title: Illegal release amount
+        status: 400
+        detail: Could not release USD 123.45 from intent 01816ccf-8ea7-660a-009f-cbcd0cd2d97b
+        availableAmount: {currency: USD, value: 100}
+        requiredAmount: {currency: USD, value: 12345}
+      summary: Illegal Release Amount
+    monitoringIntentVersionMismatchException:
+      value:
+        type: http://dtw.matera.com/transaction/monitoring-version-mismatch
+        title: Monitoring service version mismatch
+        status: 412
+        detail: 'The monitoring service 01816ccf-8ea7-660a-009f-cbcd0cd2d97b is not on the expected version. The update failed. [expected: 34, actual: 3]'
+        expectedVersion: 34,
+        intent: 01816ccf-8ea7-660a-009f-cbcd0cd2d97b
+        actualVersion: 3
+      summary: Monitoring service version mismatch
+    illegalMonitoringStatus:
+      value:
+        type: http://dtw.matera.com/transaction/illegal-monitoring-status
+        title: Illegal monitoring service status
+        status: 412
+        detail: 'The status of the monitoring service foo=bar is CANCELLED. Therefore, its operation was aborted.'
+        actualStatus: CANCELLED
+        monitoring: 01816ccf-8ea7-660a-009f-cbcd0cd2d97b
+        correlations: [{ originator: foo, correlationId: bar }]
+      summary: Illegal monitoring service status
+    illegalRelatedAmountEntries:
+      value:
+        type: http://dtw.matera.com/transaction/related-entry-amount-mismatch
+        title: Related entry amount mismatch
+        status: 400
+        detail: Could not release [USD 1.00] of intent due to the amount related entries being greater than the released value.
+        releaseAmount: {currency: USD, value: 100}
+        totalAmountEntries: {currency: USD, value: 1400}
+      summary: Related entry amount mismatch
+    unknownBalanceType:
+      value:
+        type: http://dtw.matera.com/transaction/balance-type-not-found
+        title: Balance type not found
+        status: 400
+        detail: 'Unknown balance type: ab4f1729-63f6-4561-b489-2a82e90c059b'
+        instance: /v1/balance-types/ab4f1729-63f6-4561-b489-2a82e90c059b
+      summary: Some of the requested balances are not known
+    invalidReturnedBalanceType:
+      value:
+        type: http://dtw.matera.com/transaction/invalid-returned-balance
+        title: Invalid returned balance
+        status: 400
+        detail: 'The balance DUMMY_VIRTUAL_BALANCE cannot be returned'
+        instance: /v1/balance-types/DUMMY_VIRTUAL_BALANCE
+      summary: Some of the requested balances cannot be returned (normally, these are virtual balances).
+    invalidMonitoringRelatedEntryKind:
+      value:
+        type: http://dtw.matera.com/transaction/invalid-monitoring-related-entry/invalid-entry-kind
+        title: Invalid monitoring related entry
+        status: 400
+        detail: The given entry blocking-entry is invalid due to it being not of ledger-entry
+        entry: {kind: blocking-entry, correlationIds: [{ originator: foor, correlationId: bar }]}
+      summary: Invalid Monitoring Related Entry Kind
+    invalidMonitoringRelatedEntryType:
+      value:
+        type: http://dtw.matera.com/transaction/invalid-monitoring-related-entry/invalid-entry-type
+        title: Invalid monitoring related entry
+        status: 400
+        detail: The given entry is invalid due to it being a CREDIT
+        historyCode: 452
+        operationKind: CREDIT
+      summary: Invalid Monitoring Related Entry Type
+    activeCompensatingTriggeredIntent:
+      value:
+        type: http://dtw.matera.com/transaction/active-compensation-triggered-intent
+        title: Triggered compensating intent already exists
+        status: 422
+        detail: The triggered compensating intent has already exists for compensation <<unknown>>=1.
+        compensatingIntent: { originator: foo, correlationId: bar }
+        intent: { id: f79c5044-7abf-4294-b689-8ecbad91edc4, correlations: [ { originator: foo, correlationId: bar } ] }
+      summary: Active Compensating Triggered Intent
+    duplicatedCompensatingEntry:
+      value:
+        type: http://dtw.matera.com/transaction/duplicated-compensation-entry
+        title: Duplicated compensating entry
+        status: 422
+        detail: The compensating entry e292276c-e507-4b43-9e8f-9fab5f2951e7 has duplicate reference on same batch.
+        compensatingEntries: [{kind: "removal-entry", correlationId: [{"originator":"dummy-originator","correlationId":"fb6b1255-dfc5-41a2-a112-406c704e1037"}]},{kind: "removal-entry", correlationId: [{"originator":"dummy-originator","correlationId":"2ca58a79-1863-405c-8d48-42717c75eb01"}]}]
+        targetCompensating: {kind: "ledger-entry", correlationId: [{"originator":"dummy-originator","correlationId":"e292276c-e507-4b43-9e8f-9fab5f2951e7"}]}
+      summary: Duplicated Compensating Entry
+    currencyMismatch:
+      value:
+        type: http://dtw.matera.com/transaction/currency-mismatch
+        title: Currency not allowed
+        status: 400
+        detail: 'The currency is not allowed for account 41478/23. The expected currency is BRL and the one provided was USD.'
+        accounts: [{number: 7, branch: 3897}]
+        entry: { kind: posted-ledger-entry, description: XPTO-DESCRIPTION, amount: { amount: 123.45, currency: USD }, correlations: [ { originator: foo, correlationId: bar } ] }
+      summary: Request amount currency has an incompatibility with its deltas
+    entryCompensationPeriodExceeded:
+      value:
+        type: http://dtw.matera.com/transaction/entry-compensation-period-exceeded
+        title: Transaction compensation period for kind exclusion-entry exceeded
+        status: 422
+        detail: The entry or transaction with ID fe1ac3f8-afe2-41f0-ac5d-1630a922761a, created at 2024-02-08T09:00:00Z, cannot be compensated by a/an exclusion-entry at 2024-02-08T09:00:02Z because it exceeds the period limit of PT0S.
+        allowedExclusionPeriod: PT0S
+        entryId: 'fe1ac3f8-afe2-41f0-ac5d-1630a922761a'
+        compensatingEntryKind: exclusion-entry
+        excludeValidationAt: '2024-02-08T09:00:02Z'
+        createdAt: '2024-02-08T09:00:00Z'
+      summary: Entry compensation period exceeded
+    illegalArgumentParse:
+      value:
+        type: http://dtw.matera.com/transaction/illegal-argument-parse
+        title: Illegal Argument Parse
+        status: 400
+        detail: 'The expected version 0:XPTO cannot be an alphanumeric value'
+      summary: Illegal request with alphanumeric value request header If-Match
+    conflictCorrelation:
+      value:
+        type: http://dtw.matera.com/transaction/correlation-conflict
+        title: Correlation conflict
+        status: 409
+        detail: 'Some of the request correlation ids were already used by another entity'
+        owners: [ { "originator":"dtw-transaction", "correlationId":"745de648bbe9", "type":"MONITORING_RELEASE" } ]
+      summary: Correlation conflict with a correlation of another entity
+    forbiddenMonitoringCancellation:
+      value:
+        type: http://dtw.matera.com/transaction/monitoring-cancellation-forbidden
+        title: Cancellation of Monitoring Intent not allowed
+        status: 422
+        detail: 'The Monitoring has associated entries that prevents its cancellation. Operations performed on a Monitoring (e.g.: release and/or debit) can create additional entries. In this case, the cancellation is not allowed'
+        monitoring: { "total": { "amount": "00.00","currency": "BRL" },"due": { "amount": "00.00","currency": "BRL" },"id": "00000000-0000-0000-0000-000000000000","correlations": [ { "originator": "dummy-test","correlationId": "000000000000" } ],"released": { "amount": "0.00","currency": "BRL" },"blueprintKind": "ledger-entry-blueprint","target": { "type": "account", "key": { "branch": 1234,"account": 123456 } } }
+    illegalMonitoringRelease:
+      value:
+        type: http://dtw.matera.com/transaction/illegal-monitoring-release
+        title: Illegal monitoring release
+        status: 400
+        detail: 'Some of the request correlation ids are being used by another entity within release request'
+        correlations: [ { "originator": "dtw-transaction", "correlationId": "745de648bbe9" } ]
+      summary: Correlation conflict with another correlation within release request
+  securitySchemes:
+    oAuth2ClientCredentials:
+      type: oauth2
+      description: Default OAuth2 client credentials flow. See https://datatracker.ietf.org/doc/html/rfc6749#section-4.4
+      flows:
+        clientCredentials:
+          tokenUrl: https://localhost:7443/oauth2/token/
+          scopes: {}
+  schemas:
+    EntryBatchRequest:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntryRequest'
+          minItems: 1
+          maxItems: 100
+      required:
+        - entries
+    EntryRequest:
+      type: object
+      discriminator:
+        propertyName: entryKind
+        mapping:
+          ledger: '#/components/schemas/LedgerEntryRequest'
+          release: '#/components/schemas/ReleaseEntryRequest'
+          reversal: '#/components/schemas/ReversalEntryRequest'
+          removal: '#/components/schemas/RemovalEntryRequest'
+          blocking: '#/components/schemas/BlockingEntryRequest'
+          unblocking: '#/components/schemas/UnblockingEntryRequest'
+      properties:
+        entryKind:
+          $ref: '#/components/schemas/Kind'
+        correlationId:
+          $ref: '#/components/schemas/CorrelationId'
+        metaData:
+          $ref: '#/components/schemas/MetaData'
+        description:
+          $ref: '#/components/schemas/Description'
+        status:
+          $ref: '#/components/schemas/EntryStatus'
+        deferredUntil:
+          $ref: '#/components/schemas/DeferredUntil'
+      required:
+        - correlationId
+        - entryKind
+        - status
+    ReleaseEntryRequest:
+      allOf:
+        - $ref: '#/components/schemas/EntryRequest'
+        - type: object
+          properties:
+            amount:
+              $ref: '#/components/schemas/Amount'
+            entryToRelease:
+              $ref: '#/components/schemas/EntryToRelease'
+          required:
+            - amount
+            - entryToRelease
+    ReversalEntryRequest:
+      allOf:
+        - $ref: '#/components/schemas/EntryRequest'
+        - type: object
+          properties:
+            asOfDate:
+              $ref: '#/components/schemas/AsOfDate'
+            entryToReverse:
+              $ref: '#/components/schemas/EntryToReverse'
+          required:
+            - entryToReverse
+    LedgerEntryRequest:
+      allOf:
+        - $ref: '#/components/schemas/EntryRequest'
+        - type: object
+          properties:
+            settlementInfo:
+              $ref: '#/components/schemas/SettlementInfoRequest'
+            historyCode:
+              $ref: '#/components/schemas/HistoryCode'
+            asOfDate:
+              $ref: '#/components/schemas/AsOfDate'
+            uponCreationHeldAs:
+              $ref: '#/components/schemas/CautionaryBlockInformation'
+          required:
+            - historyCode
+            - settlementInfo
+    BlockingEntryRequest:
+      allOf:
+        - $ref: '#/components/schemas/EntryRequest'
+        - type: object
+          properties:
+            settlementInfo:
+              $ref: '#/components/schemas/SettlementInfoRequest'
+            holdReasonId:
+              $ref: '#/components/schemas/HoldReasonId'
+            asOfDate:
+              $ref: '#/components/schemas/AsOfDate'
+          required:
+            - holdReasonId
+            - settlementInfo
+    UnblockingEntryRequest:
+      allOf:
+        - $ref: '#/components/schemas/EntryRequest'
+        - type: object
+          properties:
+            settlementInfo:
+              $ref: '#/components/schemas/SettlementInfoRequest'
+            holdReasonId:
+              $ref: '#/components/schemas/HoldReasonId'
+            asOfDate:
+              $ref: '#/components/schemas/AsOfDate'
+            uponCreationHeldAs:
+              $ref: '#/components/schemas/CautionaryBlockInformation'
+            releasing:
+              $ref: '#/components/schemas/CautionaryUnblockInformation'
+          required:
+            - holdReasonId
+            - settlementInfo
+    RemovalEntryRequest:
+      allOf:
+        - $ref: '#/components/schemas/EntryRequest'
+        - type: object
+          properties:
+            asOfDate:
+              $ref: '#/components/schemas/AsOfDate'
+            entryToRemove:
+              $ref: '#/components/schemas/EntryToRemove'
+          required:
+            - entryToRemove
+    SettlementInfoRequest:
+      type: object
+      discriminator:
+        propertyName: fulfillment
+        mapping:
+          TOTAL: '#/components/schemas/TotalSettlementInfoRequest'
+          PARTIAL: '#/components/schemas/PartialSettlementInfoRequest'
+      properties:
+        fulfillment:
+          $ref: '#/components/schemas/Fulfillment'
+      required:
+        - fulfillment
+    PartialSettlementInfoRequest:
+      allOf:
+        - $ref: '#/components/schemas/SettlementInfoRequest'
+        - type: object
+          properties:
+            amountRange:
+              $ref: '#/components/schemas/AmountRange'
+      required:
+        - amountRange
+    TotalSettlementInfoRequest:
+      allOf:
+        - $ref: '#/components/schemas/SettlementInfoRequest'
+        - type: object
+          properties:
+            amount:
+              $ref: '#/components/schemas/Amount'
+      required:
+        - amount
+    MonitoringEntryRequest:
+      type: object
+      discriminator:
+        propertyName: entryKind
+        mapping:
+          ledger: '#/components/schemas/MonitoringLedgerEntryRequest'
+      properties:
+        entryKind:
+          $ref: '#/components/schemas/Kind'
+        correlationId:
+          $ref: '#/components/schemas/BlueprintCorrelationId'
+        metaData:
+          $ref: '#/components/schemas/MetaData'
+        description:
+          $ref: '#/components/schemas/Description'
+      required:
+        - entryKind
+    MonitoringLedgerEntryRequest:
+      allOf:
+        - $ref: '#/components/schemas/MonitoringEntryRequest'
+        - type: object
+          properties:
+            historyCode:
+              $ref: '#/components/schemas/HistoryCode'
+            settlementInfo:
+              $ref: '#/components/schemas/SettlementInfoRequest'
+            asOfDate:
+              $ref: '#/components/schemas/AsOfDate'
+          required:
+            - historyCode
+            - amount
+    Kind:
+      type: string
+      enum:
+        - ledger
+        - release
+        - reversal
+        - removal
+        - blocking
+        - unblocking
+    KindResponse:
+      type: string
+      enum:
+        - ledger
+        - release
+        - reversal
+        - removal
+        - blocking
+        - unblocking
+        - exclusion
+    MetaData:
+      description: |
+        A set of key-value pairs that you can attach to an object. This can be useful for storing additional information about the object in a structured format. This is a free-to-enter field and MUST NOT store personal information.
+        Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados).
+      type: object
+      additionalProperties: true
+      example: {"internal request number":"1234567"}
+    BalanceChanges:
+      description: 'The balances modified following a transaction.'
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/Amount'
+      example:
+    Description:
+      description: |
+        The description of the transaction. This description will end up on the customer statement.
+        This is a free-to-enter field and MUST NOT store personal information.
+        Data stored in this field do **not** follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados).
+      minLength: 1
+      maxLength: 40
+      type: string
+      example: 'ATM withdrawal'
+    CorrelationId:
+      description: 'The unique identifier of the operation.'
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: '770109dc-7564-4558-bcf4-ffe7e46c5a38'
+    HistoryCode:
+      description: 'A code that categorizes the transaction type as credit or debit.'
+      type: integer
+      format: int64
+      minimum: 0
+      example: 4919
+    AsOfDate:
+      description: The date when the transaction was requested. It serves accounting purposes exclusively, as it doesn't affect the approval process, which relies on the actual balance at that time.
+      type: string
+      format: date
+      example: '2021-05-22'
+    CreatedAt:
+      description: |
+        The date when the entry was created on the database. 
+        As it is timestamped, the response is formatted in the UTC time zone.
+      type: string
+      format: date-time
+      example: '2017-07-21T17:32:28Z'
+    Branch:
+      description: 'The account branch. The branch field in the account information should be set to 0 if it does not contain a branch number.'
+      type: integer
+      format: int32
+      minimum: 0
+      example: 4919
+    Account:
+      description: 'The account number or unique identifier representing the account.'
+      type: integer
+      format: int64
+      minimum: 0
+      example: 223166
+    GroupKind:
+      description: 'Kind of group.'
+      type: string
+      example: 'HOLDER'
+    MembershipId:
+      description: 'The identifier of group.'
+      type: string
+      example: '12345678'
+    Amount:
+      type: object
+      description: 'The operation amount.'
+      properties:
+        value:
+          type: integer
+          format: int64
+          example: 100000
+          description: The actual amount.
+          minimum: 1
+        currency:
+          $ref: '#/components/schemas/CurrencyISO4217'
+      required:
+        - value
+        - currency
+    AmountDue:
+      type: object
+      description: 'The outstanding amount for the ongoing monitoring service.'
+      properties:
+        value:
+          type: integer
+          format: int64
+          example: 100000
+          description: The actual amount.
+          minimum: 1
+        currency:
+          $ref: '#/components/schemas/CurrencyISO4217'
+      required:
+        - value
+        - currency
+    ReleasedAmount:
+      type: object
+      description: 'The monitored amount released in this operation.'
+      properties:
+        value:
+          type: integer
+          format: int64
+          example: 100000
+          description: The actual amount.
+          minimum: 1
+        currency:
+          $ref: '#/components/schemas/CurrencyISO4217'
+      required:
+        - value
+        - currency
+    AmountRange:
+      type: object
+      description: 'The amount range.'
+      properties:
+        min:
+          type: integer
+          format: int64
+          example: 100000
+          description: The minimum range value.
+          minimum: 1
+        max:
+          type: integer
+          format: int64
+          example: 100000
+          description: The maximum range value.
+          minimum: 1
+        currency:
+          $ref: '#/components/schemas/CurrencyISO4217'
+      required:
+        - min
+        - max
+        - currency
+    CautionaryBlockInformation:
+      type: object
+      description: >
+        Information of the cautionary block associated with the transaction. This field must only be completed when the status of the transaction is 'ON_HOLD'.
+        Use the correlation ID within this field to unblock/release the transaction value.
+      properties:
+        holdReasonId:
+          $ref: '#/components/schemas/HoldReasonId'
+        correlationId:
+          $ref: '#/components/schemas/CautionaryBlockCorrelationId'
+
+      required:
+        - holdReasonId
+        - correlationId
+
+    CautionaryUnblockInformation:
+      type: object
+      description: >
+        The transaction to release. The referenced transaction needs to be cautionary-blocked, indicated by its status being set to ON_HOLD.
+        The correlation ID provided must correspond to the one passed within the 'uponCreationHeldAs' field during the initial creation process.
+      properties:
+        correlationId:
+          $ref: '#/components/schemas/CautionaryReleasingCorrelationId'
+
+      required:
+        - correlationId
+    DeferredUntil:
+      type: object
+      discriminator:
+        propertyName: triggeredBy
+        mapping:
+          COMPENSATION: '#/components/schemas/DeferredCompensationTrigger'
+          MAIN: '#/components/schemas/DeferredBaseTrigger'
+      description: This field must only be completed if the transaction status is marked as 'Deferred'.'
+      properties:
+        triggeredBy:
+          $ref: '#/components/schemas/TriggeredBy'
+      required:
+        - triggeredBy
+    TriggeredBy:
+      description: |
+        The entry type category that triggers the deferred entry.
+        * MAIN: The transaction will be deferred until the triggering entry is created. 
+        * COMPENSATION: The transaction will be deferred until the triggering entry is compensated by another entry.
+      type: string
+      default: MAIN
+      example: COMPENSATION
+      enum:
+        - MAIN
+        - COMPENSATION
+    DeferredBaseTrigger:
+      allOf:
+        - $ref: '#/components/schemas/DeferredUntil'
+        - type: object
+      properties:
+        initiator:
+          $ref: '#/components/schemas/DeferredUntilCorrelationId'
+        onPhase:
+          $ref: '#/components/schemas/Phase'
+      required:
+        - initiator
+      example:
+        example: 'Using the triggerBy MAIN will create a deferred entry for waiting the target entry is created and supplied on phase REGULAR { "triggerBy": "MAIN", "initiator": "CORRELATION_ABC", "onPhase": "REGULAR"}'
+    DeferredCompensationTrigger:
+      allOf:
+        - $ref: '#/components/schemas/DeferredBaseTrigger'
+        - type: object
+      properties:
+        executeOn:
+          $ref: '#/components/schemas/ExecuteOn'
+      required:
+        - executeOn
+      example: 'When the triggerBy will a compensating entry with type reversal and supplied on phase REGULAR { "triggerBy": "COMPENSATION", "initiator": "CORRELATION_ABC", "onPhase": "REGULAR", "executeOn": "REMOVAL"}'
+    ExecuteOn:
+      description: |
+        The type of compensation transaction that will trigger the deferred transaction. It's visible only when the field 'triggeredBy' is marked as 'Compensation'. 
+        * REMOVAL: The deferred transaction will be triggered when the triggering entry kind is 'Removal'.
+        * REVERSAL: The deferred transaction will be triggered when the triggering entry kind is 'Reversal'.
+      type: string
+      example: REMOVAL
+      enum:
+        - REMOVAL
+        - REVERSAL
+    Fulfillment:
+      type: string
+      description: 'The designated criteria specifying the settlement amount for the transaction.'
+      enum:
+        - TOTAL
+        - PARTIAL
+      default: TOTAL
+      example: 'TOTAL'
+    CurrencyISO4217: # Can be referenced as '#/components/schemas/CurrencyISO4217'
+      type: string
+      description: 'The currency code as in ISO 4217 standard (e.g. BRL for Brazilian Real).'
+      example: 'BRL'
+      enum: [
+        AED,
+        AFN,
+        ALL,
+        AMD,
+        ANG,
+        AOA,
+        ARS,
+        AUD,
+        AWG,
+        AZN,
+        BAM,
+        BBD,
+        BDT,
+        BGN,
+        BHD,
+        BIF,
+        BMD,
+        BND,
+        BOB,
+        BOV,
+        BRL,
+        BSD,
+        BTN,
+        BWP,
+        BYR,
+        BZD,
+        CAD,
+        CDF,
+        CHE,
+        CHF,
+        CHW,
+        CLF,
+        CLP,
+        CNY,
+        COP,
+        COU,
+        CRC,
+        CUC,
+        CUP,
+        CVE,
+        CZK,
+        DJF,
+        DKK,
+        DOP,
+        DZD,
+        ECS,
+        EGP,
+        ERN,
+        ETB,
+        EUR,
+        FJD,
+        FKP,
+        GBP,
+        GEL,
+        GHS,
+        GIP,
+        GMD,
+        GNF,
+        GTQ,
+        GYD,
+        HKD,
+        HNL,
+        HRK,
+        HTG,
+        HUF,
+        IDR,
+        ILS,
+        INR,
+        IQD,
+        IRR,
+        ISK,
+        JMD,
+        JOD,
+        JPY,
+        KES,
+        KGS,
+        KHR,
+        KMF,
+        KPW,
+        KRW,
+        KWD,
+        KYD,
+        KZT,
+        LAK,
+        LBP,
+        LKR,
+        LRD,
+        LSL,
+        LTL,
+        LVL,
+        LYD,
+        MAD,
+        MDL,
+        MGA,
+        MKD,
+        MMK,
+        MNT,
+        MOP,
+        MRO,
+        MUR,
+        MVR,
+        MWK,
+        MXN,
+        MXV,
+        MYR,
+        MZN,
+        NAD,
+        NGN,
+        NIO,
+        NOK,
+        NPR,
+        NZD,
+        OMR,
+        PAB,
+        PEN,
+        PGK,
+        PHP,
+        PKR,
+        PLN,
+        PYG,
+        QAR,
+        RON,
+        RSD,
+        RUB,
+        RWF,
+        SAR,
+        SBD,
+        SCR,
+        SDG,
+        SEK,
+        SGD,
+        SHP,
+        SLL,
+        SOS,
+        SRD,
+        STD,
+        SVC,
+        SYP,
+        SZL,
+        THB,
+        TJS,
+        TMT,
+        TND,
+        TOP,
+        TRY,
+        TTD,
+        TWD,
+        TZS,
+        UAH,
+        UGX,
+        USD,
+        USN,
+        USS,
+        UYI,
+        UYU,
+        UZS,
+        VEF,
+        VND,
+        VUV,
+        WST,
+        XAF,
+        XAG,
+        XAU,
+        XBA,
+        XBB,
+        XBC,
+        XBD,
+        XCD,
+        XDR,
+        XFU,
+        XOF,
+        XPD,
+        XPF,
+        XPT,
+        XTS,
+        XXX,
+        YER,
+        ZAR,
+        ZMW,
+        ZWL
+      ]
+    ProblemResponse: # Can be referenced as '#/components/schemas/ProblemResponse'
+      type: object
+      required:
+        - status
+        - title
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+          format: uri
+          description: |
+            A Uniform Resource Identifier (URI) that identifies the problem type.  When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          default: 'about:blank'
+          example: 'https://zalando.github.io/problem/constraint-violation'
+        title:
+          type: string
+          description: The title of the problem summarizing the encountered issue, such as 'Service Unavailable'. It could either adopt the title recommended by RFC 7807 or encompass more specific details relevant to the issue.
+        status:
+          type: integer
+          format: int32
+          description: The HTTP status code produced by the server in response to this specific problem instance.
+          minimum: 100
+          maximum: 600
+          exclusiveMaximum: true
+          example: 503
+        detail:
+          type: string
+          description: A clear, understandable description for this particular problem instance.
+          example: Connection to database timed out
+    Phase:
+      description: The point at which the transaction will be triggered. If it's marked as 'REGULAR', it initiates when the triggering entry status is either 'Pending' or 'Posted'. If it's marked as 'POSTED_ONLY', it initiates only when the status becomes 'Posted'.
+      type: string
+      default: REGULAR
+      example: REGULAR
+      enum:
+        - REGULAR
+        - POSTED_ONLY
+    MonitoringsAccountResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        monitorings:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitoringResponse'
+    MonitoringAccountEntriesResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        monitoringEntries:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitoringEntryResponse'
+    EntryBatchGroupResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        createdAt:
+          $ref: '#/components/schemas/CreatedAt'
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntryResponse'
+        balances:
+          type: object
+          description: The updated balances following the transaction. This field provides the requested balances based on the applied query filters.
+          additionalProperties:
+            $ref: '#/components/schemas/Balance'
+    EntryResponse:
+      properties:
+        id:
+          $ref: '#/components/schemas/CorrelationId'
+        entryKind:
+          $ref: '#/components/schemas/KindResponse'
+        historyCode:
+          $ref: '#/components/schemas/HistoryCode'
+        holdReasonId:
+          $ref: '#/components/schemas/HoldReasonId'
+        status:
+          $ref: '#/components/schemas/EntryStatus'
+        description:
+          $ref: '#/components/schemas/Description'
+        asOfDate:
+          $ref: '#/components/schemas/AsOfDate'
+        correlations:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/CorrelationId'
+          example: {"dummy-originator": "130e2a5a-0c34-4810-b72f-dca85defe51e"}
+        initiator:
+          $ref: '#/components/schemas/Initiator'
+        balanceChanges:
+          description: 'The balances modified following a transaction.'
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Amount'
+          example: { "AVAILABLE": { "value": "12", "currency": "USD" } }
+        amount:
+          $ref: '#/components/schemas/Amount'
+        metaData:
+          $ref: '#/components/schemas/MetaData'
+    Balance:
+      type: object
+      description: 'Information of the updated account balances.'
+      properties:
+        amount:
+          $ref: '#/components/schemas/Amount'
+    EntryStatus:
+      description: |
+        The status of the transaction:
+        * POSTED: The transaction has been successfully posted to the account, resulting in the confirmation of the debit, credit, or block transaction as established in the entry kind field.
+        * PENDING: The transaction is processing. In case of a debit transaction, the transaction amount is held from the account. If it is a credit transaction, the transaction amount is not added to the account until the transaction is classified as 'POSTED'.
+        * ON_HOLD: The transaction is placing a hold on the corresponding amount in the account balance until verifications are complete. When the release occurs, the transaction amount is credited to the account.
+        * DEFERRED: A condition has been imposed for the execution of a transaction. For example, it specifies that a particular transaction can only proceed after the successful completion of another transaction, thereby establishing a dependency between them. The criterion for this transaction to happen is described in the 'deferredUntil' field, indicating the conditions or requirements that must be met before the said transaction can take place.
+      type: string
+      default: POSTED
+      enum:
+        - POSTED
+        - PENDING
+        - ON_HOLD
+        - DEFERRED
+    HoldReasonId:
+      description: The reason for the held amount. This field must only be completed when the entry kind is 'Blocking'.
+      type: string
+      example: '123'
+    EntryToRelease:
+      description: 'The correlation ID of which entry is the release desired.'
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: '797e0165-5cc2-472a-823a-27a3744c29e3'
+    EntryToReverse:
+      description: 'The Correlation ID that will reference the transaction to reverse.'
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: '53d63bd1-3a6f-49b1-b3bd-47bcefcfea43'
+    EntryToRemove:
+      description: 'The Correlation ID that will reference the transaction to remove.'
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: '0627b502-d7ed-4243-bd54-e086db4c486b'
+    DeferredUntilCorrelationId:
+      description: The unique identifier of the entry/transaction that will initiate the deferred transaction.
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: 'ddc57628-bfb4-40ab-91b4-ae3812c3a810'
+    InitiatorCorrelationId:
+      description: 'The unique identifier of the initiator.'
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: '2226a067-858a-4a40-b05d-b084c0d5e9b4'
+    BlueprintCorrelationId:
+      description: 'The unique identifier of the entry detailed in the blueprint.'
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: 'f71b6072-3ce5-408a-91db-77a5ba7912ae'
+    CautionaryBlockCorrelationId:
+      description: 'The unique identifier of the cautionary block.'
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: 'c4bb2b17-563e-4620-a96d-7607777c0545'
+    CautionaryReleasingCorrelationId:
+      description: 'The unique identifier of the cautionary block that shall be released.'
+      minLength: 1
+      maxLength: 128
+      type: string
+      example: '201f56d3-ac7b-4e6d-ac76-5e9a4ddb2e0c'
+    Initiator:
+      description: The entry/transaction that will initiate the deferred transaction.
+      properties:
+        id:
+          $ref: '#/components/schemas/InitiatorCorrelationId'
+        correlations:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/CorrelationId'
+          example: { "dummy-originator": "2f4d8075-5f5a-48ba-bb5a-bc8e5fc2ea1b" }
+    BalanceType:
+      type: string
+      description: 'Identifies which kind of balance'
+      example: 'REAL'
+    Role:
+      description: 'The role of the given batch'
+      type: string
+      default: PRIMARY
+      enum:
+        - PRIMARY
+        - ANNEX
+      example: PRIMARY
+    MonitoringRequest:
+      type: object
+      properties:
+        monitoringKind:
+          $ref: '#/components/schemas/Kind'
+        correlationId:
+          $ref: '#/components/schemas/CorrelationId'
+        amount:
+          $ref: '#/components/schemas/Amount'
+        metaData:
+          $ref: '#/components/schemas/MetaData'
+        status:
+          $ref: '#/components/schemas/MonitoringStatus'
+        blueprint:
+          $ref: '#/components/schemas/MonitoringCreateEntryRequest'
+      required:
+        - monitoringKind
+        - correlationId
+        - amount
+        - status
+        - blueprint
+    MonitoringStatus:
+      description: |
+        The status the monitoring service should have after the release:
+        * ACTIVE: Indicates that the monitoring service is currently operational.
+        * INACTIVE: Indicates that the monitoring service is not currently operational.
+        * REALIZED: Indicates that the monitoring service was realized.
+        * EXCLUDED: Indicates that the monitoring service was excluded. **Deprecated
+        * CANCELLED: Indicates that the monitoring service was cancelled.
+      type: string
+      default: ACTIVE
+      enum:
+        - ACTIVE
+        - INACTIVE
+        - EXCLUDED
+        - REALIZED
+        - CANCELLED
+    IfMatch:
+      description: 'If-Match pass the version to update the monitoring register.'
+      type: string
+      example: '123'
+    Id:
+      description: 'The unique identifier of the monitoring service.'
+      type: string
+      format: uuid
+      example: '00000000-0000-0000-0000-000000000000'
+    MonitoringBasedResponse:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        correlations:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/CorrelationId'
+          example: { "dummy-originator": "2edd7b8c-ebf9-46c7-8ff1-fd416c9125f5" }
+        metaData:
+          $ref: '#/components/schemas/MetaData'
+        status:
+          $ref: '#/components/schemas/MonitoringStatus'
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitoringEntryResponse'
+    MonitoringResponse:
+      allOf:
+        - $ref: '#/components/schemas/MonitoringBasedResponse'
+        - type: object
+          properties:
+            blueprint:
+              $ref: '#/components/schemas/EntryResponse'
+            amount:
+              $ref: '#/components/schemas/Amount'
+            amountDue:
+              $ref: '#/components/schemas/AmountDue'
+            releasedAmount:
+              $ref: '#/components/schemas/ReleasedAmount'
+    MonitoringReleaseResponse:
+      allOf:
+        - $ref: '#/components/schemas/MonitoringBasedResponse'
+        - type: object
+          properties:
+            releasedAmount:
+              $ref: '#/components/schemas/ReleasedAmount'
+            releaseCorrelations:
+              type: object
+              description: 'A set of correlations of monitoring release. This is used by idempotency control.'
+              additionalProperties:
+                $ref: '#/components/schemas/CorrelationId'
+              example: { "dummy-originator": "ea313ff0-eb00-4a38-b815-265470d39ff5" }
+    #The following item was constructed in the most verbose way because apparently the openapi generator has problems
+    #with object validation in the response when we use inheritance implemented through allOf
+    MonitoringEntryResponse:
+      allOf:
+        - $ref: '#/components/schemas/EntryResponse'
+        - type: object
+          properties:
+            branch:
+              $ref: '#/components/schemas/Branch'
+            account:
+              $ref: '#/components/schemas/Account'
+            createdAt:
+              $ref: '#/components/schemas/CreatedAt'
+    MonitoringPatchRequest:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/MonitoringStatus'
+        amount:
+          $ref: '#/components/schemas/Amount'
+    MonitoringReleaseRequestV1:
+      deprecated: true
+      description: "Deprecated monitoring release request"
+      type: object
+      properties:
+        blueprints:
+          description: Information regarding the debiting of the held amount from the account.
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitoringEntryRequest'
+          minItems: 0
+          maxItems: 100
+        settlementInfo:
+          $ref: '#/components/schemas/SettlementInfoRequest'
+        metaData:
+          $ref: '#/components/schemas/MetaData'
+      required:
+        - settlementInfo
+    MonitoringReleaseRequest:
+      deprecated: false
+      description: "Monitoring release request"
+      allOf:
+        - $ref: '#/components/schemas/MonitoringReleaseRequestV1'
+        - type: object
+          required:
+            - correlationId
+          properties:
+            correlationId:
+              $ref: '#/components/schemas/CorrelationId'
+    MonitoringCreateEntryRequest:
+      description: 'Information regarding the type of monitoring service to set up.'
+      type: object
+      discriminator:
+        propertyName: entryKind
+        mapping:
+          ledger: '#/components/schemas/MonitoringCreateLedgerEntryRequest'
+          blocking: '#/components/schemas/MonitoringCreateBlockingEntryRequest'
+      properties:
+        entryKind:
+          $ref: '#/components/schemas/Kind'
+        metaData:
+          $ref: '#/components/schemas/MetaData'
+        description:
+          $ref: '#/components/schemas/Description'
+      required:
+        - entryKind
+    MonitoringCreateLedgerEntryRequest:
+      allOf:
+        - $ref: '#/components/schemas/MonitoringCreateEntryRequest'
+        - type: object
+          properties:
+            historyCode:
+              $ref: '#/components/schemas/HistoryCode'
+      required:
+        - historyCode
+    MonitoringCreateBlockingEntryRequest:
+      allOf:
+        - $ref: '#/components/schemas/MonitoringCreateEntryRequest'
+        - type: object
+          properties:
+            holdReasonId:
+              $ref: '#/components/schemas/HoldReasonId'
+      required:
+        - holdReasonId
+  parameters:
+    returnedBalances:
+      name: balances
+      in: query
+      description: The balances the request should return, separated by commas. Use "All" to get all available balances or "None" to get no balances.
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+          default: all
+    generateSnapshot:
+      name: X-Generate-Balance-Snapshot
+      in: header
+      description: If true, this request forcibly generates a balance snapshot.
+      schema:
+        type: boolean
+    size:
+      name: size
+      in: query
+      description: The maximum number of items to return per page.
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 100
+        default: 20
+    page:
+      name: page
+      in: query
+      description: The range of pages to retrieve, specified from 0 to N.
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        default: 0
+  headers:
+    xTotalItems:
+      description: The total number of results based on the applied query filters.
+      schema:
+        type: integer
+    xTotalPages:
+      description: The total number of pages based on the applied query filters and page size.
+      schema:
+        type: integer

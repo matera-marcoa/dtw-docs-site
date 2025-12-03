@@ -1,0 +1,43 @@
+[
+ {
+    "namespace": "com.matera.dtw.event.transaction.intent",
+    "type": "record",
+    "name": "AccountIntentCreationEvent",
+    "doc": "Represents an account creation intent",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "accountKey", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "deferredEntry", "type": "com.matera.dtw.event.command.intent.commons.DeferredEntry", "doc": "The criteria of execution the intention"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.transaction.intent",
+    "type": "record",
+    "name": "AccountGroupIntentCreationEvent",
+    "doc": "Represents an account group creation intent",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "accountGroupKey", "type": "com.matera.dtw.event.account.group.common.AccountGroupKey"},
+      {"name": "deferredEntry", "type": "com.matera.dtw.event.command.intent.commons.DeferredEntry", "doc": "The criteria of execution the intention"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.transaction.intent",
+    "type": "record",
+    "name": "AccountIntentExclusionEvent",
+    "doc": "Represents an account exclusion intent",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "accountKey", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "deferredEntry", "type": "com.matera.dtw.event.command.intent.commons.DeferredEntry", "doc": "The criteria of execution the intention"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.event.transaction.intent",
+    "type": "record",
+    "name": "AccountGroupIntentExclusionEvent",
+    "doc": "Represents an account group exclusion intent",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "accountGroupKey", "type": "com.matera.dtw.event.account.group.common.AccountGroupKey"},
+      {"name": "deferredEntry", "type": "com.matera.dtw.event.command.intent.commons.DeferredEntry", "doc": "The criteria of execution the intention"}
+    ]
+  }
+]

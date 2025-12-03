@@ -1,0 +1,113 @@
+[
+  {
+    "namespace": "com.matera.dtw.command.transaction.intent",
+    "type": "record",
+    "name": "ByCorrelationIdCriteria",
+    "doc": "Criteria-based on the intent correlation id",
+    "fields": [
+      {"name": "correlationId", "type": "string", "doc": "The correlation id of the intent"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.transaction.intent",
+    "type": "record",
+    "name": "ByIdCriteria",
+    "doc": "Criteria-based on the intent id",
+    "fields": [
+      {"name": "id", "type":{ "type" : "string", "logicalType" : "uuid"} , "doc": "The intent id."}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.command.intent.commons",
+    "type": "enum",
+    "name": "TriggeredByKind",
+    "doc": "Kind of deferred trigger where MAIN means that the entry creation will be deferred until the target entry is created and is at the supplied phase. and COMPENSATION means that the entry creation will be trigger by a compensating entry.",
+    "symbols": [
+      "MAIN",
+      "COMPENSATION"
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.command.intent.commons",
+    "type": "enum",
+    "name": "ExecuteOnKind",
+    "doc": "Kind of deferred execution in which REMOVAL means a executing the deferred on a removal entry and REVERSAL: means a executing the deferred on a reversal entry",
+    "symbols": [
+      "REMOVAL",
+      "REVERSAL"
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.command.intent.commons",
+    "type": "enum",
+    "name": "PhaseKind",
+    "doc": "Phase of entry where REGULAR: means an entry that was in 'PENDING' and/or 'POSTED' status. POSTED_ONLY: on the other hand, means an entry that was in 'POSTED' status. POSTED: *DEPRECATED* means an entry that was in POSTED status. PENDING: *DEPRECATED* means the entry that was in PENDING status.",
+    "symbols": [
+      "REGULAR",
+      "POSTED_ONLY",
+      "PENDING",
+      "POSTED"
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.command.intent.commons",
+    "type": "record",
+    "name": "DeferredUntil",
+    "doc": "Criteria of execution of this intent",
+    "fields": [
+      {"name": "triggeredBy", "type": "com.matera.dtw.event.command.intent.commons.TriggeredByKind", "default": "MAIN"},
+      {"name": "initiatorCorrelationID", "type": "string", "doc": "The initiator kind entry's correlationID who is going to fire this intention" },
+      {"name": "executeOn", "type": ["null","com.matera.dtw.event.command.intent.commons.ExecuteOnKind"]},
+      {"name": "onPhase", "type": "com.matera.dtw.event.command.intent.commons.PhaseKind", "default": "REGULAR"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.command.intent.commons",
+    "type": "record",
+    "name": "Blueprint",
+    "doc": "Represents information on the intent entry",
+    "fields": [
+      {"name": "kind", "type": "string", "default": "LEDGER", "doc": "Determine the entry kind which have the possible values: LEDGER/REVERSAL/REMOVAL/BLOCKING/UNBLOCKING"},
+      {"name": "historyCode", "type": ["null","int"], "default": null, "doc": "Determine if the entry is debit or credit, might be shown on the statement with its description"},
+      {"name": "holdReasonId", "type": ["null","string"], "default": null, "doc": "Reason for holding the credit amount when the status is \"ON_HOLD\". Used only in credit entries."},
+      {"name": "asOfDate", "type": ["null", {"type": "int", "logicalType": "date"}], "default": null, "doc": "date when the entry happened"},
+      {"name": "correlations", "type" : {"type": "map", "values" : "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "amount", "type": ["null", "com.matera.dtw.event.common.financial.FinancialAmount"], "default": null, "doc": "amount"},
+      {"name": "entryToRemove", "type": ["null","string"], "default": null, "doc": "The ID of the soon-to-be-removal entry."},
+      {"name": "entryToReverse", "type": ["null","string"], "default": null, "doc": "The ID of the soon-to-be-reverted entry."},
+      {"name": "description", "type": ["null","string"], "default": null,"doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do *not* follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do *not* follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.command.intent.commons",
+    "type": "record",
+    "name": "DeferredEntry",
+    "doc": "Holds the setup of entry intent and deferred",
+    "fields": [
+      {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc": "The id of the newly-created intention"},
+      {"name": "blueprint", "type": "com.matera.dtw.event.command.intent.commons.Blueprint", "doc": "Blueprint entry to be executed within the criteria of execution of the intent"},
+      {"name": "deferredUntil", "type": "com.matera.dtw.event.command.intent.commons.DeferredUntil", "doc": "Criteria of execution of the intent"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.command.intent.commons",
+    "type": "record",
+    "name": "MonitoringRelatedEntry",
+    "doc": "Holds the setup of monitoring related entry",
+    "fields": [
+      {"name": "id", "type": ["null", {"type": "string", "logicalType": "uuid"}], "default": null, "doc": "The id of the newly-created intention"},
+      {"name": "correlations", "type" : {"type": "map", "values" : "string"}, "default": {}, "doc": "Correlation map to unique identify the events in correspondent systems."},
+      {"name": "historyCode", "type": ["null","int"], "default": null, "doc": "Determine if the entry is debit or credit, might be shown on the statement with its description"},
+      {"name": "kind", "type": "string", "default": "LEDGER", "doc": "Determine the entry kind which have the possible values: LEDGER/REVERSAL/REMOVAL/BLOCKING/UNBLOCKING"},
+      {"name": "holdReasonId", "type": ["null","string"], "default": null, "doc": "Reason for holding the credit amount when the status is \"ON_HOLD\". Used only in credit entries."},
+      {"name": "status", "type": "com.matera.dtw.event.transaction.common.EntryStatus", "default": "POSTED", ",doc": "Whether the created entry is POSTED or PENDING."},
+      {"name": "description", "type": ["null","string"], "default": null,"doc": "Description of the entry. This description will end up on the customer statement. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do *not* follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "asOfDate", "type": ["null", {"type": "int", "logicalType": "date"}], "default": null, "doc": "date when the entry happened"},
+      {"name": "initiator", "type": ["null", "com.matera.dtw.event.transaction.entry.InitiatorInfo"], "default": null, "doc": "Holds the given entry initiator. Might be null if the entry was originate from a API/Command"},
+      {"name": "balanceChanges", "type" : {"type": "map", "values" : "com.matera.dtw.event.common.financial.FinancialAmount"}, "default": {}, "doc": "Delta value changed by the given entry in the account balances. May be empty if no such information is available."},
+      {"name": "amount", "type": ["null", "com.matera.dtw.event.common.financial.FinancialAmount"], "default": null, "doc": "amount"},
+      {"name": "metaData", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Json with metadata. Might be used for other correlationIds or information needed in other channels/integrations. This is a free-to-enter field and MUST NOT store personal information. Data stored in this field do *not* follow the requirements of regulations such as GDPR (General Data Protection Regulation) and LGPD (Lei Geral de Proteção de Dados)."},
+      {"name": "createdAt", "type": {"type": "long", "logicalType": "local-timestamp-millis"}, "doc": "Timestamp with milliseconds when the event was generated in UTC."}
+    ]
+  }
+]

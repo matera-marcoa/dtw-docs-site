@@ -1,0 +1,35 @@
+[
+  {
+    "namespace": "com.matera.dtw.event.account",
+    "type": "record",
+    "name": "AccountChangeEvent",
+    "doc": "Event to create or update an account.",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"},
+      {"name": "accountType", "type": "string", "doc": "The unique identifier to account type record"},
+      {"name": "timeZone", "type": "string", "doc": "The account timezone based on the IANA timezone database canonical name"},
+      {"name": "active", "type": "boolean", "doc": "global account status"}
+    ]
+  },
+  {
+    "namespace": "com.matera.dtw.event.account",
+    "type": "record",
+    "name": "AccountDeleteEvent",
+    "doc": "Event to delete an account.",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey"}
+    ]
+  } ,
+  {
+    "namespace": "com.matera.dtw.event.account.reset",
+    "type": "record",
+    "name": "AccountResetEvent",
+    "doc": "Represents a reset event on a given account. This event is only supporting account financial reset",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent"},
+      {"name": "account", "type": "com.matera.dtw.event.account.common.AccountKey", "doc": "The account associated with financial reset"}
+    ]
+  }
+]

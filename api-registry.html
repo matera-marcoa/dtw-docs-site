@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registry API - DTW Documentation</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="stylesheet" href="assets/styles.css">
+    <style>
+        .api-detail {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+        .endpoint-block {
+            background: white;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+        .method {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 12px;
+            margin-right: 12px;
+        }
+        .method-get { background: #00D4AA; color: white; }
+        .method-post { background: #4F46E5; color: white; }
+        .method-put { background: #F59E0B; color: white; }
+        .method-delete { background: #EF4444; color: white; }
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+        .param-table th, .param-table td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #E0E0E0;
+        }
+        .param-table th {
+            background: #F8F9FA;
+            font-weight: 600;
+        }
+        .required { color: #EF4444; font-weight: 600; }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 24px;
+            color: #00D4AA;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="40" height="40" rx="8" fill="#00D4AA"/>
+                        <path d="M12 14h6c3.31 0 6 2.69 6 6s-2.69 6-6 6h-6V14zm6 10c2.21 0 4-1.79 4-4s-1.79-4-4-4h-3v8h3z" fill="white"/>
+                        <path d="M26 14h2v12h-2V14z" fill="white"/>
+                    </svg>
+                    <span class="logo-text">DTW Documentation</span>
+                </div>
+                <nav class="main-nav">
+                    <a href="index.html#home" class="nav-link">Home</a>
+                    <a href="index.html#apis" class="nav-link active">API Reference</a>
+                    <a href="index.html#events" class="nav-link">Events & Commands</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="api-detail">
+        <a href="index.html#apis" class="back-link">← Back to APIs</a>
+        <h1>Digital Twin Registry Services API</h1>
+        <p style="color: #666; font-size: 18px; margin: 16px 0 40px;">These endpoints retrieve account information and manage account limits. <br>
+ ## Recommended Resilience Patterns
+To improve resilience when consuming this API, we recommend using the following patterns:
+
+- **Retry**: Implement retry logic for responses with HTTP status codes 5xx or 429 - Too Many Requests. This ensures that the application can handle temporary overload situations or intermittent failures.<br>
+- **Backoff**: Use a backoff mechanism between retry attempts to prevent overloading the system with multiple simultaneous requests. An exponential backoff, for example, can be used to progressively space out the retry attempts.<br>
+
+These practices enhance the robustness and resilience of your integration with the API.
+</p>
+        
+        <div class="endpoint-block">
+            <h3>Base URL</h3>
+            <code>http://localhost:8080/v1</code>
+        </div>
+
+        <div class="endpoint-block">
+            <h2>
+                <span class="method method-get">GET</span>
+                /accounts
+            </h2>
+            <p style="color: #666; margin: 16px 0;">Retrieve account information</p>
+            <div style="background: #F8F9FA; padding: 16px; border-radius: 4px; margin: 16px 0;">
+                This request retrieves information for one or a list of accounts by specifying account keys. It requires a logged user with the *view-accounts* role assigned.
+            </div>
+
+            <h3 style="margin-top: 24px;">Parameters</h3>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>In</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td><strong></strong></td>
+                        <td><code>N/A</code></td>
+                        <td></td>
+                        <td>No</td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong></strong></td>
+                        <td><code>N/A</code></td>
+                        <td></td>
+                        <td>No</td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>key</strong></td>
+                        <td><code>array</code></td>
+                        <td>query</td>
+                        <td><span class="required">Yes</span></td>
+                        <td>A list of account keys, each composed of the BranchNumber and AccountNumber separated by a slash (/). <br> Use commas to separate multiple account keys. At least one account key is required for filter</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="endpoint-block">
+            <h2>
+                <span class="method method-get">GET</span>
+                /memberships/accounts
+            </h2>
+            <p style="color: #666; margin: 16px 0;">Retrieve account details using membership related filters
+</p>
+            <div style="background: #F8F9FA; padding: 16px; border-radius: 4px; margin: 16px 0;">
+                This request retrieves all accounts related to the membership key. It requires a logged user with the *view-account-memberships* role assigned. &lt;br&gt; Accounts may have multiple memberships, each key identified by a unique kind and ID separated by a slash (/).
+
+            </div>
+
+            <h3 style="margin-top: 24px;">Parameters</h3>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>In</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td><strong></strong></td>
+                        <td><code>N/A</code></td>
+                        <td></td>
+                        <td>No</td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong></strong></td>
+                        <td><code>N/A</code></td>
+                        <td></td>
+                        <td>No</td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>membershipKey</strong></td>
+                        <td><code>array</code></td>
+                        <td>query</td>
+                        <td><span class="required">Yes</span></td>
+                        <td>The membership key has the format [Membership kind]/[Membership id] with a slash separating the membership kind and id. <br>
+Use comma to separate multiple membership keys. <br>
+At least one membershi</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="endpoint-block">
+            <h2>
+                <span class="method method-get">GET</span>
+                /accounts/{branch}/{account}/limits
+            </h2>
+            <p style="color: #666; margin: 16px 0;">List all account limits</p>
+            <div style="background: #F8F9FA; padding: 16px; border-radius: 4px; margin: 16px 0;">
+                This request lists all account limits set to an account. It requires a logged user with the *view-account-limits* role assigned. 
+
+            </div>
+
+            <h3 style="margin-top: 24px;">Parameters</h3>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>In</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td><strong></strong></td>
+                        <td><code>N/A</code></td>
+                        <td></td>
+                        <td>No</td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong></strong></td>
+                        <td><code>N/A</code></td>
+                        <td></td>
+                        <td>No</td>
+                        <td></td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="endpoint-block">
+            <h2>
+                <span class="method method-get">GET</span>
+                /accounts/{branch}/{account}/limits/{limitType}
+            </h2>
+            <p style="color: #666; margin: 16px 0;">Retrieve an account limit by type</p>
+            <div style="background: #F8F9FA; padding: 16px; border-radius: 4px; margin: 16px 0;">
+                This request requires a logged user with the *view-account-limits* role assigned.
+            </div>
+
+            <h3 style="margin-top: 24px;">Parameters</h3>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>In</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td><strong></strong></td>
+                        <td><code>N/A</code></td>
+                        <td></td>
+                        <td>No</td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong></strong></td>
+                        <td><code>N/A</code></td>
+                        <td></td>
+                        <td>No</td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>limitType</strong></td>
+                        <td><code>string</code></td>
+                        <td>path</td>
+                        <td><span class="required">Yes</span></td>
+                        <td>The limit type to return.</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="endpoint-block">
+            <h2>
+                <span class="method method-put">PUT</span>
+                /accounts/{branch}/{account}/limits/{limitType}
+            </h2>
+            <p style="color: #666; margin: 16px 0;">Add or update an account limit</p>
+            <div style="background: #F8F9FA; padding: 16px; border-radius: 4px; margin: 16px 0;">
+                This request adds or updates an existing account limit by specifying its type. It requires a logged user with the *modify-account-limits* role assigned.
+
+            </div>
+
+            <h3 style="margin-top: 24px;">Parameters</h3>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>In</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td><strong></strong></td>
+                        <td><code>N/A</code></td>
+                        <td></td>
+                        <td>No</td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong></strong></td>
+                        <td><code>N/A</code></td>
+                        <td></td>
+                        <td>No</td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>limitType</strong></td>
+                        <td><code>string</code></td>
+                        <td>path</td>
+                        <td><span class="required">Yes</span></td>
+                        <td>The limit type to add or update.</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="endpoint-block">
+            <h2>
+                <span class="method method-delete">DELETE</span>
+                /accounts/{branch}/{account}/limits/{limitType}
+            </h2>
+            <p style="color: #666; margin: 16px 0;">Delete an account limit</p>
+            <div style="background: #F8F9FA; padding: 16px; border-radius: 4px; margin: 16px 0;">
+                This request deletes an account limit by specifying its type. It requires a logged user with the *modify-account-limits* role assigned.
+
+            </div>
+
+            <h3 style="margin-top: 24px;">Parameters</h3>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>In</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td><strong></strong></td>
+                        <td><code>N/A</code></td>
+                        <td></td>
+                        <td>No</td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong></strong></td>
+                        <td><code>N/A</code></td>
+                        <td></td>
+                        <td>No</td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>limitType</strong></td>
+                        <td><code>string</code></td>
+                        <td>path</td>
+                        <td><span class="required">Yes</span></td>
+                        <td>The limit type to delete.</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="endpoint-block">
+            <h2>
+                <span class="method method-get">GET</span>
+                /system/limits
+            </h2>
+            <p style="color: #666; margin: 16px 0;">List all system limits</p>
+            <div style="background: #F8F9FA; padding: 16px; border-radius: 4px; margin: 16px 0;">
+                This request requires a logged user with the *view-system-limits* role assigned.
+            </div>
+        </div>
+
+        <div class="endpoint-block">
+            <h2>
+                <span class="method method-get">GET</span>
+                /system/limits/{limitType}
+            </h2>
+            <p style="color: #666; margin: 16px 0;">Retrieve a system limit by type</p>
+            <div style="background: #F8F9FA; padding: 16px; border-radius: 4px; margin: 16px 0;">
+                This request requires a logged user with the *view-system-limits* role assigned.
+            </div>
+
+            <h3 style="margin-top: 24px;">Parameters</h3>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>In</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td><strong>limitType</strong></td>
+                        <td><code>string</code></td>
+                        <td>path</td>
+                        <td><span class="required">Yes</span></td>
+                        <td>The system limit to return.</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="endpoint-block">
+            <h2>
+                <span class="method method-put">PUT</span>
+                /system/limits/{limitType}
+            </h2>
+            <p style="color: #666; margin: 16px 0;">Add or update a system limit</p>
+            <div style="background: #F8F9FA; padding: 16px; border-radius: 4px; margin: 16px 0;">
+                This request adds or updates an existing system limit by specifying its type. It requires a logged user with the *modify-system-limits* role assigned. 
+
+            </div>
+
+            <h3 style="margin-top: 24px;">Parameters</h3>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>In</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td><strong>limitType</strong></td>
+                        <td><code>string</code></td>
+                        <td>path</td>
+                        <td><span class="required">Yes</span></td>
+                        <td>The limit type to add or update.</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="endpoint-block">
+            <h2>
+                <span class="method method-delete">DELETE</span>
+                /system/limits/{limitType}
+            </h2>
+            <p style="color: #666; margin: 16px 0;">Delete a system limit</p>
+            <div style="background: #F8F9FA; padding: 16px; border-radius: 4px; margin: 16px 0;">
+                This request deletes a system limit by specifying its type. It requires a logged user with the *modify-system-limits* role assigned.
+
+            </div>
+
+            <h3 style="margin-top: 24px;">Parameters</h3>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>In</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td><strong>limitType</strong></td>
+                        <td><code>string</code></td>
+                        <td>path</td>
+                        <td><span class="required">Yes</span></td>
+                        <td>The system limit to delete.</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Digital Twin Platform</h4>
+                    <p>Enterprise-grade financial platform documentation</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Digital Twin Platform. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

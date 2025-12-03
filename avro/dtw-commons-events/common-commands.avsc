@@ -1,0 +1,47 @@
+[
+  {
+    "namespace": "com.matera.dtw.command.base.common",
+    "type": "record",
+    "name": "FailureInfo",
+    "doc" : "Represent a command execution failure metadata. Loosely based on the RFC7807 (https://datatracker.ietf.org/doc/html/rfc7807)",
+    "fields": [
+      {"name": "type", "type": "string", "doc": "A URI reference RFC3986 (https://datatracker.ietf.org/doc/html/rfc3986) that identifies the problem type."},
+      {"name": "title", "type": "string", "doc":  "A short, human-readable summary of the problem type."},
+      {"name": "details", "type": ["null", "string"], "default": null, "doc": "A human-readable explanation specific to this occurrence of the problem." },
+      {"name": "parameters", "type": ["null",{"type": "string", "logicalType": "json"}], "default": null, "doc": "Additional parameters that give more context on the cause of the given errors. Stored on the Json Format"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.base.common",
+    "type": "record",
+    "name": "BaseCommand",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent", "doc":  "This command's meta-data"},
+      {"name": "replyTo", "type": "string", "doc": "The destination topic to reply to"},
+      {"name": "replyKey", "type":["null", "string"], "default": null, "doc": "Key used when replying"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.base.common",
+    "type": "record",
+    "name": "BaseCommandSuccessResult",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent", "doc":  "This command's meta-data"}
+    ]
+  }, {
+    "namespace": "com.matera.dtw.command.base.common",
+    "type": "record",
+    "name": "BaseCommandFailureResult",
+    "fields": [
+      {"name": "baseEvent", "type": "com.matera.dtw.event.base.common.BaseEvent", "doc":  "This command's meta-data"},
+      {"name": "failureInfo", "type": "com.matera.dtw.command.base.common.FailureInfo", "doc": "Data related with the underlying failure"}
+    ]
+  },{
+      "namespace": "com.matera.dtw.command.base.common",
+      "type": "enum",
+      "name": "ResultStatus",
+      "doc": "Whether the result is already obtained or is deferred",
+      "symbols": [
+        "IMMEDIATE",
+        "DEFERRED"
+      ]
+    }
+]
