@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matera Digital Twin - Balance & Statement: Balance APIs</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="assets/matera-icon.svg" alt="Matera" width="40" height="40">
+                    <span class="logo-text">Matera Digital Twin</span>
+                </div>
+                <nav class="main-nav">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="index.html#apis" class="nav-link active">API Reference</a>
+                    <a href="index.html#events" class="nav-link">Events & Commands</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="content-section">
+        <div class="container">
+            <div class="api-detail">
+                <div class="breadcrumb">
+                    <a href="index.html">Home</a> > <a href="index.html#apis">APIs</a> > Balance & Statement > Balance APIs
+                </div>
+                
+                <h1>Balance & Statement: Balance APIs</h1>
+                <p class="api-description">Retrieve balance information for accounts.</p>
+                
+                <div class="endpoint-section">
+                    <div class="endpoints-header">
+                        <h2>Endpoints</h2>
+                        <button class="btn btn-sm btn-primary" onclick="openSwaggerModal()">Show Swagger</button>
+                    </div>
+                    
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method get">GET</span>
+                            <code>/v1/balances</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>List balances for a group of accounts.</p>
+                            
+                            <h3>Parameters</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">accountKeys</div>
+                                    <div class="param-type">array</div>
+                                    <div class="param-desc">List of account keys (branch/account format)</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">initialDate</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">Initial date for balance query (YYYY-MM-DD)</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">finalDate</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">Final date for balance query (YYYY-MM-DD)</div>
+                                </div>
+                            </div>
+                            
+                            <h3>Response</h3>
+                            <pre class="code-block"><code>{
+  "balances": [
+    {
+      "branch": 1,
+      "account": 100,
+      "balances": [
+        {
+          "date": "2024-01-01",
+          "balances": {
+            "AVAILABLE": {
+              "value": 1000,
+              "currency": "USD"
+            },
+            "HELD": {
+              "value": 0,
+              "currency": "USD"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method get">GET</span>
+                            <code>/v1/accounts/{branch}/{account}/balances</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Get balance information for a specific account.</p>
+                            
+                            <h3>Parameters</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">branch</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">Branch number</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">account</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">Account number</div>
+                                </div>
+                            </div>
+                            
+                            <h3>Response</h3>
+                            <pre class="code-block"><code>{
+  "balances": [
+    {
+      "date": "2022-07-06",
+      "balances": {
+        "AVAILABLE": {
+          "value": 3000,
+          "currency": "USD"
+        },
+        "HELD": {
+          "value": 2000,
+          "currency": "USD"
+        },
+        "BLOCKED": {
+          "value": 500,
+          "currency": "USD"
+        },
+        "BOOK": {
+          "value": 200,
+          "currency": "USD"
+        }
+      }
+    }
+  ]
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method get">GET</span>
+                            <code>/v1/accounts/{branch}/{account}/limits</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Get account limits information.</p>
+                            
+                            <h3>Parameters</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">branch</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">Branch number</div>
+                                </div>
+                                <div class="param-row">
+                                    <div class="param-name">account</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">Account number</div>
+                                </div>
+                            </div>
+                            
+                            <h3>Response</h3>
+                            <pre class="code-block"><code>{
+  "limits": [
+    {
+      "type": "DAILY_LIMIT",
+      "value": 10000,
+      "currency": "USD",
+      "effectiveDate": "2024-01-01"
+    }
+  ]
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-panel">
+                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                            <span class="method get">GET</span>
+                            <code>/v1/cubes/balances</code>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                        <div class="endpoint-content">
+                            <p>Get aggregated balance information from data cubes using MDX queries.</p>
+                            
+                            <h3>Parameters</h3>
+                            <div class="params-table">
+                                <div class="param-row">
+                                    <div class="param-name">mdxQuery</div>
+                                    <div class="param-type">string</div>
+                                    <div class="param-desc">MDX query for cube data retrieval</div>
+                                </div>
+                            </div>
+                            
+                            <h3>Response</h3>
+                            <pre class="code-block"><code>{
+  "data": [
+    {
+      "dimension": "BALANCE_TYPE",
+      "measure": "AMOUNT",
+      "value": 15000,
+      "currency": "USD"
+    }
+  ],
+  "metadata": {
+    "query": "MDX query string",
+    "executionTime": "150ms"
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <img src="assets/matera-logo.png" alt="Matera" height="40" class="footer-logo">
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Matera. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Swagger Modal -->
+    <div id="swaggerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Swagger</h3>
+                <span class="close" onclick="closeSwaggerModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <pre class="swagger-code" id="swaggerCode">Loading...</pre>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-sm btn-primary" onclick="copySwagger()">Copy to Clipboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/script.js"></script>
+    <script>
+        function toggleEndpoint(header) {
+            const content = header.nextElementSibling;
+            const isExpanded = content.classList.contains('expanded');
+            
+            if (isExpanded) {
+                content.classList.remove('expanded');
+                header.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                header.classList.add('expanded');
+            }
+        }
+
+        function openSwaggerModal() {
+            document.getElementById('swaggerModal').style.display = 'block';
+            loadSwaggerContent();
+        }
+
+        function closeSwaggerModal() {
+            document.getElementById('swaggerModal').style.display = 'none';
+        }
+
+        function loadSwaggerContent() {
+            fetch('swagger/dtw-balance-statements-balance-api.yml')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('swaggerCode').textContent = data;
+                })
+                .catch(error => {
+                    document.getElementById('swaggerCode').textContent = 'Error loading Swagger file: ' + error;
+                });
+        }
+
+        function copySwagger() {
+            const swaggerText = document.getElementById('swaggerCode').textContent;
+            navigator.clipboard.writeText(swaggerText).then(() => {
+                alert('Swagger copied to clipboard!');
+            });
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('swaggerModal');
+            if (event.target == modal) {
+                closeSwaggerModal();
+            }
+        }
+    </script>
+</body>
+</html>
